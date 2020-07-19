@@ -1,1 +1,1 @@
-# sup
+# sup -- the Simple Unicode Plotter
