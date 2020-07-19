@@ -2,7 +2,7 @@ import numpy as np
 from collections import OrderedDict
 import h5py
 
-def prettify(input_string, ccode_fg, ccode_bg, bold=True, reset=False):
+def prettify(input_string, ccode_fg, ccode_bg, bold=True, reset=True):
     # example: "\u001b[48;5;" + str(ccode_bg) + ";38;5;" + str(ccode_fg) + "m" + input_string + "\u001b[0m"
     result = "\u001b" 
     result += "[" 
@@ -150,8 +150,8 @@ def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None):
     # y axis:
     for i in range(xy_bins[1]):
         lines[i] += mod_func(" │")
-    lines[mid_y_index - 1*even_y_bins] = lines[mid_y_index - 1*even_y_bins][:-2] + mod_func(" │\u0332")
-    lines[xy_bins[1]-1] = lines[xy_bins[1]-1][:-2] + mod_func(" │\u0332")
+    lines[mid_y_index - 1*even_y_bins] = lines[mid_y_index - 1*even_y_bins][:-5] + mod_func("│\u0332")
+    lines[xy_bins[1]-1] = lines[xy_bins[1]-1][:-5] + mod_func("│\u0332")
     top_line = mod_func("  " * xy_bins[0] + " _")
     lines = [top_line] + lines
 
@@ -173,9 +173,15 @@ def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None):
     y_tick_2 = "%.1e" % y_bin_limits[mid_y_index] 
     y_tick_3 = "%.1e" % y_bin_limits[-1] 
 
-    lines[0] += mod_func(" " + y_tick_3)
-    lines[mid_y_index + 1*(not even_y_bins)] += mod_func(" " + y_tick_2)
-    lines[-2] += mod_func(" " + y_tick_1)
+    lines[0] += mod_func(" " + y_tick_3 + "  ")
+    lines[mid_y_index + 1*(not even_y_bins)] += mod_func(" " + y_tick_2 + "  ")
+    lines[-2] += mod_func(" " + y_tick_1 + "  ")
+
+    for i,line in enumerate(lines):
+        if i in [0, mid_y_index + 1*(not even_y_bins), len(lines)-2]:
+            pass
+        else:
+            lines[i] += mod_func(" " + " "*len(y_tick_1) + "  ")
 
     # x ticks
     x_tick_1 = "%.1e" % x_bin_limits[0]
@@ -187,7 +193,7 @@ def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None):
     x_ticks += x_tick_2
     x_ticks += " " * (1 * xy_bins[0] - len(x_tick_2)) + " "*(not even_x_bins)
     x_ticks += x_tick_3
-    x_ticks = mod_func(x_ticks)
+    x_ticks = mod_func(x_ticks + "    ")
     lines.append(x_ticks)
 
     return lines

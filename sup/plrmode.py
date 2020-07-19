@@ -15,10 +15,7 @@ import shutil
 # Variables for colors, markers and padding
 #
 
-left_padding = "  "
-
-# This is how to set a black background:
-#   yi_line += "\u001b[48;5;232;38;5;" + str(ccode) + "m" + marker + "\u001b[0m"
+left_padding = 2*" "
 
 ccode_bg = 232
 ccode_fg = 255
@@ -222,47 +219,45 @@ def run(args):
                 marker = get_marker(z_norm)
 
             # Add point to line
-            # yi_line += "\u001b[38;5;" + str(ccode) + "m" + marker + "\u001b[0m"
-            yi_line += prettify(marker, ccode, ccode_bg, reset=True)
+            yi_line += prettify(marker, ccode, ccode_bg)
 
         lines.append(yi_line)
 
     lines.reverse()
 
-    # Add axes
-    # lines = add_axes(lines, xy_bins, x_bin_limits, y_bin_limits)
-    # def axes_mod_func(input_string):
-    #     return prettify(input_string, ccode_fg, ccode_bg, bold=True, reset=False)
 
-    axes_mod_func = lambda input_str : prettify(input_str, ccode_fg, ccode_bg, bold=True, reset=False)
+    # Add axes
+    axes_mod_func = lambda input_str : prettify(input_str, ccode_fg, ccode_bg, bold=True)
     lines = add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=axes_mod_func)
 
     # Add legend
+    plot_width = xy_bins[0] * 2 + 12
+
     legend = ""
+    legend_length = 0
     if not use_capped_loglike:
         legend += prettify(special_marker.strip(), max_bin_ccode, ccode_bg) + prettify(" best-fit", ccode_fg, ccode_bg)
         legend += prettify("  ", ccode_fg, ccode_bg)
+        legend_length += len("* best-fit  ")
 
     legend += prettify(regular_marker.strip(), ccodes[-1], ccode_bg) + prettify(" 1σ", ccode_fg, ccode_bg)
-    # legend += "\u001b[38;5;" + str(ccodes[-1]) + "m" + regular_marker.strip() + "\u001b[0m" + " 1σ"
     legend += prettify("  ", ccode_fg, ccode_bg)
+    legend_length += len("* 1σ  ")
     legend += prettify(regular_marker.strip(), ccodes[-2], ccode_bg) + prettify(" 2σ", ccode_fg, ccode_bg)
-    # legend += "\u001b[38;5;" + str(ccodes[-2]) + "m" + regular_marker.strip() + "\u001b[0m" + " 2σ"
     legend += prettify("  ", ccode_fg, ccode_bg)
-    # legend += "\u001b[38;5;" + str(ccodes[-3]) + "m" + regular_marker.strip() + "\u001b[0m" + " 3σ"
+    legend_length += len("* 2σ  ")
     legend += prettify(regular_marker.strip(), ccodes[-3], ccode_bg) + prettify(" 3σ", ccode_fg, ccode_bg)
+    legend += prettify("  ", ccode_fg, ccode_bg)
+    legend_length += len("* 3σ  ")
 
-    # if not use_capped_loglike:
-    #     legend += "\u001b[38;5;" + str(max_bin_ccode) + "m" + special_marker.strip() + "\u001b[0m" + " best-fit"
-    #     legend += "  "
-    # legend += "\u001b[38;5;" + str(ccodes[-1]) + "m" + regular_marker.strip() + "\u001b[0m" + " 1σ"
-    # legend += "  "
-    # legend += "\u001b[38;5;" + str(ccodes[-2]) + "m" + regular_marker.strip() + "\u001b[0m" + " 2σ"
-    # legend += "  "
-    # legend += "\u001b[38;5;" + str(ccodes[-3]) + "m" + regular_marker.strip() + "\u001b[0m" + " 3σ"
-    lines.append("")
+    legend += prettify(" " * (plot_width - legend_length), ccode_fg, ccode_bg)
+
+    lines.append(prettify(" " * (plot_width), ccode_fg, ccode_bg) )
     lines.append(legend)
+    lines.append(prettify(" " * (plot_width), ccode_fg, ccode_bg) )
 
+    # Add top line
+    lines = [prettify(" " * (plot_width), ccode_fg, ccode_bg)] + lines
 
     #
     # Set labels
@@ -275,42 +270,23 @@ def run(args):
 
 
     #
-    # Add info text
-    #
-
-    info_lines = {}
-    info_lines['x_axis'] = "x-axis : {n} {mm}".format(n=x_label, mm=x_range)
-    info_lines['y_axis'] = "y-axis : {n} {mm}".format(n=y_label, mm=y_range)
-    info_lines['color']  = " color : {n}".format(n=z_label)
-    info_lines['sort']   = "  sort : {n} [{t}]".format(n=s_label, t=s_type)
-    if use_capped_loglike:
-        info_lines['capped'] = "capped : ln(L) dataset ({n}) capped at {v}".format(n=loglike_name, v=args.cap_loglike_val)
-
-    lines.append( prettify("", ccode_fg, ccode_bg) )
-    lines.append( prettify(info_lines["x_axis"], ccode_fg, ccode_bg) )
-    lines.append( prettify(info_lines["y_axis"], ccode_fg, ccode_bg) )
-    lines.append( prettify(info_lines["color"], ccode_fg, ccode_bg) )
-    lines.append( prettify(info_lines["sort"], ccode_fg, ccode_bg) )
-    if use_capped_loglike:
-        lines.append( prettify(info_lines["capped"], ccode_fg, ccode_bg) )
-    lines.append( prettify("", ccode_fg, ccode_bg, reset=True) )
-
-    # lines.append( prettify("", ccode_fg, ccode_bg) )
-    # lines.append( prettify("x-axis : {n} {mm}".format(n=x_label, mm=x_range), ccode_fg, ccode_bg) )
-    # lines.append( prettify("y-axis : {n} {mm}".format(n=y_label, mm=y_range), ccode_fg, ccode_bg) )
-    # lines.append( prettify(" color : {n}".format(n=z_label), ccode_fg, ccode_bg) )
-    # lines.append( prettify("  sort : {n} [{t}]".format(n=s_label, t=s_type), ccode_fg, ccode_bg) )
-    # if use_capped_loglike:
-    #     lines.append( prettify("capped : ln(L) dataset ({n}) capped at {v}".format(n=loglike_name, v=args.cap_loglike_val), ccode_fg, ccode_bg) )
-    # lines.append( prettify("", ccode_fg, ccode_bg, reset=True) )
-
-
-    #
-    # Add padding
+    # Add padding for plot
     #
 
     for i,line in enumerate(lines):
         lines[i] = prettify(left_padding, ccode_fg, ccode_bg) + line
+
+    #
+    # Add info text
+    #
+
+    info_lines = []
+    info_lines.append(left_padding + "x-axis : {n} {mm}".format(n=x_label, mm=x_range))
+    info_lines.append(left_padding + "y-axis : {n} {mm}".format(n=y_label, mm=y_range))
+    info_lines.append(left_padding + " color : {n}".format(n=z_label))
+    info_lines.append(left_padding + "  sort : {n} [{t}]".format(n=s_label, t=s_type))
+    if use_capped_loglike:
+        info_lines.append(left_padding + "capped : ln(L) dataset ({n}) capped at {v}".format(n=loglike_name, v=args.cap_loglike_val))
 
 
     #
@@ -321,12 +297,8 @@ def run(args):
     for line in lines:
         print(line)
     print()
-    # print( prettify(left_padding + "x-axis : {n} {mm}".format(n=x_label, mm=x_range), ccode_fg, ccode_bg) )
-    # print( prettify(left_padding + "y-axis : {n} {mm}".format(n=y_label, mm=y_range), ccode_fg, ccode_bg) )
-    # print( prettify(left_padding + " color : {n}".format(n=z_label), ccode_fg, ccode_bg) )
-    # print( prettify(left_padding + "  sort : {n} [{t}]".format(n=s_label, t=s_type), ccode_fg, ccode_bg) )
-    # if use_capped_loglike:
-    #     print( prettify(left_padding + "capped : ln(L) dataset ({n}) capped at {v}".format(n=loglike_name, v=args.cap_loglike_val), ccode_fg, ccode_bg) )
-    # print( prettify("", ccode_fg, ccode_bg, reset=True) )
+    for info_line in info_lines:
+        print(info_line)
+    print()
 
     sys.exit()    
