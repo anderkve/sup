@@ -254,7 +254,7 @@ def run(args):
 
     lines.append(prettify(" " * plot_width, ccode_fg, ccode_bg) )
     lines.append(legend)
-    lines.append(prettify(" " * plot_width, ccode_fg, ccode_bg) )
+    # lines.append(prettify(" " * plot_width, ccode_fg, ccode_bg) )
 
     # Add top line
     lines = [prettify(" " * plot_width, ccode_fg, ccode_bg)] + lines
