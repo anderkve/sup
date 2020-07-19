@@ -252,12 +252,12 @@ def run(args):
 
     legend += prettify(" " * (plot_width - legend_length), ccode_fg, ccode_bg)
 
-    lines.append(prettify(" " * (plot_width), ccode_fg, ccode_bg) )
+    lines.append(prettify(" " * plot_width, ccode_fg, ccode_bg) )
     lines.append(legend)
-    lines.append(prettify(" " * (plot_width), ccode_fg, ccode_bg) )
+    lines.append(prettify(" " * plot_width, ccode_fg, ccode_bg) )
 
     # Add top line
-    lines = [prettify(" " * (plot_width), ccode_fg, ccode_bg)] + lines
+    lines = [prettify(" " * plot_width, ccode_fg, ccode_bg)] + lines
 
     #
     # Set labels
@@ -281,24 +281,43 @@ def run(args):
     #
 
     info_lines = []
+    info_lines.append(left_padding)
     info_lines.append(left_padding + "x-axis : {n} {mm}".format(n=x_label, mm=x_range))
     info_lines.append(left_padding + "y-axis : {n} {mm}".format(n=y_label, mm=y_range))
     info_lines.append(left_padding + " color : {n}".format(n=z_label))
     info_lines.append(left_padding + "  sort : {n} [{t}]".format(n=s_label, t=s_type))
     if use_capped_loglike:
         info_lines.append(left_padding + "capped : ln(L) dataset ({n}) capped at {v}".format(n=loglike_name, v=args.cap_loglike_val))
+    info_lines.append(left_padding)
+
+    info_lines_lengths = [len(l) for l in info_lines]
+    info_lines_width = max(info_lines_lengths)
+
+    for i,line in enumerate(info_lines):
+        info_lines[i] = prettify(line + " "*(info_lines_width - len(line)) + "  ", ccode_fg, ccode_bg)
+
+
+    #
+    # Fill in missing background color
+    #
+
+    width_diff = info_lines_width - plot_width
+    if width_diff > 0:
+        for i,line in enumerate(lines):
+            lines[i] += prettify(" " * width_diff, ccode_fg, ccode_bg)
+    elif width_diff < 0:
+        for i,line in enumerate(info_lines):
+            info_lines[i] += prettify(" " * int(abs(width_diff)), ccode_fg, ccode_bg)
 
 
     #
     # Print everything
     #
 
-    print()
     for line in lines:
         print(line)
-    print()
+
     for info_line in info_lines:
         print(info_line)
-    print()
 
     sys.exit()    
