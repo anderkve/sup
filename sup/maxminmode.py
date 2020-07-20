@@ -47,29 +47,30 @@ ccodes_color_bb = [236, 19, 45, 226]
 ccodes_color_wb = [248, 19, 45, 220]
 ccodes = ccodes_color_bb
 
-color_z_lims = [0.0, 0.003, 0.046, 0.317]
+# color_z_lims = [0.0, 0.003, 0.046, 0.317]
+color_z_lims = [0.0, 0.25, 0.50, 0.75]
 
-def get_color_code(z_norm, use_capped_loglike=False):
+def get_color_code(z_norm, use_capped_z=False):
 
     if z_norm == 1.0:
-        if use_capped_loglike:
+        if use_capped_z:
             return ccodes[-1]
         else:
             return max_bin_ccode
 
     i = 0
     for j, lim in enumerate(color_z_lims):
-        if z_norm > lim:
+        if z_norm >= lim:
             i = j
         else:
             break
     return ccodes[i]
 
 
-def get_marker(z_norm, use_capped_loglike=False):
+def get_marker(z_norm, use_capped_z=False):
 
     if z_norm == 1.0:
-        if use_capped_loglike:
+        if use_capped_z:
             return regular_marker
         else:
             return special_marker
@@ -81,7 +82,15 @@ def get_marker(z_norm, use_capped_loglike=False):
 # Run
 #
 
-def run(args):
+def run_max(args):
+    run(args, "max")
+
+def run_min(args):
+    run(args, "min")
+
+def run(args, mode):
+
+    assert mode in ["max", "min"]
 
     global ccodes 
     global ccodes_grayscale 
@@ -95,11 +104,15 @@ def run(args):
     global special_marker
 
     input_file = args.input_file
+
     x_index = args.x_index
     y_index = args.y_index
-    loglike_index = args.loglike_index
-    s_index = args.loglike_index
-    s_type = "max"
+    z_index = args.z_index
+
+    s_index = args.z_index
+    if args.s_index is not None:
+        s_index = args.s_index
+    s_type = mode
 
     x_range = args.x_range
     y_range = args.y_range
@@ -111,16 +124,18 @@ def run(args):
 
     x_use_abs_val = args.x_use_abs_val
     y_use_abs_val = args.y_use_abs_val
-    # z_use_abs_val = sup.defaults.z_use_abs_val
-    s_use_abs_val = False
+    z_use_abs_val = args.z_use_abs_val
+    s_use_abs_val = args.s_use_abs_val
+    if s_index == z_index:
+        s_use_abs_val = z_use_abs_val
 
     xy_bins = args.xy_bins
     if not xy_bins:
         xy_bins = sup.defaults.xy_bins
     
-    use_capped_loglike = False
-    if args.cap_loglike_val is not None:
-        use_capped_loglike = True
+    use_capped_z = False
+    if args.cap_z_val is not None:
+        use_capped_z = True
 
     use_white_bg = args.use_white_bg
     if use_white_bg:
@@ -151,18 +166,18 @@ def run(args):
     dset_names = get_dataset_names(f)
     x_name = dset_names[x_index]
     y_name = dset_names[y_index]
-    loglike_name = dset_names[loglike_index]
+    z_name = dset_names[z_index]
     s_name = dset_names[s_index]
 
     x_data = np.array(f[x_name])[:read_length]
     y_data = np.array(f[y_name])[:read_length]
-    loglike_data = np.array(f[loglike_name])[:read_length]
+    z_data = np.array(f[z_name])[:read_length]
     s_data = np.array(f[s_name])[:read_length]
 
     f.close()
 
     assert len(x_data) == len(y_data)
-    assert len(x_data) == len(loglike_data)
+    assert len(x_data) == len(z_data)
     assert len(x_data) == len(s_data)
     # data_length = len(x_data)
 
@@ -171,6 +186,8 @@ def run(args):
         x_data = np.abs(x_data)
     if y_use_abs_val:
         y_data = np.abs(y_data)
+    if z_use_abs_val:
+        z_data = np.abs(z_data)
     if s_use_abs_val:
         s_data = np.abs(s_data)
 
@@ -179,34 +196,19 @@ def run(args):
     if not y_range:
         y_range = [np.min(y_data), np.max(y_data)]
 
-    # if not z_min:
-    #     z_min = np.min(z_data)
-    # if not z_max:
-    #     z_max = np.max(z_data)
+    # Cap z dataset?
+    if use_capped_z:
+        z_data = np.minimum(z_data, args.cap_z_val)
 
-    # Cap loglike?
-    if use_capped_loglike:
-        loglike_data = np.minimum(loglike_data, args.cap_loglike_val)
-
-
-    #
-    # Create likelihood ratio dataset
-    #
-
-    loglike_max = np.max(loglike_data)
-    likelihood_ratio = np.exp(loglike_data) / np.exp(loglike_max)
+    # Get z max and minimum
+    z_min = np.min(z_data)
+    z_max = np.max(z_data)
+    z_range = (z_min, z_max)
 
 
     #
     # Get a dict with info per bin
     #
-
-    z_data = likelihood_ratio
-    s_data = z_data  # sort according to likelihood_ratio
-    # if not z_min:
-    #     z_min = np.min(z_data)
-    # if not z_max:
-    #     z_max = np.max(z_data)
 
     bins_info, x_bin_limits, y_bin_limits = get_bin_tuples(x_data, y_data, z_data, xy_bins, x_range, y_range, s_data, s_type)
 
@@ -229,11 +231,11 @@ def run(args):
 
             if xiyi in bins_info.keys():
                 z_val = bins_info[xiyi][2]
-                z_norm = z_val
-                # z_norm = (z_val - z_min) / (z_max - z_min)
+                z_norm = (z_val - z_min) / (z_max - z_min)
+                # print("DEBUG: xi, yi, z_val, z_norm : ", xi, yi, z_val, z_norm)
 
-                ccode = get_color_code(z_norm, use_capped_loglike=use_capped_loglike)
-                marker = get_marker(z_norm, use_capped_loglike=use_capped_loglike)
+                ccode = get_color_code(z_norm, use_capped_z=use_capped_z)
+                marker = get_marker(z_norm, use_capped_z=use_capped_z)
 
             # Add point to line
             yi_line += prettify(marker, ccode, bg_ccode)
@@ -255,11 +257,13 @@ def run(args):
     legend_mod_func = lambda input_str, input_fg_ccode : prettify(input_str, input_fg_ccode, bg_ccode, bold=True)
     legend_entries = []
 
-    if not use_capped_loglike:
-        legend_entries.append( (special_marker.strip(), max_bin_ccode, "best-fit", fg_ccode) )
-    legend_entries.append( (regular_marker.strip(), ccodes[-1], "1σ", fg_ccode) )
-    legend_entries.append( (regular_marker.strip(), ccodes[-2], "2σ", fg_ccode) )
-    legend_entries.append( (regular_marker.strip(), ccodes[-3], "3σ", fg_ccode) )
+    # if not use_capped_z:
+    #     legend_entries.append( (special_marker.strip(), max_bin_ccode, "best-fit", fg_ccode) )
+    legend_entries.append( (special_marker.strip(), max_bin_ccode, "1.0", fg_ccode) )
+    legend_entries.append( (regular_marker.strip(), ccodes[-1], "0.75", fg_ccode) )
+    legend_entries.append( (regular_marker.strip(), ccodes[-2], "0.50", fg_ccode) )
+    legend_entries.append( (regular_marker.strip(), ccodes[-3], "0.25", fg_ccode) )
+    legend_entries.append( (regular_marker.strip(), ccodes[-4], "0.00", fg_ccode) )
     
     legend, legend_width = generate_legend(legend_entries, legend_mod_func, sep="  ")
     # Add a blank line below the legend
@@ -279,8 +283,8 @@ def run(args):
 
     x_label = x_name
     y_label = y_name
-    z_label = "likelihood ratio (L/L_max)"
-    s_label = z_label
+    z_label = z_name
+    s_label = s_name
 
 
     #
@@ -291,10 +295,10 @@ def run(args):
     info_lines.append(left_padding)
     info_lines.append(left_padding + "x-axis : {n} {mm}".format(n=x_label, mm=x_range))
     info_lines.append(left_padding + "y-axis : {n} {mm}".format(n=y_label, mm=y_range))
-    info_lines.append(left_padding + " color : {n}".format(n=z_label))
+    info_lines.append(left_padding + " color : {n} {mm}".format(n=z_label, mm=z_range))
     info_lines.append(left_padding + "  sort : {n} [{t}]".format(n=s_label, t=s_type))
-    if use_capped_loglike:
-        info_lines.append(left_padding + "capped : ln(L) dataset ({n}) capped at {v}".format(n=loglike_name, v=args.cap_loglike_val))
+    if use_capped_z:
+        info_lines.append(left_padding + "capped : z-axis (color) dataset capped at {v}".format(v=args.cap_z_val))
     info_lines.append(left_padding)
 
     info_lines_lengths = [len(l) for l in info_lines]
