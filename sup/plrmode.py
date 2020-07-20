@@ -30,17 +30,20 @@ empty_bin_marker_color = " ■"
 empty_bin_marker = empty_bin_marker_color
 
 empty_bin_ccode_grayscale = 233
-empty_bin_ccode_color = 233
-empty_bin_ccode = empty_bin_ccode_color
+empty_bin_ccode_color_bb = 233
+empty_bin_ccode_color_wb = 255
+empty_bin_ccode = empty_bin_ccode_color_bb
 
 max_bin_ccode_grayscale = 231 # 255
-max_bin_ccode_color = 231 # 255
-max_bin_ccode = max_bin_ccode_color
+max_bin_ccode_color_bb = 231 # 255
+max_bin_ccode_color_wb = 232 # 255
+max_bin_ccode = max_bin_ccode_color_bb
 
 # 232 --> 255
 ccodes_grayscale = [233, 235, 242, 231] #[233, 235, 242, 255]
-ccodes_color = [236, 19, 45, 226]
-ccodes = ccodes_color
+ccodes_color_bb = [236, 19, 45, 226]
+ccodes_color_wb = [248, 19, 45, 220]
+ccodes = ccodes_color_bb
 
 color_z_lims = [0.0, 0.003, 0.046, 0.317]
 
@@ -127,6 +130,9 @@ def run(args):
     if use_white_bg:
         bg_ccode = bg_ccode_wb
         fg_ccode = fg_ccode_wb
+        empty_bin_ccode = empty_bin_ccode_color_wb
+        max_bin_ccode = max_bin_ccode_color_wb
+        ccodes = ccodes_color_wb
 
     if args.use_grayscale:
         ccodes = ccodes_grayscale
