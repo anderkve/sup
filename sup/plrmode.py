@@ -2,7 +2,7 @@ import sys
 import numpy as np
 import h5py
 import sup.defaults
-from sup.utils import get_bin_tuples, get_dataset_names, add_axes, prettify, fill_missing_bg
+from sup.utils import get_bin_tuples, get_dataset_names, add_axes, prettify, fill_missing_bg, generate_legend
 
 
 #
@@ -247,39 +247,28 @@ def run(args):
     axes_mod_func = lambda input_str : prettify(input_str, fg_ccode, bg_ccode, bold=True)
     plot_lines = add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=axes_mod_func)
 
-    # Add legend
+    # Add top line
     plot_width = xy_bins[0] * 2 + 12
+    plot_lines = [prettify(" " * plot_width, fg_ccode, bg_ccode)] + plot_lines
 
-    legend = ""
-    legend_length = 0
+    # Add legend
+    legend_mod_func = lambda input_str, input_fg_ccode : prettify(input_str, input_fg_ccode, bg_ccode, bold=True)
+    legend_entries = []
+
     if not use_capped_loglike:
-        legend += prettify(special_marker.strip(), max_bin_ccode, bg_ccode) + prettify(" best-fit", fg_ccode, bg_ccode)
-        legend += prettify("  ", fg_ccode, bg_ccode)
-        legend_length += len("* best-fit  ")
-
-    legend += prettify(regular_marker.strip(), ccodes[-1], bg_ccode) + prettify(" 1σ", fg_ccode, bg_ccode)
-    legend += prettify("  ", fg_ccode, bg_ccode)
-    legend_length += len("* 1σ  ")
-    legend += prettify(regular_marker.strip(), ccodes[-2], bg_ccode) + prettify(" 2σ", fg_ccode, bg_ccode)
-    legend += prettify("  ", fg_ccode, bg_ccode)
-    legend_length += len("* 2σ  ")
-    legend += prettify(regular_marker.strip(), ccodes[-3], bg_ccode) + prettify(" 3σ", fg_ccode, bg_ccode)
-    legend += prettify("  ", fg_ccode, bg_ccode)
-    legend_length += len("* 3σ  ")
-
-    legend += prettify(" " * (plot_width - legend_length), fg_ccode, bg_ccode)
+        legend_entries.append( (special_marker.strip(), max_bin_ccode, "best-fit", fg_ccode) )
+    legend_entries.append( (regular_marker.strip(), ccodes[-1], "1σ", fg_ccode) )
+    legend_entries.append( (regular_marker.strip(), ccodes[-2], "2σ", fg_ccode) )
+    legend_entries.append( (regular_marker.strip(), ccodes[-3], "3σ", fg_ccode) )
+    
+    legend, legend_width = generate_legend(legend_entries, legend_mod_func, sep="  ")
+    # Add a blank line below the legend
+    legend += prettify(" " * (plot_width - legend_width), fg_ccode, bg_ccode)
 
     plot_lines.append(prettify(" " * plot_width, fg_ccode, bg_ccode) )
     plot_lines.append(legend)
 
-    # Add top line
-    plot_lines = [prettify(" " * plot_width, fg_ccode, bg_ccode)] + plot_lines
-
-
-    #
-    # Add padding for plot
-    #
-
+    # Add left padding
     for i,line in enumerate(plot_lines):
         plot_lines[i] = prettify(left_padding, fg_ccode, bg_ccode) + line
 
