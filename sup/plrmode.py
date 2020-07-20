@@ -42,10 +42,13 @@ ccodes = ccodes_color
 
 color_z_lims = [0.0, 0.003, 0.046, 0.317]
 
-def get_color_code(z_norm, use_grayscale=False):
+def get_color_code(z_norm, use_capped_loglike=False):
 
     if z_norm == 1.0:
-        return max_bin_ccode
+        if use_capped_loglike:
+            return ccodes[-1]
+        else:
+            return max_bin_ccode
 
     i = 0
     for j, lim in enumerate(color_z_lims):
@@ -56,10 +59,13 @@ def get_color_code(z_norm, use_grayscale=False):
     return ccodes[i]
 
 
-def get_marker(z_norm):
+def get_marker(z_norm, use_capped_loglike=False):
 
     if z_norm == 1.0:
-        return special_marker
+        if use_capped_loglike:
+            return regular_marker
+        else:
+            return special_marker
     else:
         return regular_marker
 
@@ -109,16 +115,16 @@ def run(args):
     # if xy_bins[1] % 2 == 0:
     #     even_y_bins = True
 
+    use_capped_loglike = False
+    if args.cap_loglike_val is not None:
+        use_capped_loglike = True
+
     if args.use_grayscale:
         ccodes = ccodes_grayscale
         max_bin_ccode = max_bin_ccode_grayscale
         empty_bin_ccode = empty_bin_ccode_grayscale
         empty_bin_marker = empty_bin_marker_grayscale
 
-    use_capped_loglike = False
-    if args.cap_loglike_val is not None:
-        use_capped_loglike = True
-        special_marker = regular_marker
 
 
     #
@@ -215,8 +221,8 @@ def run(args):
                 z_norm = z_val
                 # z_norm = (z_val - z_min) / (z_max - z_min)
 
-                ccode = get_color_code(z_norm)
-                marker = get_marker(z_norm)
+                ccode = get_color_code(z_norm, use_capped_loglike=use_capped_loglike)
+                marker = get_marker(z_norm, use_capped_loglike=use_capped_loglike)
 
             # Add point to line
             yi_line += prettify(marker, ccode, ccode_bg)
