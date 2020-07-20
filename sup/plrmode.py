@@ -17,8 +17,8 @@ import shutil
 
 left_padding = 2*" "
 
-bg_ccode_bb, fg_ccode_bb = 232, 255
-bg_ccode_wb, fg_ccode_wb = 255, 232
+bg_ccode_bb, fg_ccode_bb = 232, 231
+bg_ccode_wb, fg_ccode_wb = 231, 232
 bg_ccode = bg_ccode_bb
 fg_ccode = fg_ccode_bb
 
@@ -33,12 +33,12 @@ empty_bin_ccode_grayscale = 233
 empty_bin_ccode_color = 233
 empty_bin_ccode = empty_bin_ccode_color
 
-max_bin_ccode_grayscale = 255
-max_bin_ccode_color = 255
+max_bin_ccode_grayscale = 231 # 255
+max_bin_ccode_color = 231 # 255
 max_bin_ccode = max_bin_ccode_color
 
 # 232 --> 255
-ccodes_grayscale = [233, 235, 242, 255]
+ccodes_grayscale = [233, 235, 242, 231] #[233, 235, 242, 255]
 ccodes_color = [236, 19, 45, 226]
 ccodes = ccodes_color
 
@@ -81,6 +81,8 @@ def run(args):
     term_cols, term_lines = shutil.get_terminal_size()
 
     global ccodes 
+    global bg_ccode
+    global fg_ccode
     global max_bin_ccode
     global empty_bin_ccode
     global empty_bin_marker
@@ -307,7 +309,7 @@ def run(args):
     info_lines_width = max(info_lines_lengths)
 
     for i,line in enumerate(info_lines):
-        info_lines[i] = prettify(line + " "*(info_lines_width - len(line)) + "  ", fg_ccode, bg_ccode)
+        info_lines[i] = prettify(line + " "*(info_lines_width - len(line)) + "  ", fg_ccode, bg_ccode, bold=False)
 
 
     #
