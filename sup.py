@@ -3,23 +3,23 @@
 """
 sup -- the Simlpe Unicode Plotter 
 
-Modes:
-  sup list      : list datasets 
-  sup max       : plot the maximum z value per bin
-  sup min       : plot the minimum z value per bin
-  sup avg       : plot the average z value per bin
-  sup plr       : plot the profile likeliood ratio per bin
-  sup dens      : plot the density in each bin
-  sup post      : plot the posterior density in each bin
+modes:
+  sup list    list dataset names and indices
+  sup plr     plot the profile likeliood ratio
+  # sup dens    plot the z density
+  # sup post    plot the z posterior probability density
+  # sup max     plot the maximum z value
+  # sup min     plot the minimum z value
+  # sup avg     plot the average z value
 
-Examples:
+examples:
+  ./sup.py list data.hdf5
 
-  ./sup.py plotinput.hdf5 121 143 160 
-                --nxbins=40 --nybins=40 --xmin=0 --xmax=2000 --ymin=0 --ymax=2000
+  ./sup.py plr data.hdf5 0 1 4 --xrange 0 10 --yrange 0 10 --bins 20 20
 
-  ./sup.py input.hdf5 121 143 160 --llr
-                --nxbins=40 --nybins=40 --xmin=0 --xmax=2000 --ymin=0 --ymax=2000
+  ./sup.py plr data.hdf5 2 1 4 --xrange 0 10 --yrange 0 10 --bins 20 20 -g
 
+  ./sup.py plr data.hdf5 2 1 4 --xrange 0 10 --yrange 0 20 --bins 20 40 --xabs
 """
 
 import sys
@@ -46,9 +46,25 @@ def main():
         prog=prog_name,
         description="sup -- the Simple Unicode Plotter",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        # epilog="""
-        # Add a description here
-        # """,
+        epilog="""
+modes:
+  sup list    list dataset names and indices
+  sup plr     plot the profile likeliood ratio
+
+examples:
+  ./sup.py list data.hdf5
+
+  ./sup.py plr data.hdf5 0 1 4 --xrange 0 10 --yrange 0 10 --bins 20 20
+
+  ./sup.py plr data.hdf5 2 1 4 --xrange 0 10 --yrange 0 10 --bins 20 20 -g
+
+  ./sup.py plr data.hdf5 2 1 4 --xrange 0 10 --yrange 0 20 --bins 20 40 --xabs
+        """,
+  # sup max     plot the maximum z value
+  # sup min     plot the minimum z value
+  # sup avg     plot the average z value
+  # sup dens    plot the z density
+  # sup post    plot the z posterior probability density
     )
     subparsers = parser.add_subparsers(dest='mode')
 
