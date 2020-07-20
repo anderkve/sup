@@ -17,8 +17,10 @@ import shutil
 
 left_padding = 2*" "
 
-ccode_bg = 232
-ccode_fg = 255
+bg_ccode_bb, fg_ccode_bb = 232, 255
+bg_ccode_wb, fg_ccode_wb = 255, 232
+bg_ccode = bg_ccode_bb
+fg_ccode = fg_ccode_bb
 
 regular_marker = " ■"
 special_marker = " 🟊"  # " ★" " 🟊" " ✱"
@@ -118,6 +120,11 @@ def run(args):
     use_capped_loglike = False
     if args.cap_loglike_val is not None:
         use_capped_loglike = True
+
+    use_white_bg = args.use_white_bg
+    if use_white_bg:
+        bg_ccode = bg_ccode_wb
+        fg_ccode = fg_ccode_wb
 
     if args.use_grayscale:
         ccodes = ccodes_grayscale
@@ -225,7 +232,7 @@ def run(args):
                 marker = get_marker(z_norm, use_capped_loglike=use_capped_loglike)
 
             # Add point to line
-            yi_line += prettify(marker, ccode, ccode_bg)
+            yi_line += prettify(marker, ccode, bg_ccode)
 
         lines.append(yi_line)
 
@@ -233,7 +240,7 @@ def run(args):
 
 
     # Add axes
-    axes_mod_func = lambda input_str : prettify(input_str, ccode_fg, ccode_bg, bold=True)
+    axes_mod_func = lambda input_str : prettify(input_str, fg_ccode, bg_ccode, bold=True)
     lines = add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=axes_mod_func)
 
     # Add legend
@@ -242,28 +249,28 @@ def run(args):
     legend = ""
     legend_length = 0
     if not use_capped_loglike:
-        legend += prettify(special_marker.strip(), max_bin_ccode, ccode_bg) + prettify(" best-fit", ccode_fg, ccode_bg)
-        legend += prettify("  ", ccode_fg, ccode_bg)
+        legend += prettify(special_marker.strip(), max_bin_ccode, bg_ccode) + prettify(" best-fit", fg_ccode, bg_ccode)
+        legend += prettify("  ", fg_ccode, bg_ccode)
         legend_length += len("* best-fit  ")
 
-    legend += prettify(regular_marker.strip(), ccodes[-1], ccode_bg) + prettify(" 1σ", ccode_fg, ccode_bg)
-    legend += prettify("  ", ccode_fg, ccode_bg)
+    legend += prettify(regular_marker.strip(), ccodes[-1], bg_ccode) + prettify(" 1σ", fg_ccode, bg_ccode)
+    legend += prettify("  ", fg_ccode, bg_ccode)
     legend_length += len("* 1σ  ")
-    legend += prettify(regular_marker.strip(), ccodes[-2], ccode_bg) + prettify(" 2σ", ccode_fg, ccode_bg)
-    legend += prettify("  ", ccode_fg, ccode_bg)
+    legend += prettify(regular_marker.strip(), ccodes[-2], bg_ccode) + prettify(" 2σ", fg_ccode, bg_ccode)
+    legend += prettify("  ", fg_ccode, bg_ccode)
     legend_length += len("* 2σ  ")
-    legend += prettify(regular_marker.strip(), ccodes[-3], ccode_bg) + prettify(" 3σ", ccode_fg, ccode_bg)
-    legend += prettify("  ", ccode_fg, ccode_bg)
+    legend += prettify(regular_marker.strip(), ccodes[-3], bg_ccode) + prettify(" 3σ", fg_ccode, bg_ccode)
+    legend += prettify("  ", fg_ccode, bg_ccode)
     legend_length += len("* 3σ  ")
 
-    legend += prettify(" " * (plot_width - legend_length), ccode_fg, ccode_bg)
+    legend += prettify(" " * (plot_width - legend_length), fg_ccode, bg_ccode)
 
-    lines.append(prettify(" " * plot_width, ccode_fg, ccode_bg) )
+    lines.append(prettify(" " * plot_width, fg_ccode, bg_ccode) )
     lines.append(legend)
-    # lines.append(prettify(" " * plot_width, ccode_fg, ccode_bg) )
+    # lines.append(prettify(" " * plot_width, fg_ccode, bg_ccode) )
 
     # Add top line
-    lines = [prettify(" " * plot_width, ccode_fg, ccode_bg)] + lines
+    lines = [prettify(" " * plot_width, fg_ccode, bg_ccode)] + lines
 
     #
     # Set labels
@@ -280,7 +287,7 @@ def run(args):
     #
 
     for i,line in enumerate(lines):
-        lines[i] = prettify(left_padding, ccode_fg, ccode_bg) + line
+        lines[i] = prettify(left_padding, fg_ccode, bg_ccode) + line
 
     #
     # Add info text
@@ -300,7 +307,7 @@ def run(args):
     info_lines_width = max(info_lines_lengths)
 
     for i,line in enumerate(info_lines):
-        info_lines[i] = prettify(line + " "*(info_lines_width - len(line)) + "  ", ccode_fg, ccode_bg)
+        info_lines[i] = prettify(line + " "*(info_lines_width - len(line)) + "  ", fg_ccode, bg_ccode)
 
 
     #
@@ -310,10 +317,10 @@ def run(args):
     width_diff = info_lines_width - plot_width
     if width_diff > 0:
         for i,line in enumerate(lines):
-            lines[i] += prettify(" " * width_diff, ccode_fg, ccode_bg)
+            lines[i] += prettify(" " * width_diff, fg_ccode, bg_ccode)
     elif width_diff < 0:
         for i,line in enumerate(info_lines):
-            info_lines[i] += prettify(" " * int(abs(width_diff)), ccode_fg, ccode_bg)
+            info_lines[i] += prettify(" " * int(abs(width_diff)), fg_ccode, bg_ccode)
 
 
     #

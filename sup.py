@@ -72,6 +72,7 @@ def main():
     parser_plrmode.add_argument("-ya", "--yabs", action="store_true", dest="y_use_abs_val", default=False, help="use the absolute value of the y-axis dataset")
     parser_plrmode.add_argument("-c", "--cap-loglike", type=float, action="store", dest="cap_loglike_val", default=None, help="cap the ln(L) at the given value", metavar="CAP_VAL")
     parser_plrmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
+    parser_plrmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
 
     # Parse the arguments and run the function for the chosen mode
     args = parser.parse_args()
