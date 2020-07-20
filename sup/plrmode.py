@@ -3,12 +3,6 @@ import numpy as np
 import h5py
 import sup.defaults
 from sup.utils import get_bin_tuples, get_dataset_names, add_axes, prettify
-import shutil
-
-# from sup.colors import ccodes, n_colors
-
-# color_codes = [236,19,27,45,87,122,155,190,226]
-# color_z_lims = []
 
 
 #
@@ -37,17 +31,16 @@ empty_bin_ccode_color_bb = 233
 empty_bin_ccode_color_wb = 255
 empty_bin_ccode = empty_bin_ccode_color_bb
 
-max_bin_ccode_grayscale_bb = 231 # 255
+max_bin_ccode_grayscale_bb = 231
 max_bin_ccode_grayscale_wb = 232
 max_bin_ccode_grayscale = max_bin_ccode_grayscale_bb
 
-max_bin_ccode_color_bb = 231 # 255
-max_bin_ccode_color_wb = 232 # 255
+max_bin_ccode_color_bb = 231
+max_bin_ccode_color_wb = 232
 max_bin_ccode = max_bin_ccode_color_bb
 
-# 232 --> 255
-ccodes_grayscale_bb = [233, 237, 242, 231] #[233, 235, 242, 255]
-ccodes_grayscale_wb = [254, 250, 243, 232] # [233, 235, 242, 252]
+ccodes_grayscale_bb = [233, 237, 242, 231]
+ccodes_grayscale_wb = [254, 250, 243, 232]
 ccodes_grayscale = ccodes_grayscale_bb
 
 ccodes_color_bb = [236, 19, 45, 226]
@@ -90,8 +83,6 @@ def get_marker(z_norm, use_capped_loglike=False):
 
 def run(args):
 
-    term_cols, term_lines = shutil.get_terminal_size()
-
     global ccodes 
     global ccodes_grayscale 
     global bg_ccode
@@ -127,13 +118,6 @@ def run(args):
     if not xy_bins:
         xy_bins = sup.defaults.xy_bins
     
-    # even_x_bins = False
-    # if xy_bins[0] % 2 == 0:
-    #     even_x_bins = True
-    # even_y_bins = False
-    # if xy_bins[1] % 2 == 0:
-    #     even_y_bins = True
-
     use_capped_loglike = False
     if args.cap_loglike_val is not None:
         use_capped_loglike = True
@@ -226,10 +210,6 @@ def run(args):
 
     bins_info, x_bin_limits, y_bin_limits = get_bin_tuples(x_data, y_data, z_data, xy_bins, x_range, y_range, s_data, s_type)
 
-    # # DEBUG:
-    # for k in bins_info.keys():
-    #     print(bins_info[k])
-
 
     #
     # Generate string to be printed
@@ -291,10 +271,18 @@ def run(args):
 
     lines.append(prettify(" " * plot_width, fg_ccode, bg_ccode) )
     lines.append(legend)
-    # lines.append(prettify(" " * plot_width, fg_ccode, bg_ccode) )
 
     # Add top line
     lines = [prettify(" " * plot_width, fg_ccode, bg_ccode)] + lines
+
+
+    #
+    # Add padding for plot
+    #
+
+    for i,line in enumerate(lines):
+        lines[i] = prettify(left_padding, fg_ccode, bg_ccode) + line
+
 
     #
     # Set labels
@@ -305,13 +293,6 @@ def run(args):
     z_label = "likelihood ratio (L/L_max)"
     s_label = z_label
 
-
-    #
-    # Add padding for plot
-    #
-
-    for i,line in enumerate(lines):
-        lines[i] = prettify(left_padding, fg_ccode, bg_ccode) + line
 
     #
     # Add info text
