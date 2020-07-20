@@ -2,7 +2,7 @@ import sys
 import numpy as np
 import h5py
 import sup.defaults
-from sup.utils import get_bin_tuples, get_dataset_names, add_axes, prettify
+from sup.utils import get_bin_tuples, get_dataset_names, add_axes, prettify, fill_missing_bg
 
 
 #
@@ -215,7 +215,7 @@ def run(args):
     # Generate string to be printed
     #
 
-    lines = []
+    plot_lines = []
     for yi in range(xy_bins[1]):
 
         yi_line = ""
@@ -238,14 +238,14 @@ def run(args):
             # Add point to line
             yi_line += prettify(marker, ccode, bg_ccode)
 
-        lines.append(yi_line)
+        plot_lines.append(yi_line)
 
-    lines.reverse()
+    plot_lines.reverse()
 
 
     # Add axes
     axes_mod_func = lambda input_str : prettify(input_str, fg_ccode, bg_ccode, bold=True)
-    lines = add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=axes_mod_func)
+    plot_lines = add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=axes_mod_func)
 
     # Add legend
     plot_width = xy_bins[0] * 2 + 12
@@ -269,19 +269,19 @@ def run(args):
 
     legend += prettify(" " * (plot_width - legend_length), fg_ccode, bg_ccode)
 
-    lines.append(prettify(" " * plot_width, fg_ccode, bg_ccode) )
-    lines.append(legend)
+    plot_lines.append(prettify(" " * plot_width, fg_ccode, bg_ccode) )
+    plot_lines.append(legend)
 
     # Add top line
-    lines = [prettify(" " * plot_width, fg_ccode, bg_ccode)] + lines
+    plot_lines = [prettify(" " * plot_width, fg_ccode, bg_ccode)] + plot_lines
 
 
     #
     # Add padding for plot
     #
 
-    for i,line in enumerate(lines):
-        lines[i] = prettify(left_padding, fg_ccode, bg_ccode) + line
+    for i,line in enumerate(plot_lines):
+        plot_lines[i] = prettify(left_padding, fg_ccode, bg_ccode) + line
 
 
     #
@@ -309,33 +309,27 @@ def run(args):
     info_lines.append(left_padding)
 
     info_lines_lengths = [len(l) for l in info_lines]
-    info_lines_width = max(info_lines_lengths)
+    info_width = max(info_lines_lengths)
 
     for i,line in enumerate(info_lines):
-        info_lines[i] = prettify(line + " "*(info_lines_width - len(line)) + "  ", fg_ccode, bg_ccode, bold=False)
+        info_lines[i] = prettify(line + " "*(info_width - len(line)) + "  ", fg_ccode, bg_ccode, bold=False)
 
 
     #
     # Fill in missing background color
     #
 
-    width_diff = info_lines_width - plot_width
-    if width_diff > 0:
-        for i,line in enumerate(lines):
-            lines[i] += prettify(" " * width_diff, fg_ccode, bg_ccode)
-    elif width_diff < 0:
-        for i,line in enumerate(info_lines):
-            info_lines[i] += prettify(" " * int(abs(width_diff)), fg_ccode, bg_ccode)
+    plot_lines, info_lines = fill_missing_bg(plot_lines, plot_width, info_lines, info_width, bg_ccode)
 
 
     #
     # Print everything
     #
 
-    for line in lines:
+    for line in plot_lines:
         print(line)
 
-    for info_line in info_lines:
-        print(info_line)
+    for line in info_lines:
+        print(line)
 
     sys.exit()    
