@@ -29,18 +29,27 @@ empty_bin_marker_grayscale = " □"
 empty_bin_marker_color = " ■"
 empty_bin_marker = empty_bin_marker_color
 
-empty_bin_ccode_grayscale = 233
+empty_bin_ccode_grayscale_bb = 233
+empty_bin_ccode_grayscale_wb = 254
+empty_bin_ccode_grayscale = empty_bin_ccode_grayscale_bb
+
 empty_bin_ccode_color_bb = 233
 empty_bin_ccode_color_wb = 255
 empty_bin_ccode = empty_bin_ccode_color_bb
 
-max_bin_ccode_grayscale = 231 # 255
+max_bin_ccode_grayscale_bb = 231 # 255
+max_bin_ccode_grayscale_wb = 232
+max_bin_ccode_grayscale = max_bin_ccode_grayscale_bb
+
 max_bin_ccode_color_bb = 231 # 255
 max_bin_ccode_color_wb = 232 # 255
 max_bin_ccode = max_bin_ccode_color_bb
 
 # 232 --> 255
-ccodes_grayscale = [233, 235, 242, 231] #[233, 235, 242, 255]
+ccodes_grayscale_bb = [233, 237, 242, 231] #[233, 235, 242, 255]
+ccodes_grayscale_wb = [254, 250, 243, 232] # [233, 235, 242, 252]
+ccodes_grayscale = ccodes_grayscale_bb
+
 ccodes_color_bb = [236, 19, 45, 226]
 ccodes_color_wb = [248, 19, 45, 220]
 ccodes = ccodes_color_bb
@@ -84,10 +93,13 @@ def run(args):
     term_cols, term_lines = shutil.get_terminal_size()
 
     global ccodes 
+    global ccodes_grayscale 
     global bg_ccode
     global fg_ccode
     global max_bin_ccode
+    global max_bin_ccode_grayscale
     global empty_bin_ccode
+    global empty_bin_ccode_grayscale
     global empty_bin_marker
     global special_marker
 
@@ -135,11 +147,15 @@ def run(args):
         ccodes = ccodes_color_wb
 
     if args.use_grayscale:
-        ccodes = ccodes_grayscale
-        max_bin_ccode = max_bin_ccode_grayscale
-        empty_bin_ccode = empty_bin_ccode_grayscale
+        if use_white_bg:
+            ccodes = ccodes_grayscale_wb
+            max_bin_ccode = max_bin_ccode_grayscale_wb
+            empty_bin_ccode = empty_bin_ccode_grayscale_wb
+        else:
+            ccodes = ccodes_grayscale_bb
+            max_bin_ccode = max_bin_ccode_grayscale_bb
+            empty_bin_ccode = empty_bin_ccode_grayscale_bb
         empty_bin_marker = empty_bin_marker_grayscale
-
 
 
     #
