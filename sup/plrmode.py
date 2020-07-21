@@ -10,6 +10,7 @@ from sup.utils import get_bin_tuples, get_dataset_names, add_axes, prettify, fil
 #
 
 ff = sup.defaults.ff
+ff2 = sup.defaults.ff2
 left_padding = 2*" "
 
 bg_ccode_bb, fg_ccode_bb = 232, 231
@@ -243,13 +244,14 @@ def run(args):
 
     plot_lines.reverse()
 
+    # Save plot width
+    plot_width = xy_bins[0] * 2 + 13
 
     # Add axes
     axes_mod_func = lambda input_str : prettify(input_str, fg_ccode, bg_ccode, bold=True)
     plot_lines = add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=axes_mod_func, ff=ff)
 
     # Add top line
-    plot_width = xy_bins[0] * 2 + 13
     plot_lines = [prettify(" " * plot_width, fg_ccode, bg_ccode)] + plot_lines
 
     # Add legend
@@ -264,13 +266,23 @@ def run(args):
     legend_entries.append( (regular_marker.strip(), ccodes[-3], "3σ", fg_ccode) )
     
     legend, legend_width = generate_legend(legend_entries, legend_mod_func, sep="  ")
-    legend += prettify(" " * (plot_width - legend_width), fg_ccode, bg_ccode)
+
+    if legend_width <= plot_width:
+        legend += prettify(" " * (plot_width - legend_width), fg_ccode, bg_ccode)
+    else:
+        for i,line in enumerate(plot_lines):
+            plot_lines[i] += prettify(" " * (legend_width - plot_width), fg_ccode, bg_ccode)
+        plot_width = legend_width
 
     # Add a blank line and then the legend
     plot_lines.append(prettify(" " * plot_width, fg_ccode, bg_ccode) )
     plot_lines.append(legend)
 
+
+    #
     # Add left padding
+    #
+
     for i,line in enumerate(plot_lines):
         plot_lines[i] = prettify(left_padding, fg_ccode, bg_ccode) + line
 
@@ -292,12 +304,12 @@ def run(args):
 
     info_lines = []
     info_lines.append(left_padding)
-    info_lines.append(left_padding + "x-axis : {} [{}, {}]".format(x_label, ff.format(x_range[0]), ff.format(x_range[1])))
-    info_lines.append(left_padding + "y-axis : {} [{}, {}]".format(y_label, ff.format(y_range[0]), ff.format(y_range[1])))
-    info_lines.append(left_padding + " color : {} [{}, {}]".format(z_label, ff.format(z_range[0]), ff.format(z_range[1])))
+    info_lines.append(left_padding + "x-axis : {} [{}, {}]".format(x_label, ff2.format(x_range[0]), ff2.format(x_range[1])))
+    info_lines.append(left_padding + "y-axis : {} [{}, {}]".format(y_label, ff2.format(y_range[0]), ff2.format(y_range[1])))
+    info_lines.append(left_padding + " color : {} [{}, {}]".format(z_label, ff2.format(z_range[0]), ff2.format(z_range[1])))
     info_lines.append(left_padding + "  sort : {} [{}]".format(s_label, s_type))
     if use_capped_loglike:
-        info_lines.append(left_padding + "capped : ln(L) dataset ({}) capped at {}".format(loglike_name, ff.format(args.cap_loglike_val)))
+        info_lines.append(left_padding + "capped : ln(L) dataset ({}) capped at {}".format(loglike_name, ff2.format(args.cap_loglike_val)))
     info_lines.append(left_padding)
 
     info_lines_lengths = [len(l) for l in info_lines]

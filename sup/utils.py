@@ -152,7 +152,7 @@ def get_bin_tuples(x_data, y_data, z_data, xy_bins, x_minmax, y_minmax, s_data, 
 
 
 
-def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None, ff="{:.1e}"):
+def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None, ff="{: .1e}"):
 
     if mod_func is None:
         mod_func = lambda x : x

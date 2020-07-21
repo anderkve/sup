@@ -10,6 +10,7 @@ from sup.utils import get_bin_tuples, get_dataset_names, add_axes, prettify, fil
 #
 
 ff = sup.defaults.ff
+ff2 = sup.defaults.ff2
 left_padding = 2*" "
 
 bg_ccode_bb, fg_ccode_bb = 232, 231
@@ -272,59 +273,57 @@ def run(args, mode):
 
     plot_lines.reverse()
 
+    # Save plot width
+    plot_width = xy_bins[0] * 2 + 13
 
     # Add axes
     axes_mod_func = lambda input_str : prettify(input_str, fg_ccode, bg_ccode, bold=True)
     plot_lines = add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=axes_mod_func, ff=ff)
 
     # Add top line
-    plot_width = xy_bins[0] * 2 + 13
     plot_lines = [prettify(" " * plot_width, fg_ccode, bg_ccode)] + plot_lines
 
     # Add legend
     legend_mod_func = lambda input_str, input_fg_ccode : prettify(input_str, input_fg_ccode, bg_ccode, bold=True)
     legend_entries = []
 
-    # legend_entries.append( ("  " + special_marker.strip() + "       ", max_bin_ccode, "", fg_ccode) )
-    # for i in range(len(color_z_lims[:-1])-1, -1, -1):
-    #     legend_entries.append( (5*regular_marker.strip(), ccodes[i], "", fg_ccode) )
-    # legend, legend_width = generate_legend(legend_entries, legend_mod_func, sep=" ")
-    # legend += prettify(" " * (plot_width - legend_width), fg_ccode, bg_ccode)
-
-    # legend_entries.append( ("  " + special_marker.strip() + "       ", max_bin_ccode, "", fg_ccode) )
-    
     legend_entries.append( ("", fg_ccode, "", fg_ccode) )
     for i in range(len(color_z_lims[:-1])-1, -1, -1):
-        legend_entries.append( ("|", fg_ccode, 8*regular_marker.strip(), ccodes[i]) )
+        legend_entries.append( ("|", fg_ccode, 7*regular_marker.strip(), ccodes[i]) )
     legend_entries.append( ("|", fg_ccode, "", fg_ccode) )
     legend, legend_width = generate_legend(legend_entries, legend_mod_func, sep=" ", internal_sep="")
-    legend += prettify(" " * (plot_width - legend_width), fg_ccode, bg_ccode)
+
+    if legend_width <= plot_width:
+        legend += prettify(" " * (plot_width - legend_width), fg_ccode, bg_ccode)
+    else:
+        for i,line in enumerate(plot_lines):
+            plot_lines[i] += prettify(" " * (legend_width - plot_width), fg_ccode, bg_ccode)
+        plot_width = legend_width
 
     # Add a blank line and then the legend
     plot_lines.append(prettify(" " * plot_width, fg_ccode, bg_ccode) )
     plot_lines.append(legend)
 
-    # # Vertical ticks down from colorbar limits
-    # legend_entries = []
-    # legend_entries.append( ("  │      ", fg_ccode, "", fg_ccode) )
-    # for i in range(len(color_z_lims[:-1])-1, -1, -1):
-    #     legend_entries.append( (" │    ", fg_ccode, "", fg_ccode) )
-    # legend_entries.append( (" │    ", fg_ccode, "", fg_ccode) )
-    # legend, legend_width = generate_legend(legend_entries, legend_mod_func, sep="")
-    # legend += prettify(" " * (plot_width - legend_width), fg_ccode, bg_ccode)
-    # plot_lines.append(legend)
-
-    # Numbers below the colorbar ticks
-    legend_entries = []
+    # Add numbers below the colorbar ticks
+    legend_nums_entries = []
     for i in range(len(color_z_lims)-1, -1, -1):
-        legend_entries.append( ("", fg_ccode, ff.format(color_z_lims[i]), fg_ccode) )
-    legend, legend_width = generate_legend(legend_entries, legend_mod_func, sep="  ", internal_sep="")
-    # legend = legend + prettify(" " * (plot_width - legend_width), fg_ccode, bg_ccode)
-    legend += prettify(" " * (plot_width - legend_width), fg_ccode, bg_ccode)
-    plot_lines.append(legend)
+        legend_nums_entries.append( ("", fg_ccode, ff.format(color_z_lims[i]), fg_ccode) )
+    legend_nums, legend_nums_width = generate_legend(legend_nums_entries, legend_mod_func, sep=" ", internal_sep="")
+
+    if legend_nums_width <= plot_width:
+        legend_nums += prettify(" " * (plot_width - legend_nums_width), fg_ccode, bg_ccode)
+    else:
+        for i,line in enumerate(plot_lines):
+            plot_lines[i] += prettify(" " * (legend_nums_width - plot_width), fg_ccode, bg_ccode)
+        plot_width = legend_nums_width
+
+    plot_lines.append(legend_nums)
 
 
+    #
     # Add left padding
+    #
+
     for i,line in enumerate(plot_lines):
         plot_lines[i] = prettify(left_padding, fg_ccode, bg_ccode) + line
 
@@ -345,12 +344,12 @@ def run(args, mode):
 
     info_lines = []
     info_lines.append(left_padding)
-    info_lines.append(left_padding + "x-axis : {} [{}, {}]".format(x_label, ff.format(x_range[0]), ff.format(x_range[1])))
-    info_lines.append(left_padding + "y-axis : {} [{}, {}]".format(y_label, ff.format(y_range[0]), ff.format(y_range[1])))
-    info_lines.append(left_padding + " color : {} [{}, {}]".format(z_label, ff.format(z_range[0]), ff.format(z_range[1])))
+    info_lines.append(left_padding + "x-axis : {} [{}, {}]".format(x_label, ff2.format(x_range[0]), ff2.format(x_range[1])))
+    info_lines.append(left_padding + "y-axis : {} [{}, {}]".format(y_label, ff2.format(y_range[0]), ff2.format(y_range[1])))
+    info_lines.append(left_padding + " color : {} [{}, {}]".format(z_label, ff2.format(z_range[0]), ff2.format(z_range[1])))
     info_lines.append(left_padding + "  sort : {} [{}]".format(s_label, s_type))
     if use_capped_z:
-        info_lines.append(left_padding + "capped : z-axis (color) dataset capped at {}".format(ff.format(args.cap_z_val)))
+        info_lines.append(left_padding + "capped : z-axis (color) dataset capped at {}".format(ff2.format(args.cap_z_val)))
     info_lines.append(left_padding)
 
     info_lines_lengths = [len(l) for l in info_lines]
