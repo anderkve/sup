@@ -219,7 +219,7 @@ def run(args):
     plot_lines = []
     for yi in range(xy_bins[1]):
 
-        yi_line = ""
+        yi_line = prettify(" ", fg_ccode, bg_ccode)
 
         for xi in range(xy_bins[0]):
 
@@ -249,13 +249,14 @@ def run(args):
     plot_lines = add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=axes_mod_func, ff=ff)
 
     # Add top line
-    plot_width = xy_bins[0] * 2 + 12
+    plot_width = xy_bins[0] * 2 + 13
     plot_lines = [prettify(" " * plot_width, fg_ccode, bg_ccode)] + plot_lines
 
     # Add legend
     legend_mod_func = lambda input_str, input_fg_ccode : prettify(input_str, input_fg_ccode, bg_ccode, bold=True)
     legend_entries = []
 
+    legend_entries.append( ("", fg_ccode, "", fg_ccode) )
     if not use_capped_loglike:
         legend_entries.append( (special_marker.strip(), max_bin_ccode, "best-fit", fg_ccode) )
     legend_entries.append( (regular_marker.strip(), ccodes[-1], "1σ", fg_ccode) )

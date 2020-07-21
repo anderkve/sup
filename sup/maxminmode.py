@@ -248,7 +248,7 @@ def run(args, mode):
     plot_lines = []
     for yi in range(xy_bins[1]):
 
-        yi_line = ""
+        yi_line = prettify(" ", fg_ccode, bg_ccode)
 
         for xi in range(xy_bins[0]):
 
@@ -278,7 +278,7 @@ def run(args, mode):
     plot_lines = add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=axes_mod_func, ff=ff)
 
     # Add top line
-    plot_width = xy_bins[0] * 2 + 12
+    plot_width = xy_bins[0] * 2 + 13
     plot_lines = [prettify(" " * plot_width, fg_ccode, bg_ccode)] + plot_lines
 
     # Add legend
@@ -292,8 +292,10 @@ def run(args, mode):
     # legend += prettify(" " * (plot_width - legend_width), fg_ccode, bg_ccode)
 
     # legend_entries.append( ("  " + special_marker.strip() + "       ", max_bin_ccode, "", fg_ccode) )
+    
+    legend_entries.append( ("", fg_ccode, "", fg_ccode) )
     for i in range(len(color_z_lims[:-1])-1, -1, -1):
-        legend_entries.append( ("|", fg_ccode, 7*regular_marker.strip(), ccodes[i]) )
+        legend_entries.append( ("|", fg_ccode, 8*regular_marker.strip(), ccodes[i]) )
     legend_entries.append( ("|", fg_ccode, "", fg_ccode) )
     legend, legend_width = generate_legend(legend_entries, legend_mod_func, sep=" ", internal_sep="")
     legend += prettify(" " * (plot_width - legend_width), fg_ccode, bg_ccode)
@@ -317,6 +319,7 @@ def run(args, mode):
     for i in range(len(color_z_lims)-1, -1, -1):
         legend_entries.append( ("", fg_ccode, ff.format(color_z_lims[i]), fg_ccode) )
     legend, legend_width = generate_legend(legend_entries, legend_mod_func, sep="  ", internal_sep="")
+    # legend = legend + prettify(" " * (plot_width - legend_width), fg_ccode, bg_ccode)
     legend += prettify(" " * (plot_width - legend_width), fg_ccode, bg_ccode)
     plot_lines.append(legend)
 

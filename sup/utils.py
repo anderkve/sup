@@ -176,11 +176,11 @@ def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None, ff="{:.1
         lines[i] += mod_func(" │")
     lines[mid_y_index - 1*even_y_bins] = lines[mid_y_index - 1*even_y_bins][:-5] + mod_func("│\u0332")
     lines[xy_bins[1]-1] = lines[xy_bins[1]-1][:-5] + mod_func("│\u0332")
-    top_line = mod_func("  " * xy_bins[0] + " _")
+    top_line = mod_func(" " + "  " * xy_bins[0] + " _")
     lines = [top_line] + lines
 
     # x axis:
-    x_axis = "├─"
+    x_axis = " ├─"
     x_axis += "─" * (xy_bins[0] - 1 - 1*(not even_x_bins)) 
     x_axis += "┼" 
     x_axis += "─" * (xy_bins[0] - 1 - 1*even_x_bins) 
@@ -197,15 +197,15 @@ def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None, ff="{:.1
     y_tick_2 = "{}".format(ff.format(y_bin_limits[mid_y_index]))
     y_tick_3 = "{}".format(ff.format(y_bin_limits[-1]))
 
-    lines[0] += mod_func(" " + y_tick_3 + "  ")
-    lines[mid_y_index + 1*(not even_y_bins)] += mod_func(" " + y_tick_2 + "  ")
-    lines[-2] += mod_func(" " + y_tick_1 + "  ")
+    lines[0] += mod_func("" + y_tick_3 + "  ")
+    lines[mid_y_index + 1*(not even_y_bins)] += mod_func("" + y_tick_2 + "  ")
+    lines[-2] += mod_func("" + y_tick_1 + "  ")
 
     for i,line in enumerate(lines):
         if i in [0, mid_y_index + 1*(not even_y_bins), len(lines)-2]:
             pass
         else:
-            lines[i] += mod_func(" " + " "*len(y_tick_1) + "  ")
+            lines[i] += mod_func("" + " "*len(y_tick_1) + "  ")
 
     # x ticks
     x_tick_1 = "{}".format(ff.format(x_bin_limits[0]))
