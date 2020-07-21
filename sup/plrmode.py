@@ -263,9 +263,9 @@ def run(args):
     legend_entries.append( (regular_marker.strip(), ccodes[-3], "3σ", fg_ccode) )
     
     legend, legend_width = generate_legend(legend_entries, legend_mod_func, sep="  ")
-    # Add a blank line below the legend
     legend += prettify(" " * (plot_width - legend_width), fg_ccode, bg_ccode)
 
+    # Add a blank line and then the legend
     plot_lines.append(prettify(" " * plot_width, fg_ccode, bg_ccode) )
     plot_lines.append(legend)
 

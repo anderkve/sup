@@ -21,14 +21,14 @@ regular_marker = " ■"
 special_marker = " 🟊"  # " ★" " 🟊" " ✱"
 
 empty_bin_marker_grayscale = " □"
-empty_bin_marker_color = " ■"
+empty_bin_marker_color = " □"
 empty_bin_marker = empty_bin_marker_color
 
 empty_bin_ccode_grayscale_bb = 233
 empty_bin_ccode_grayscale_wb = 254
 empty_bin_ccode_grayscale = empty_bin_ccode_grayscale_bb
 
-empty_bin_ccode_color_bb = 233
+empty_bin_ccode_color_bb = 237
 empty_bin_ccode_color_wb = 255
 empty_bin_ccode = empty_bin_ccode_color_bb
 
@@ -44,16 +44,23 @@ ccodes_grayscale_bb = [233, 237, 242, 231]
 ccodes_grayscale_wb = [254, 250, 243, 232]
 ccodes_grayscale = ccodes_grayscale_bb
 
-ccodes_color_bb = [236, 19, 45, 226]
-ccodes_color_wb = [248, 19, 45, 220]
+ccodes_color_bb = [18,20,27,45,122,155,226,214,202,196]
+ccodes_color_wb = [18,20,27,45,122,155,226,214,202,196]
 ccodes = ccodes_color_bb
 
-# color_z_lims = [0.0, 0.003, 0.046, 0.317]
-color_z_lims = [0.0, 0.25, 0.50, 0.75]
+# color_z_lims = [0.0, 0.25, 0.50, 0.75]
 
-def get_color_code(z_norm, use_capped_z=False):
 
-    if z_norm == 1.0:
+def get_color_code(z_val, z_norm, color_z_lims, s_type, use_capped_z=False):
+
+    assert s_type in ["min", "max"]
+
+    if (z_norm == 1.0) and (s_type == "max"):
+        if use_capped_z:
+            return ccodes[-1]
+        else:
+            return max_bin_ccode
+    elif (z_norm == 0.0) and (s_type == "min"):
         if use_capped_z:
             return ccodes[-1]
         else:
@@ -61,16 +68,23 @@ def get_color_code(z_norm, use_capped_z=False):
 
     i = 0
     for j, lim in enumerate(color_z_lims):
-        if z_norm >= lim:
+        if z_val >= lim:
             i = j
         else:
             break
     return ccodes[i]
 
 
-def get_marker(z_norm, use_capped_z=False):
+def get_marker(z_norm, s_type, use_capped_z=False):
 
-    if z_norm == 1.0:
+    assert s_type in ["min", "max"]
+
+    if (z_norm == 1.0) and (s_type == "max"):
+        if use_capped_z:
+            return regular_marker
+        else:
+            return special_marker
+    elif (z_norm == 0.0) and (s_type == "min"):
         if use_capped_z:
             return regular_marker
         else:
@@ -103,6 +117,7 @@ def run(args, mode):
     global empty_bin_ccode_grayscale
     global empty_bin_marker
     global special_marker
+    global color_z_lims
 
     input_file = args.input_file
 
@@ -157,6 +172,12 @@ def run(args, mode):
             empty_bin_ccode = empty_bin_ccode_grayscale_bb
         empty_bin_marker = empty_bin_marker_grayscale
 
+    n_colors = args.n_colors
+    if n_colors < 1:
+        n_colors = 1
+    elif n_colors > 10:
+        n_colors = 10
+    ccodes = ccodes[:n_colors]
 
     #
     # Read datasets from file
@@ -205,7 +226,13 @@ def run(args, mode):
     z_min = np.min(z_data)
     z_max = np.max(z_data)
     z_range = [z_min, z_max]
+    # z_norm = (z_data - z_min) / (z_max - z_min)
 
+
+    # Set color limits
+    color_z_lims = list( np.linspace(z_min, z_max, len(ccodes)+1) )
+    # color_z_norm_lims = list( np.linspace(0.0, 1.0, len(ccodes)+1) )
+    # print("DEBUG:", color_z_norm_lims)
 
     #
     # Get a dict with info per bin
@@ -235,8 +262,8 @@ def run(args, mode):
                 z_norm = (z_val - z_min) / (z_max - z_min)
                 # print("DEBUG: xi, yi, z_val, z_norm : ", xi, yi, z_val, z_norm)
 
-                ccode = get_color_code(z_norm, use_capped_z=use_capped_z)
-                marker = get_marker(z_norm, use_capped_z=use_capped_z)
+                ccode = get_color_code(z_val, z_norm, color_z_lims, s_type, use_capped_z=use_capped_z)
+                marker = get_marker(z_norm, s_type, use_capped_z=use_capped_z)
 
             # Add point to line
             yi_line += prettify(marker, ccode, bg_ccode)
@@ -258,20 +285,41 @@ def run(args, mode):
     legend_mod_func = lambda input_str, input_fg_ccode : prettify(input_str, input_fg_ccode, bg_ccode, bold=True)
     legend_entries = []
 
-    # if not use_capped_z:
-    #     legend_entries.append( (special_marker.strip(), max_bin_ccode, "best-fit", fg_ccode) )
-    legend_entries.append( (special_marker.strip(), max_bin_ccode, "1.0", fg_ccode) )
-    legend_entries.append( (regular_marker.strip(), ccodes[-1], "0.75", fg_ccode) )
-    legend_entries.append( (regular_marker.strip(), ccodes[-2], "0.50", fg_ccode) )
-    legend_entries.append( (regular_marker.strip(), ccodes[-3], "0.25", fg_ccode) )
-    legend_entries.append( (regular_marker.strip(), ccodes[-4], "0.00", fg_ccode) )
-    
-    legend, legend_width = generate_legend(legend_entries, legend_mod_func, sep="  ")
-    # Add a blank line below the legend
+    # legend_entries.append( ("  " + special_marker.strip() + "       ", max_bin_ccode, "", fg_ccode) )
+    # for i in range(len(color_z_lims[:-1])-1, -1, -1):
+    #     legend_entries.append( (5*regular_marker.strip(), ccodes[i], "", fg_ccode) )
+    # legend, legend_width = generate_legend(legend_entries, legend_mod_func, sep=" ")
+    # legend += prettify(" " * (plot_width - legend_width), fg_ccode, bg_ccode)
+
+    # legend_entries.append( ("  " + special_marker.strip() + "       ", max_bin_ccode, "", fg_ccode) )
+    for i in range(len(color_z_lims[:-1])-1, -1, -1):
+        legend_entries.append( ("|", fg_ccode, 7*regular_marker.strip(), ccodes[i]) )
+    legend_entries.append( ("|", fg_ccode, "", fg_ccode) )
+    legend, legend_width = generate_legend(legend_entries, legend_mod_func, sep=" ", internal_sep="")
     legend += prettify(" " * (plot_width - legend_width), fg_ccode, bg_ccode)
 
+    # Add a blank line and then the legend
     plot_lines.append(prettify(" " * plot_width, fg_ccode, bg_ccode) )
     plot_lines.append(legend)
+
+    # # Vertical ticks down from colorbar limits
+    # legend_entries = []
+    # legend_entries.append( ("  │      ", fg_ccode, "", fg_ccode) )
+    # for i in range(len(color_z_lims[:-1])-1, -1, -1):
+    #     legend_entries.append( (" │    ", fg_ccode, "", fg_ccode) )
+    # legend_entries.append( (" │    ", fg_ccode, "", fg_ccode) )
+    # legend, legend_width = generate_legend(legend_entries, legend_mod_func, sep="")
+    # legend += prettify(" " * (plot_width - legend_width), fg_ccode, bg_ccode)
+    # plot_lines.append(legend)
+
+    # Numbers below the colorbar ticks
+    legend_entries = []
+    for i in range(len(color_z_lims)-1, -1, -1):
+        legend_entries.append( ("", fg_ccode, ff.format(color_z_lims[i]), fg_ccode) )
+    legend, legend_width = generate_legend(legend_entries, legend_mod_func, sep="  ", internal_sep="")
+    legend += prettify(" " * (plot_width - legend_width), fg_ccode, bg_ccode)
+    plot_lines.append(legend)
+
 
     # Add left padding
     for i,line in enumerate(plot_lines):

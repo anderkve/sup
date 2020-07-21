@@ -28,16 +28,16 @@ def fill_missing_bg(lines_1, width_1, lines_2, width_2, bg_ccode):
     return lines_1, lines_2
 
 
-def generate_legend(legend_entries, mod_func, sep="  "):
+def generate_legend(legend_entries, mod_func, sep="  ", internal_sep=" "):
 
     legend = ""
     legend_width = 0
 
     for entry_tuple in legend_entries:
         marker, marker_ccode, txt, txt_ccode = entry_tuple
-        legend += mod_func(marker, marker_ccode) + mod_func(" " + txt, txt_ccode)
+        legend += mod_func(marker, marker_ccode) + mod_func(internal_sep + txt, txt_ccode)
         legend += mod_func(sep, txt_ccode)
-        legend_width += len(marker) + len(txt) + 3
+        legend_width += len(marker) + len(internal_sep) + len(txt) + len(sep)
 
     return legend, legend_width
 
