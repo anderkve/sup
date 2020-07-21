@@ -152,7 +152,7 @@ def get_bin_tuples(x_data, y_data, z_data, xy_bins, x_minmax, y_minmax, s_data, 
 
 
 
-def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None):
+def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None, ff="{:.1e}"):
 
     if mod_func is None:
         mod_func = lambda x : x
@@ -193,9 +193,9 @@ def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None):
     #
 
     # y ticks
-    y_tick_1 = "%.1e" % y_bin_limits[0]
-    y_tick_2 = "%.1e" % y_bin_limits[mid_y_index] 
-    y_tick_3 = "%.1e" % y_bin_limits[-1] 
+    y_tick_1 = "{}".format(ff.format(y_bin_limits[0]))
+    y_tick_2 = "{}".format(ff.format(y_bin_limits[mid_y_index]))
+    y_tick_3 = "{}".format(ff.format(y_bin_limits[-1]))
 
     lines[0] += mod_func(" " + y_tick_3 + "  ")
     lines[mid_y_index + 1*(not even_y_bins)] += mod_func(" " + y_tick_2 + "  ")
@@ -208,9 +208,9 @@ def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None):
             lines[i] += mod_func(" " + " "*len(y_tick_1) + "  ")
 
     # x ticks
-    x_tick_1 = "%.1e" % x_bin_limits[0]
-    x_tick_2 = "%.1e" % x_bin_limits[mid_x_index] 
-    x_tick_3 = "%.1e" % x_bin_limits[-1] 
+    x_tick_1 = "{}".format(ff.format(x_bin_limits[0]))
+    x_tick_2 = "{}".format(ff.format(x_bin_limits[mid_x_index]))
+    x_tick_3 = "{}".format(ff.format(x_bin_limits[-1]))
 
     x_ticks = x_tick_1
     x_ticks += " " * (1 * xy_bins[0] - len(x_tick_1)) + " "*even_x_bins

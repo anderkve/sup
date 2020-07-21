@@ -6,9 +6,10 @@ from sup.utils import get_bin_tuples, get_dataset_names, add_axes, prettify, fil
 
 
 #
-# Variables for colors, markers and padding
+# Variables for colors, markers, padding, etc
 #
 
+ff = sup.defaults.ff
 left_padding = 2*" "
 
 bg_ccode_bb, fg_ccode_bb = 232, 231
@@ -196,17 +197,17 @@ def run(args):
     loglike_max = np.max(loglike_data)
     likelihood_ratio = np.exp(loglike_data) / np.exp(loglike_max)
 
+    z_data = likelihood_ratio
+    z_min = np.min(z_data)
+    z_max = np.max(z_data)
+    z_range = [z_min, z_max]
+
+    s_data = z_data  # sort according to likelihood_ratio
+
 
     #
     # Get a dict with info per bin
     #
-
-    z_data = likelihood_ratio
-    s_data = z_data  # sort according to likelihood_ratio
-    # if not z_min:
-    #     z_min = np.min(z_data)
-    # if not z_max:
-    #     z_max = np.max(z_data)
 
     bins_info, x_bin_limits, y_bin_limits = get_bin_tuples(x_data, y_data, z_data, xy_bins, x_range, y_range, s_data, s_type)
 
@@ -245,7 +246,7 @@ def run(args):
 
     # Add axes
     axes_mod_func = lambda input_str : prettify(input_str, fg_ccode, bg_ccode, bold=True)
-    plot_lines = add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=axes_mod_func)
+    plot_lines = add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=axes_mod_func, ff=ff)
 
     # Add top line
     plot_width = xy_bins[0] * 2 + 12
@@ -287,14 +288,15 @@ def run(args):
     # Add info text
     #
 
+
     info_lines = []
     info_lines.append(left_padding)
-    info_lines.append(left_padding + "x-axis : {n} {mm}".format(n=x_label, mm=x_range))
-    info_lines.append(left_padding + "y-axis : {n} {mm}".format(n=y_label, mm=y_range))
-    info_lines.append(left_padding + " color : {n}".format(n=z_label))
-    info_lines.append(left_padding + "  sort : {n} [{t}]".format(n=s_label, t=s_type))
+    info_lines.append(left_padding + "x-axis : {} [{}, {}]".format(x_label, ff.format(x_range[0]), ff.format(x_range[1])))
+    info_lines.append(left_padding + "y-axis : {} [{}, {}]".format(y_label, ff.format(y_range[0]), ff.format(y_range[1])))
+    info_lines.append(left_padding + " color : {} [{}, {}]".format(z_label, ff.format(z_range[0]), ff.format(z_range[1])))
+    info_lines.append(left_padding + "  sort : {} [{}]".format(s_label, s_type))
     if use_capped_loglike:
-        info_lines.append(left_padding + "capped : ln(L) dataset ({n}) capped at {v}".format(n=loglike_name, v=args.cap_loglike_val))
+        info_lines.append(left_padding + "capped : ln(L) dataset ({}) capped at {}".format(loglike_name, ff.format(args.cap_loglike_val)))
     info_lines.append(left_padding)
 
     info_lines_lengths = [len(l) for l in info_lines]

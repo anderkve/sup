@@ -6,9 +6,10 @@ from sup.utils import get_bin_tuples, get_dataset_names, add_axes, prettify, fil
 
 
 #
-# Variables for colors, markers and padding
+# Variables for colors, markers, padding, etc
 #
 
+ff = sup.defaults.ff
 left_padding = 2*" "
 
 bg_ccode_bb, fg_ccode_bb = 232, 231
@@ -203,7 +204,7 @@ def run(args, mode):
     # Get z max and minimum
     z_min = np.min(z_data)
     z_max = np.max(z_data)
-    z_range = (z_min, z_max)
+    z_range = [z_min, z_max]
 
 
     #
@@ -247,7 +248,7 @@ def run(args, mode):
 
     # Add axes
     axes_mod_func = lambda input_str : prettify(input_str, fg_ccode, bg_ccode, bold=True)
-    plot_lines = add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=axes_mod_func)
+    plot_lines = add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=axes_mod_func, ff=ff)
 
     # Add top line
     plot_width = xy_bins[0] * 2 + 12
@@ -293,12 +294,12 @@ def run(args, mode):
 
     info_lines = []
     info_lines.append(left_padding)
-    info_lines.append(left_padding + "x-axis : {n} {mm}".format(n=x_label, mm=x_range))
-    info_lines.append(left_padding + "y-axis : {n} {mm}".format(n=y_label, mm=y_range))
-    info_lines.append(left_padding + " color : {n} {mm}".format(n=z_label, mm=z_range))
-    info_lines.append(left_padding + "  sort : {n} [{t}]".format(n=s_label, t=s_type))
+    info_lines.append(left_padding + "x-axis : {} [{}, {}]".format(x_label, ff.format(x_range[0]), ff.format(x_range[1])))
+    info_lines.append(left_padding + "y-axis : {} [{}, {}]".format(y_label, ff.format(y_range[0]), ff.format(y_range[1])))
+    info_lines.append(left_padding + " color : {} [{}, {}]".format(z_label, ff.format(z_range[0]), ff.format(z_range[1])))
+    info_lines.append(left_padding + "  sort : {} [{}]".format(s_label, s_type))
     if use_capped_z:
-        info_lines.append(left_padding + "capped : z-axis (color) dataset capped at {v}".format(v=args.cap_z_val))
+        info_lines.append(left_padding + "capped : z-axis (color) dataset capped at {}".format(ff.format(args.cap_z_val)))
     info_lines.append(left_padding)
 
     info_lines_lengths = [len(l) for l in info_lines]
