@@ -49,12 +49,8 @@ cmaps = [
     [53,56,62,26,31,36,42,47,154,226],      # viridis
     [18,20,27,45,122,155,226,214,202,196],  # jet
 ]
-# ccodes_color_bb = cmaps[0]
-# ccodes_color_wb = cmaps[0]
-# ccodes = ccodes_color_bb
 ccodes = cmaps[0]
 
-# color_z_lims = [0.0, 0.25, 0.50, 0.75]
 
 
 def get_color_code(z_val, z_norm, color_z_lims, s_type, use_capped_z=False):
@@ -186,7 +182,7 @@ def run(args, mode):
         n_colors = 1
     elif n_colors > 10:
         n_colors = 10
-    ccodes = ccodes[:n_colors]
+    ccodes = [ ccodes[int(i)] for i in np.round( np.linspace(0, len(ccodes)-1, n_colors) ) ]
 
     #
     # Read datasets from file
