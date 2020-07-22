@@ -45,13 +45,14 @@ ccodes_grayscale_bb = [233, 237, 242, 231]
 ccodes_grayscale_wb = [254, 250, 243, 232]
 ccodes_grayscale = ccodes_grayscale_bb
 
-# ccodes_color_bb = [18,20,27,45,122,155,226,214,202,196]  # blue --> red
-ccodes_color_bb = [53,56,62,26,31,36,42,47,154,226]  # viridis
-
-# ccodes_color_wb = [18,20,27,45,122,155,226,214,202,196]  # blue --> red
-ccodes_color_wb = [53,56,62,26,31,36,42,47,154,226]  # viridis
-
-ccodes = ccodes_color_bb
+cmaps = [
+    [53,56,62,26,31,36,42,47,154,226],      # viridis
+    [18,20,27,45,122,155,226,214,202,196],  # jet
+]
+# ccodes_color_bb = cmaps[0]
+# ccodes_color_wb = cmaps[0]
+# ccodes = ccodes_color_bb
+ccodes = cmaps[0]
 
 # color_z_lims = [0.0, 0.25, 0.50, 0.75]
 
@@ -111,6 +112,7 @@ def run_min(args):
 def run(args, mode):
 
     assert mode in ["max", "min"]
+    assert args.cmap_index in range(len(cmaps))
 
     global ccodes 
     global ccodes_grayscale 
@@ -158,13 +160,15 @@ def run(args, mode):
     if args.cap_z_val is not None:
         use_capped_z = True
 
+    cmap_index = args.cmap_index
+    ccodes = cmaps[cmap_index]
     use_white_bg = args.use_white_bg
     if use_white_bg:
         bg_ccode = bg_ccode_wb
         fg_ccode = fg_ccode_wb
         empty_bin_ccode = empty_bin_ccode_color_wb
         max_bin_ccode = max_bin_ccode_color_wb
-        ccodes = ccodes_color_wb
+        # ccodes = ccodes_color_wb
 
     if args.use_grayscale:
         if use_white_bg:

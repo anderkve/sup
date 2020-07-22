@@ -115,6 +115,7 @@ examples:
     parser_maxmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
     parser_maxmode.add_argument("-w", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
     parser_maxmode.add_argument("-nc", "--num-colors", type=int, action="store", dest="n_colors", default=10, help="number of colors in colorbar (max 10)", metavar="N_COLORS")
+    parser_maxmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish", metavar="CM")
 
     # Parser for "min" mode
     parser_minmode = subparsers.add_parser("min")
@@ -135,6 +136,7 @@ examples:
     parser_minmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
     parser_minmode.add_argument("-w", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
     parser_minmode.add_argument("-nc", "--num-colors", type=int, action="store", dest="n_colors", default=10, help="number of colors in colorbar (max 10)", metavar="N_COLORS")
+    parser_minmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish", metavar="CM")
 
     # Parse the arguments and run the function for the chosen mode
     args = parser.parse_args()
