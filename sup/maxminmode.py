@@ -25,8 +25,8 @@ empty_bin_marker_grayscale = " □"
 empty_bin_marker_color = " □"
 empty_bin_marker = empty_bin_marker_color
 
-empty_bin_ccode_grayscale_bb = 233
-empty_bin_ccode_grayscale_wb = 254
+empty_bin_ccode_grayscale_bb = 237
+empty_bin_ccode_grayscale_wb = 252
 empty_bin_ccode_grayscale = empty_bin_ccode_grayscale_bb
 
 empty_bin_ccode_color_bb = 237
@@ -41,9 +41,15 @@ max_bin_ccode_color_bb = 231
 max_bin_ccode_color_wb = 232
 max_bin_ccode = max_bin_ccode_color_bb
 
-ccodes_grayscale_bb = [233, 237, 242, 231]
-ccodes_grayscale_wb = [254, 250, 243, 232]
-ccodes_grayscale = ccodes_grayscale_bb
+# ccodes_grayscale_bb = [233, 237, 242, 231]
+# ccodes_grayscale_wb = [254, 250, 243, 232]
+# ccodes_grayscale = ccodes_grayscale_bb
+
+cmaps_grayscale = [
+    [237, 239, 241, 243, 245, 247, 249, 251, 253, 255],  # for black background
+    [235, 237, 239, 241, 243, 245, 247, 249, 251, 253],  # for white background
+]
+ccodes_grayscale = cmaps_grayscale[0]
 
 cmaps = [
     [53,56,62,26,31,36,42,47,154,226],      # viridis
@@ -168,11 +174,13 @@ def run(args, mode):
 
     if args.use_grayscale:
         if use_white_bg:
-            ccodes = ccodes_grayscale_wb
+            ccodes = cmaps_grayscale[1]
+            # ccodes = ccodes_grayscale_wb
             max_bin_ccode = max_bin_ccode_grayscale_wb
             empty_bin_ccode = empty_bin_ccode_grayscale_wb
         else:
-            ccodes = ccodes_grayscale_bb
+            ccodes = cmaps_grayscale[0]
+            # ccodes = ccodes_grayscale_bb
             max_bin_ccode = max_bin_ccode_grayscale_bb
             empty_bin_ccode = empty_bin_ccode_grayscale_bb
         empty_bin_marker = empty_bin_marker_grayscale
