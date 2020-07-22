@@ -30,7 +30,7 @@ empty_bin_ccode_grayscale_wb = 254
 empty_bin_ccode_grayscale = empty_bin_ccode_grayscale_bb
 
 empty_bin_ccode_color_bb = 237
-empty_bin_ccode_color_wb = 255
+empty_bin_ccode_color_wb = 252
 empty_bin_ccode = empty_bin_ccode_color_bb
 
 max_bin_ccode_grayscale_bb = 231
@@ -45,8 +45,12 @@ ccodes_grayscale_bb = [233, 237, 242, 231]
 ccodes_grayscale_wb = [254, 250, 243, 232]
 ccodes_grayscale = ccodes_grayscale_bb
 
-ccodes_color_bb = [18,20,27,45,122,155,226,214,202,196]
-ccodes_color_wb = [18,20,27,45,122,155,226,214,202,196]
+# ccodes_color_bb = [18,20,27,45,122,155,226,214,202,196]  # blue --> red
+ccodes_color_bb = [53,56,62,26,31,36,42,47,154,226]  # viridis
+
+# ccodes_color_wb = [18,20,27,45,122,155,226,214,202,196]  # blue --> red
+ccodes_color_wb = [53,56,62,26,31,36,42,47,154,226]  # viridis
+
 ccodes = ccodes_color_bb
 
 # color_z_lims = [0.0, 0.25, 0.50, 0.75]
@@ -288,8 +292,9 @@ def run(args, mode):
     legend_entries = []
 
     legend_entries.append( ("", fg_ccode, "", fg_ccode) )
-    for i in range(len(color_z_lims[:-1])-1, -1, -1):
-        legend_entries.append( ("|", fg_ccode, 7*regular_marker.strip(), ccodes[i]) )
+    # for i in range(len(color_z_lims)-2, -1, -1):
+    for i in range(0, len(color_z_lims)-1):
+        legend_entries.append( ("|", fg_ccode, 6*regular_marker.strip(), ccodes[i]) )
     legend_entries.append( ("|", fg_ccode, "", fg_ccode) )
     legend, legend_width = generate_legend(legend_entries, legend_mod_func, sep=" ", internal_sep="")
 
@@ -306,9 +311,14 @@ def run(args, mode):
 
     # Add numbers below the colorbar ticks
     legend_nums_entries = []
-    for i in range(len(color_z_lims)-1, -1, -1):
-        legend_nums_entries.append( ("", fg_ccode, ff.format(color_z_lims[i]), fg_ccode) )
-    legend_nums, legend_nums_width = generate_legend(legend_nums_entries, legend_mod_func, sep=" ", internal_sep="")
+    # for i in range(len(color_z_lims)-1, -1, -1):
+    for i in range(0, len(color_z_lims)):
+        txt = ff.format(color_z_lims[i])
+        if i % 2 == 0:
+            legend_nums_entries.append( ("", fg_ccode, txt, fg_ccode) )
+        else:
+            legend_nums_entries.append( ("", fg_ccode, " " * len(txt), fg_ccode) )
+    legend_nums, legend_nums_width = generate_legend(legend_nums_entries, legend_mod_func, sep="", internal_sep="")
 
     if legend_nums_width <= plot_width:
         legend_nums += prettify(" " * (plot_width - legend_nums_width), fg_ccode, bg_ccode)
