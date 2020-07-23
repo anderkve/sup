@@ -307,7 +307,7 @@ def run(args):
     info_lines.append(info_left_padding)
     info_lines.append(info_left_padding + "x-axis : {} [{}, {}]".format(x_label, ff2.format(x_range[0]), ff2.format(x_range[1])))
     info_lines.append(info_left_padding + "y-axis : {} [{}, {}]".format(y_label, ff2.format(y_range[0]), ff2.format(y_range[1])))
-    info_lines.append(info_left_padding + " color : {} [{}, {}]".format(z_label, ff2.format(z_range[0]), ff2.format(z_range[1])))
+    info_lines.append(info_left_padding + "z-axis : {} [{}, {}]".format(z_label, ff2.format(z_range[0]), ff2.format(z_range[1])))
     info_lines.append(info_left_padding + "  sort : {} [{}]".format(s_label, s_type))
     if use_capped_loglike:
         info_lines.append(info_left_padding + "capped : ln(L) dataset ({}) capped at {}".format(loglike_name, ff2.format(args.cap_loglike_val)))
