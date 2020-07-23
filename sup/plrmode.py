@@ -258,9 +258,9 @@ def run(args):
     legend_mod_func = lambda input_str, input_fg_ccode : prettify(input_str, input_fg_ccode, bg_ccode, bold=True)
     legend_entries = []
 
-    legend_entries.append( ("", fg_ccode, "", fg_ccode) )
+    # legend_entries.append( ("", fg_ccode, "", fg_ccode) )
     if not use_capped_loglike:
-        legend_entries.append( (special_marker.strip(), max_bin_ccode, "best-fit", fg_ccode) )
+        legend_entries.append( (" " + special_marker.strip(), max_bin_ccode, "best-fit", fg_ccode) )
     legend_entries.append( (regular_marker.strip(), ccodes[-1], "1σ", fg_ccode) )
     legend_entries.append( (regular_marker.strip(), ccodes[-2], "2σ", fg_ccode) )
     legend_entries.append( (regular_marker.strip(), ccodes[-3], "3σ", fg_ccode) )
@@ -303,14 +303,15 @@ def run(args):
 
 
     info_lines = []
-    info_lines.append(left_padding)
-    info_lines.append(left_padding + "x-axis : {} [{}, {}]".format(x_label, ff2.format(x_range[0]), ff2.format(x_range[1])))
-    info_lines.append(left_padding + "y-axis : {} [{}, {}]".format(y_label, ff2.format(y_range[0]), ff2.format(y_range[1])))
-    info_lines.append(left_padding + " color : {} [{}, {}]".format(z_label, ff2.format(z_range[0]), ff2.format(z_range[1])))
-    info_lines.append(left_padding + "  sort : {} [{}]".format(s_label, s_type))
+    info_left_padding = left_padding + " "
+    info_lines.append(info_left_padding)
+    info_lines.append(info_left_padding + "x-axis : {} [{}, {}]".format(x_label, ff2.format(x_range[0]), ff2.format(x_range[1])))
+    info_lines.append(info_left_padding + "y-axis : {} [{}, {}]".format(y_label, ff2.format(y_range[0]), ff2.format(y_range[1])))
+    info_lines.append(info_left_padding + " color : {} [{}, {}]".format(z_label, ff2.format(z_range[0]), ff2.format(z_range[1])))
+    info_lines.append(info_left_padding + "  sort : {} [{}]".format(s_label, s_type))
     if use_capped_loglike:
-        info_lines.append(left_padding + "capped : ln(L) dataset ({}) capped at {}".format(loglike_name, ff2.format(args.cap_loglike_val)))
-    info_lines.append(left_padding)
+        info_lines.append(info_left_padding + "capped : ln(L) dataset ({}) capped at {}".format(loglike_name, ff2.format(args.cap_loglike_val)))
+    info_lines.append(info_left_padding)
 
     info_lines_lengths = [len(l) for l in info_lines]
     info_width = max(info_lines_lengths)

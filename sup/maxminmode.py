@@ -41,10 +41,6 @@ max_bin_ccode_color_bb = 231
 max_bin_ccode_color_wb = 232
 max_bin_ccode = max_bin_ccode_color_bb
 
-# ccodes_grayscale_bb = [233, 237, 242, 231]
-# ccodes_grayscale_wb = [254, 250, 243, 232]
-# ccodes_grayscale = ccodes_grayscale_bb
-
 cmaps_grayscale = [
     [237, 239, 241, 243, 245, 247, 249, 251, 253, 255],  # for black background
     [235, 237, 239, 241, 243, 245, 247, 249, 251, 253],  # for white background
@@ -237,8 +233,15 @@ def run(args, mode):
 
     # Get z max and minimum
     z_min = np.min(z_data)
+    z_min_index = np.argmin(z_data)
     z_max = np.max(z_data)
+    z_max_index = np.argmax(z_data)
     z_range = [z_min, z_max]
+
+    # Get positions of max/min points
+    xyz_max = (x_data[z_max_index], y_data[z_max_index], z_max)
+    xyz_min = (x_data[z_min_index], y_data[z_min_index], z_min)
+
     # z_norm = (z_data - z_min) / (z_max - z_min)
 
 
@@ -297,13 +300,14 @@ def run(args, mode):
 
     # Add legend
     legend_mod_func = lambda input_str, input_fg_ccode : prettify(input_str, input_fg_ccode, bg_ccode, bold=True)
-    legend_entries = []
 
+    # - colorbar
+    legend_entries = []
     legend_entries.append( ("", fg_ccode, "", fg_ccode) )
-    # for i in range(len(color_z_lims)-2, -1, -1):
     for i in range(0, len(color_z_lims)-1):
         legend_entries.append( ("|", fg_ccode, 6*regular_marker.strip(), ccodes[i]) )
     legend_entries.append( ("|", fg_ccode, "", fg_ccode) )
+
     legend, legend_width = generate_legend(legend_entries, legend_mod_func, sep=" ", internal_sep="")
 
     if legend_width <= plot_width:
@@ -313,13 +317,11 @@ def run(args, mode):
             plot_lines[i] += prettify(" " * (legend_width - plot_width), fg_ccode, bg_ccode)
         plot_width = legend_width
 
-    # Add a blank line and then the legend
     plot_lines.append(prettify(" " * plot_width, fg_ccode, bg_ccode) )
     plot_lines.append(legend)
 
-    # Add numbers below the colorbar ticks
+    # - numbers below the colorbar
     legend_nums_entries = []
-    # for i in range(len(color_z_lims)-1, -1, -1):
     for i in range(0, len(color_z_lims)):
         txt = ff.format(color_z_lims[i])
         if i % 2 == 0:
@@ -337,6 +339,18 @@ def run(args, mode):
 
     plot_lines.append(legend_nums)
 
+    # - max/min 
+    if s_index == z_index:
+        legend_maxmin_entries = []
+        if s_type == "max":
+            point = ("(" + ff2 + ", " + ff2 + ", " + ff2 + ")").format(xyz_max[0], xyz_max[1], xyz_max[2])
+            legend_maxmin_entries.append( (" " + special_marker.strip(), fg_ccode, "max(z) point: (x, y, z) = " + point, fg_ccode) )
+        else:
+            point = ("(" + ff2 + ", " + ff2 + ", " + ff2 + ")").format(xyz_min[0], xyz_min[1], xyz_min[2])
+            legend_maxmin_entries.append( (" " + special_marker.strip(), fg_ccode, "min(z) point: (x, y, z) = " + point, fg_ccode) )
+        legend_maxmin, legend_width = generate_legend(legend_maxmin_entries, legend_mod_func, sep=" ", internal_sep="  ")
+        plot_lines.append(prettify(" " * plot_width, fg_ccode, bg_ccode) )
+        plot_lines.append(legend_maxmin)
 
     #
     # Add left padding
@@ -361,14 +375,15 @@ def run(args, mode):
     #
 
     info_lines = []
-    info_lines.append(left_padding)
-    info_lines.append(left_padding + "x-axis : {} [{}, {}]".format(x_label, ff2.format(x_range[0]), ff2.format(x_range[1])))
-    info_lines.append(left_padding + "y-axis : {} [{}, {}]".format(y_label, ff2.format(y_range[0]), ff2.format(y_range[1])))
-    info_lines.append(left_padding + " color : {} [{}, {}]".format(z_label, ff2.format(z_range[0]), ff2.format(z_range[1])))
-    info_lines.append(left_padding + "  sort : {} [{}]".format(s_label, s_type))
+    info_left_padding = left_padding + " "
+    info_lines.append(info_left_padding)
+    info_lines.append(info_left_padding + "x-axis : {} [{}, {}]".format(x_label, ff2.format(x_range[0]), ff2.format(x_range[1])))
+    info_lines.append(info_left_padding + "y-axis : {} [{}, {}]".format(y_label, ff2.format(y_range[0]), ff2.format(y_range[1])))
+    info_lines.append(info_left_padding + " color : {} [{}, {}]".format(z_label, ff2.format(z_range[0]), ff2.format(z_range[1])))
+    info_lines.append(info_left_padding + "  sort : {} [{}]".format(s_label, s_type))
     if use_capped_z:
-        info_lines.append(left_padding + "capped : z-axis (color) dataset capped at {}".format(ff2.format(args.cap_z_val)))
-    info_lines.append(left_padding)
+        info_lines.append(info_left_padding + "capped : z-axis (color) dataset capped at {}".format(ff2.format(args.cap_z_val)))
+    info_lines.append(info_left_padding)
 
     info_lines_lengths = [len(l) for l in info_lines]
     info_width = max(info_lines_lengths)
