@@ -111,10 +111,10 @@ def run(args):
 
     read_length = sup.defaults.read_length
 
-    x_use_abs_val = args.x_use_abs_val
-    y_use_abs_val = args.y_use_abs_val
-    # z_use_abs_val = sup.defaults.z_use_abs_val
-    s_use_abs_val = False
+    # x_use_abs_val = args.x_use_abs_val
+    # y_use_abs_val = args.y_use_abs_val
+    # # z_use_abs_val = sup.defaults.z_use_abs_val
+    # s_use_abs_val = False
 
     xy_bins = args.xy_bins
     if not xy_bins:
@@ -168,13 +168,21 @@ def run(args):
     assert len(x_data) == len(s_data)
     # data_length = len(x_data)
 
+    x_transf_expr = args.x_transf_expr
+    y_transf_expr = args.y_transf_expr
+    x = x_data
+    y = y_data
+    if x_transf_expr != "":
+        x_data = eval(x_transf_expr)
+    if y_transf_expr != "":
+        y_data = eval(y_transf_expr)
 
-    if x_use_abs_val:
-        x_data = np.abs(x_data)
-    if y_use_abs_val:
-        y_data = np.abs(y_data)
-    if s_use_abs_val:
-        s_data = np.abs(s_data)
+    # if x_use_abs_val:
+    #     x_data = np.abs(x_data)
+    # if y_use_abs_val:
+    #     y_data = np.abs(y_data)
+    # if s_use_abs_val:
+    #     s_data = np.abs(s_data)
 
     if not x_range:
         x_range = [np.min(x_data), np.max(x_data)]
@@ -261,7 +269,7 @@ def run(args):
     # legend_entries.append( ("", fg_ccode, "", fg_ccode) )
     if not use_capped_loglike:
         legend_entries.append( (" " + special_marker.strip(), max_bin_ccode, "best-fit", fg_ccode) )
-    legend_entries.append( (regular_marker.strip(), ccodes[-1], "1σ", fg_ccode) )
+    legend_entries.append( (" " * use_capped_loglike + regular_marker.strip(), ccodes[-1], "1σ", fg_ccode) )
     legend_entries.append( (regular_marker.strip(), ccodes[-2], "2σ", fg_ccode) )
     legend_entries.append( (regular_marker.strip(), ccodes[-3], "3σ", fg_ccode) )
     
@@ -305,12 +313,24 @@ def run(args):
     info_lines = []
     info_left_padding = left_padding + " "
     info_lines.append(info_left_padding)
-    info_lines.append(info_left_padding + "x-axis : {} [{}, {}]".format(x_label, ff2.format(x_range[0]), ff2.format(x_range[1])))
-    info_lines.append(info_left_padding + "y-axis : {} [{}, {}]".format(y_label, ff2.format(y_range[0]), ff2.format(y_range[1])))
-    info_lines.append(info_left_padding + "z-axis : {} [{}, {}]".format(z_label, ff2.format(z_range[0]), ff2.format(z_range[1])))
-    info_lines.append(info_left_padding + "  sort : {} [{}]".format(s_label, s_type))
+
+    info_lines.append(info_left_padding + "x-axis: {}".format(x_label))
+    if x_transf_expr != "":
+        info_lines.append(info_left_padding + "        - transf.: {}".format(x_transf_expr))
+    info_lines.append(info_left_padding + "        - range: [{}, {}]".format(ff2.format(x_range[0]), ff2.format(x_range[1])))
+
+    info_lines.append(info_left_padding + "y-axis: {}".format(y_label))
+    if y_transf_expr != "":
+        info_lines.append(info_left_padding + "        - transf.: {}".format(y_transf_expr))
+    info_lines.append(info_left_padding + "        - range: [{}, {}]".format(ff2.format(y_range[0]), ff2.format(y_range[1])))
+
+    info_lines.append(info_left_padding + "z-axis: {}".format(z_label))
+    info_lines.append(info_left_padding + "        - range: [{}, {}]".format(ff2.format(z_range[0]), ff2.format(z_range[1])))
+
+    info_lines.append(info_left_padding + "  sort: {} [{}]".format(s_label, s_type))
+
     if use_capped_loglike:
-        info_lines.append(info_left_padding + "capped : ln(L) dataset ({}) capped at {}".format(loglike_name, ff2.format(args.cap_loglike_val)))
+        info_lines.append(info_left_padding + "capped: ln(L) dataset ({}) capped at {}".format(loglike_name, ff2.format(args.cap_loglike_val)))
     info_lines.append(info_left_padding)
 
     info_lines_lengths = [len(l) for l in info_lines]

@@ -143,12 +143,12 @@ def run(args, mode):
 
     read_length = sup.defaults.read_length
 
-    x_use_abs_val = args.x_use_abs_val
-    y_use_abs_val = args.y_use_abs_val
-    z_use_abs_val = args.z_use_abs_val
-    s_use_abs_val = args.s_use_abs_val
-    if s_index == z_index:
-        s_use_abs_val = z_use_abs_val
+    # x_use_abs_val = args.x_use_abs_val
+    # y_use_abs_val = args.y_use_abs_val
+    # z_use_abs_val = args.z_use_abs_val
+    # s_use_abs_val = args.s_use_abs_val
+    # if s_index == z_index:
+    #     s_use_abs_val = z_use_abs_val
 
     xy_bins = args.xy_bins
     if not xy_bins:
@@ -212,15 +212,31 @@ def run(args, mode):
     assert len(x_data) == len(s_data)
     # data_length = len(x_data)
 
+    x_transf_expr = args.x_transf_expr
+    y_transf_expr = args.y_transf_expr
+    z_transf_expr = args.z_transf_expr
+    s_transf_expr = args.s_transf_expr
+    x = x_data
+    y = y_data
+    z = z_data
+    s = s_data
+    if x_transf_expr != "":
+        x_data = eval(x_transf_expr)
+    if y_transf_expr != "":
+        y_data = eval(y_transf_expr)
+    if z_transf_expr != "":
+        z_data = eval(z_transf_expr)
+    if s_transf_expr != "":
+        s_data = eval(s_transf_expr)
 
-    if x_use_abs_val:
-        x_data = np.abs(x_data)
-    if y_use_abs_val:
-        y_data = np.abs(y_data)
-    if z_use_abs_val:
-        z_data = np.abs(z_data)
-    if s_use_abs_val:
-        s_data = np.abs(s_data)
+    # if x_use_abs_val:
+    #     x_data = np.abs(x_data)
+    # if y_use_abs_val:
+    #     y_data = np.abs(y_data)
+    # if z_use_abs_val:
+    #     z_data = np.abs(z_data)
+    # if s_use_abs_val:
+    #     s_data = np.abs(s_data)
 
     if not x_range:
         x_range = [np.min(x_data), np.max(x_data)]
@@ -377,12 +393,28 @@ def run(args, mode):
     info_lines = []
     info_left_padding = left_padding + " "
     info_lines.append(info_left_padding)
-    info_lines.append(info_left_padding + "x-axis : {} [{}, {}]".format(x_label, ff2.format(x_range[0]), ff2.format(x_range[1])))
-    info_lines.append(info_left_padding + "y-axis : {} [{}, {}]".format(y_label, ff2.format(y_range[0]), ff2.format(y_range[1])))
-    info_lines.append(info_left_padding + "z-axis : {} [{}, {}]".format(z_label, ff2.format(z_range[0]), ff2.format(z_range[1])))
-    info_lines.append(info_left_padding + "  sort : {} [{}]".format(s_label, s_type))
+
+    info_lines.append(info_left_padding + "x-axis: {}".format(x_label))
+    if x_transf_expr != "":
+        info_lines.append(info_left_padding + "        - transf.: {}".format(x_transf_expr))
+    info_lines.append(info_left_padding + "        - range: [{}, {}]".format(ff2.format(x_range[0]), ff2.format(x_range[1])))
+
+    info_lines.append(info_left_padding + "y-axis: {}".format(y_label))
+    if y_transf_expr != "":
+        info_lines.append(info_left_padding + "        - transf.: {}".format(y_transf_expr))
+    info_lines.append(info_left_padding + "        - range: [{}, {}]".format(ff2.format(y_range[0]), ff2.format(y_range[1])))
+
+    info_lines.append(info_left_padding + "z-axis: {}".format(z_label))
+    if z_transf_expr != "":
+        info_lines.append(info_left_padding + "        - transf.: {}".format(z_transf_expr))
+    info_lines.append(info_left_padding + "        - range: [{}, {}]".format(ff2.format(z_range[0]), ff2.format(z_range[1])))
+
+    info_lines.append(info_left_padding + "  sort: {} [{}]".format(z_label, s_type))
+    if s_transf_expr != "":
+        info_lines.append(info_left_padding + "        - transf.: {}".format(s_transf_expr))
+
     if use_capped_z:
-        info_lines.append(info_left_padding + "capped : z-axis (color) dataset capped at {}".format(ff2.format(args.cap_z_val)))
+        info_lines.append(info_left_padding + "capped: z-axis (color) dataset capped at {}".format(ff2.format(args.cap_z_val)))
     info_lines.append(info_left_padding)
 
     info_lines_lengths = [len(l) for l in info_lines]
