@@ -226,6 +226,7 @@ def run(args):
     #
 
     plot_lines = []
+    fig_width = 0
     for yi in range(xy_bins[1]):
 
         yi_line = utils.prettify(" ", fg_ccode, bg_ccode)
@@ -254,15 +255,20 @@ def run(args):
 
     # Save plot width
     plot_width = xy_bins[0] * 2 + 13
+    fig_width = plot_width
 
     # Add axes
     axes_mod_func = lambda input_str : utils.prettify(input_str, fg_ccode, bg_ccode, bold=True)
     plot_lines = utils.add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=axes_mod_func, ff=ff)
 
     # Add blank top line
-    plot_lines = [utils.prettify(" " * plot_width, fg_ccode, bg_ccode)] + plot_lines
+    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode, insert_pos=0)
 
+
+    #
     # Add legend
+    #
+
     legend_mod_func = lambda input_str, input_fg_ccode : utils.prettify(input_str, input_fg_ccode, bg_ccode, bold=True)
     legend_entries = []
 
@@ -275,16 +281,8 @@ def run(args):
     
     legend, legend_width = utils.generate_legend(legend_entries, legend_mod_func, sep="  ")
 
-    if legend_width <= plot_width:
-        legend += utils.prettify(" " * (plot_width - legend_width), fg_ccode, bg_ccode)
-    else:
-        for i,line in enumerate(plot_lines):
-            plot_lines[i] += utils.prettify(" " * (legend_width - plot_width), fg_ccode, bg_ccode)
-        plot_width = legend_width
-
-    # Add a blank line and then the legend
-    plot_lines.append(utils.prettify(" " * plot_width, fg_ccode, bg_ccode) )
-    plot_lines.append(legend)
+    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode)
+    plot_lines, fig_width = utils.insert_line(legend, legend_width, plot_lines, fig_width, fg_ccode, bg_ccode)
 
 
     #
@@ -309,7 +307,6 @@ def run(args):
     # Add info text
     #
 
-
     info_lines = []
     info_left_padding = left_padding + " "
     info_lines.append(info_left_padding)
@@ -333,18 +330,9 @@ def run(args):
         info_lines.append(info_left_padding + "capped: ln(L) dataset ({}) capped at {}".format(loglike_name, ff2.format(args.cap_loglike_val)))
     info_lines.append(info_left_padding)
 
-    info_lines_lengths = [len(l) for l in info_lines]
-    info_width = max(info_lines_lengths)
-
     for i,line in enumerate(info_lines):
-        info_lines[i] = utils.prettify(line + " "*(info_width - len(line)) + "  ", fg_ccode, bg_ccode, bold=False)
-
-
-    #
-    # Fill in missing background color
-    #
-
-    plot_lines, info_lines = utils.fill_missing_bg(plot_lines, plot_width, info_lines, info_width, bg_ccode)
+        pretty_line = utils.prettify(line + "  ", fg_ccode, bg_ccode, bold=False)
+        plot_lines, fig_width = utils.insert_line(pretty_line, len(line), plot_lines, fig_width, fg_ccode, bg_ccode)
 
 
     #
@@ -352,9 +340,6 @@ def run(args):
     #
 
     for line in plot_lines:
-        print(line)
-
-    for line in info_lines:
         print(line)
 
     sys.exit()    
