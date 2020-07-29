@@ -306,6 +306,7 @@ def run(args, mode):
 
     # Save plot width
     plot_width = xy_bins[0] * 2 + 13
+    fig_width = plot_width
 
     # Add axes
     axes_mod_func = lambda input_str : prettify(input_str, fg_ccode, bg_ccode, bold=True)
@@ -331,9 +332,9 @@ def run(args, mode):
     else:
         for i,line in enumerate(plot_lines):
             plot_lines[i] += prettify(" " * (legend_width - plot_width), fg_ccode, bg_ccode)
-        plot_width = legend_width
+        fig_width = legend_width
 
-    plot_lines.append(prettify(" " * plot_width, fg_ccode, bg_ccode) )
+    plot_lines.append(prettify(" " * fig_width, fg_ccode, bg_ccode) )
     plot_lines.append(legend)
 
     # - numbers below the colorbar
@@ -346,12 +347,12 @@ def run(args, mode):
             legend_nums_entries.append( ("", fg_ccode, " " * len(txt), fg_ccode) )
     legend_nums, legend_nums_width = generate_legend(legend_nums_entries, legend_mod_func, sep="", internal_sep="")
 
-    if legend_nums_width <= plot_width:
-        legend_nums += prettify(" " * (plot_width - legend_nums_width), fg_ccode, bg_ccode)
+    if legend_nums_width <= fig_width:
+        legend_nums += prettify(" " * (fig_width - legend_nums_width), fg_ccode, bg_ccode)
     else:
         for i,line in enumerate(plot_lines):
-            plot_lines[i] += prettify(" " * (legend_nums_width - plot_width), fg_ccode, bg_ccode)
-        plot_width = legend_nums_width
+            plot_lines[i] += prettify(" " * (legend_nums_width - fig_width), fg_ccode, bg_ccode)
+        fig_width = max(legend_nums_width, fig_width)
 
     plot_lines.append(legend_nums)
 
@@ -365,8 +366,17 @@ def run(args, mode):
             point = ("(" + ff2 + ", " + ff2 + ", " + ff2 + ")").format(xyz_min[0], xyz_min[1], xyz_min[2])
             legend_maxmin_entries.append( (" " + special_marker.strip(), fg_ccode, "min(z) point: (x, y, z) = " + point, fg_ccode) )
         legend_maxmin, legend_width = generate_legend(legend_maxmin_entries, legend_mod_func, sep=" ", internal_sep="  ")
-        plot_lines.append(prettify(" " * plot_width, fg_ccode, bg_ccode) )
+
+        if legend_width <= fig_width:
+            legend_maxmin += prettify(" " * (fig_width - legend_width), fg_ccode, bg_ccode)
+        else:
+            for i,line in enumerate(plot_lines):
+                plot_lines[i] += prettify(" " * (legend_width - fig_width), fg_ccode, bg_ccode)
+            fig_width = legend_width
+
+        plot_lines.append(prettify(" " * fig_width, fg_ccode, bg_ccode) )
         plot_lines.append(legend_maxmin)
+
 
     #
     # Add left padding
@@ -428,7 +438,7 @@ def run(args, mode):
     # Fill in missing background color
     #
 
-    plot_lines, info_lines = fill_missing_bg(plot_lines, plot_width, info_lines, info_width, bg_ccode)
+    plot_lines, info_lines = fill_missing_bg(plot_lines, fig_width, info_lines, info_width, bg_ccode)
 
 
     #

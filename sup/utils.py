@@ -2,14 +2,14 @@ import numpy as np
 from collections import OrderedDict
 import h5py
 
-def prettify(input_string, ccode_fg, ccode_bg, bold=True, reset=True):
-    # example: "\u001b[48;5;" + str(ccode_bg) + ";38;5;" + str(ccode_fg) + "m" + input_string + "\u001b[0m"
+def prettify(input_string, fg_ccode, bg_ccode, bold=True, reset=True):
+    # example: "\u001b[48;5;" + str(bg_ccode) + ";38;5;" + str(fg_ccode) + "m" + input_string + "\u001b[0m"
     result = "\u001b" 
     result += "[" 
-    result += "48;5;" +str(ccode_bg) + ";"
+    result += "48;5;" +str(bg_ccode) + ";"
     if bold:
         result += "1;"
-    result += "38;5;" + str(ccode_fg) + "m"
+    result += "38;5;" + str(fg_ccode) + "m"
     result += input_string 
     if reset:
         result += "\u001b[0m"
