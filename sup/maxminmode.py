@@ -411,18 +411,9 @@ def run(args, mode):
         info_lines.append(info_left_padding + "capped: z-axis (color) dataset capped at {}".format(ff2.format(args.cap_z_val)))
     info_lines.append(info_left_padding)
 
-    info_lines_lengths = [len(l) for l in info_lines]
-    info_width = max(info_lines_lengths)
-
     for i,line in enumerate(info_lines):
-        info_lines[i] = utils.prettify(line + " "*(info_width - len(line)) + "  ", fg_ccode, bg_ccode, bold=False)
-
-
-    #
-    # Fill in missing background color
-    #
-
-    plot_lines, info_lines = utils.fill_missing_bg(plot_lines, fig_width, info_lines, info_width, bg_ccode)
+        pretty_line = utils.prettify(line + "  ", fg_ccode, bg_ccode, bold=False)
+        plot_lines, fig_width = utils.insert_line(pretty_line, len(line), plot_lines, fig_width, fg_ccode, bg_ccode)
 
 
     #
@@ -430,9 +421,6 @@ def run(args, mode):
     #
 
     for line in plot_lines:
-        print(line)
-
-    for line in info_lines:
         print(line)
 
     sys.exit()    
