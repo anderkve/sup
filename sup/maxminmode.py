@@ -1,16 +1,16 @@
 import sys
 import numpy as np
 import h5py
-import sup.defaults
-from sup.utils import get_bin_tuples, get_dataset_names, add_axes, prettify, fill_missing_bg, generate_legend
+import sup.defaults as defaults
+import sup.utils as utils
 
 
 #
 # Variables for colors, markers, padding, etc
 #
 
-ff = sup.defaults.ff
-ff2 = sup.defaults.ff2
+ff = defaults.ff
+ff2 = defaults.ff2
 left_padding = 2*" "
 
 bg_ccode_bb, fg_ccode_bb = 232, 231
@@ -138,10 +138,10 @@ def run(args, mode):
     x_range = args.x_range
     y_range = args.y_range
 
-    # z_min = sup.defaults.z_min
-    # z_max = sup.defaults.z_max
+    # z_min = defaults.z_min
+    # z_max = defaults.z_max
 
-    read_length = sup.defaults.read_length
+    read_length = defaults.read_length
 
     # x_use_abs_val = args.x_use_abs_val
     # y_use_abs_val = args.y_use_abs_val
@@ -152,7 +152,7 @@ def run(args, mode):
 
     xy_bins = args.xy_bins
     if not xy_bins:
-        xy_bins = sup.defaults.xy_bins
+        xy_bins = defaults.xy_bins
     
     use_capped_z = False
     if args.cap_z_val is not None:
@@ -194,7 +194,7 @@ def run(args, mode):
 
     f = h5py.File(input_file, "r")
 
-    dset_names = get_dataset_names(f)
+    dset_names = utils.get_dataset_names(f)
     x_name = dset_names[x_index]
     y_name = dset_names[y_index]
     z_name = dset_names[z_index]
@@ -270,7 +270,7 @@ def run(args, mode):
     # Get a dict with info per bin
     #
 
-    bins_info, x_bin_limits, y_bin_limits = get_bin_tuples(x_data, y_data, z_data, xy_bins, x_range, y_range, s_data, s_type)
+    bins_info, x_bin_limits, y_bin_limits = utils.get_bin_tuples(x_data, y_data, z_data, xy_bins, x_range, y_range, s_data, s_type)
 
 
     #
@@ -278,9 +278,10 @@ def run(args, mode):
     #
 
     plot_lines = []
+    fig_width = 0
     for yi in range(xy_bins[1]):
 
-        yi_line = prettify(" ", fg_ccode, bg_ccode)
+        yi_line = utils.prettify(" ", fg_ccode, bg_ccode)
 
         for xi in range(xy_bins[0]):
 
@@ -298,7 +299,7 @@ def run(args, mode):
                 marker = get_marker(z_norm, s_type, use_capped_z=use_capped_z)
 
             # Add point to line
-            yi_line += prettify(marker, ccode, bg_ccode)
+            yi_line += utils.prettify(marker, ccode, bg_ccode)
 
         plot_lines.append(yi_line)
 
@@ -309,52 +310,42 @@ def run(args, mode):
     fig_width = plot_width
 
     # Add axes
-    axes_mod_func = lambda input_str : prettify(input_str, fg_ccode, bg_ccode, bold=True)
-    plot_lines = add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=axes_mod_func, ff=ff)
+    axes_mod_func = lambda input_str : utils.prettify(input_str, fg_ccode, bg_ccode, bold=True)
+    plot_lines = utils.add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=axes_mod_func, ff=ff)
 
-    # Add top line
-    plot_lines = [prettify(" " * plot_width, fg_ccode, bg_ccode)] + plot_lines
+    # Add blank top line
+    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode, insert_pos=0)
 
-    # Add legend
-    legend_mod_func = lambda input_str, input_fg_ccode : prettify(input_str, input_fg_ccode, bg_ccode, bold=True)
+
+    #
+    # Add colorbar, legend, etc
+    #
+
+    legend_mod_func = lambda input_str, input_fg_ccode : utils.prettify(input_str, input_fg_ccode, bg_ccode, bold=True)
 
     # - colorbar
-    legend_entries = []
-    legend_entries.append( ("", fg_ccode, "", fg_ccode) )
+    cb_entries = []
+    cb_entries.append( ("", fg_ccode, "", fg_ccode) )
     for i in range(0, len(color_z_lims)-1):
-        legend_entries.append( ("|", fg_ccode, 6*regular_marker.strip(), ccodes[i]) )
-    legend_entries.append( ("|", fg_ccode, "", fg_ccode) )
+        cb_entries.append( ("|", fg_ccode, 6*regular_marker.strip(), ccodes[i]) )
+    cb_entries.append( ("|", fg_ccode, "", fg_ccode) )
 
-    legend, legend_width = generate_legend(legend_entries, legend_mod_func, sep=" ", internal_sep="")
+    cb_line, cb_width = utils.generate_legend(cb_entries, legend_mod_func, sep=" ", internal_sep="")
 
-    if legend_width <= plot_width:
-        legend += prettify(" " * (plot_width - legend_width), fg_ccode, bg_ccode)
-    else:
-        for i,line in enumerate(plot_lines):
-            plot_lines[i] += prettify(" " * (legend_width - plot_width), fg_ccode, bg_ccode)
-        fig_width = legend_width
-
-    plot_lines.append(prettify(" " * fig_width, fg_ccode, bg_ccode) )
-    plot_lines.append(legend)
+    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode)
+    plot_lines, fig_width = utils.insert_line(cb_line, cb_width, plot_lines, fig_width, fg_ccode, bg_ccode)
 
     # - numbers below the colorbar
-    legend_nums_entries = []
+    cb_nums_entries = []
     for i in range(0, len(color_z_lims)):
         txt = ff.format(color_z_lims[i])
         if i % 2 == 0:
-            legend_nums_entries.append( ("", fg_ccode, txt, fg_ccode) )
+            cb_nums_entries.append( ("", fg_ccode, txt, fg_ccode) )
         else:
-            legend_nums_entries.append( ("", fg_ccode, " " * len(txt), fg_ccode) )
-    legend_nums, legend_nums_width = generate_legend(legend_nums_entries, legend_mod_func, sep="", internal_sep="")
+            cb_nums_entries.append( ("", fg_ccode, " " * len(txt), fg_ccode) )
+    cb_nums_line, cb_nums_width = utils.generate_legend(cb_nums_entries, legend_mod_func, sep="", internal_sep="")
 
-    if legend_nums_width <= fig_width:
-        legend_nums += prettify(" " * (fig_width - legend_nums_width), fg_ccode, bg_ccode)
-    else:
-        for i,line in enumerate(plot_lines):
-            plot_lines[i] += prettify(" " * (legend_nums_width - fig_width), fg_ccode, bg_ccode)
-        fig_width = max(legend_nums_width, fig_width)
-
-    plot_lines.append(legend_nums)
+    plot_lines, fig_width = utils.insert_line(cb_nums_line, cb_nums_width, plot_lines, fig_width, fg_ccode, bg_ccode)
 
     # - max/min 
     if s_index == z_index:
@@ -365,25 +356,18 @@ def run(args, mode):
         else:
             point = ("(" + ff2 + ", " + ff2 + ", " + ff2 + ")").format(xyz_min[0], xyz_min[1], xyz_min[2])
             legend_maxmin_entries.append( (" " + special_marker.strip(), fg_ccode, "min(z) point: (x, y, z) = " + point, fg_ccode) )
-        legend_maxmin, legend_width = generate_legend(legend_maxmin_entries, legend_mod_func, sep=" ", internal_sep="  ")
+        legend_maxmin, legend_maxmin_width = utils.generate_legend(legend_maxmin_entries, legend_mod_func, sep=" ", internal_sep="  ")
 
-        if legend_width <= fig_width:
-            legend_maxmin += prettify(" " * (fig_width - legend_width), fg_ccode, bg_ccode)
-        else:
-            for i,line in enumerate(plot_lines):
-                plot_lines[i] += prettify(" " * (legend_width - fig_width), fg_ccode, bg_ccode)
-            fig_width = legend_width
-
-        plot_lines.append(prettify(" " * fig_width, fg_ccode, bg_ccode) )
-        plot_lines.append(legend_maxmin)
-
+        plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode)
+        plot_lines, fig_width = utils.insert_line(legend_maxmin, legend_maxmin_width, plot_lines, fig_width, fg_ccode, bg_ccode)
+        
 
     #
     # Add left padding
     #
 
     for i,line in enumerate(plot_lines):
-        plot_lines[i] = prettify(left_padding, fg_ccode, bg_ccode) + line
+        plot_lines[i] = utils.prettify(left_padding, fg_ccode, bg_ccode) + line
 
 
     #
@@ -431,14 +415,14 @@ def run(args, mode):
     info_width = max(info_lines_lengths)
 
     for i,line in enumerate(info_lines):
-        info_lines[i] = prettify(line + " "*(info_width - len(line)) + "  ", fg_ccode, bg_ccode, bold=False)
+        info_lines[i] = utils.prettify(line + " "*(info_width - len(line)) + "  ", fg_ccode, bg_ccode, bold=False)
 
 
     #
     # Fill in missing background color
     #
 
-    plot_lines, info_lines = fill_missing_bg(plot_lines, fig_width, info_lines, info_width, bg_ccode)
+    plot_lines, info_lines = utils.fill_missing_bg(plot_lines, fig_width, info_lines, info_width, bg_ccode)
 
 
     #

@@ -2,6 +2,7 @@ import numpy as np
 from collections import OrderedDict
 import h5py
 
+
 def prettify(input_string, fg_ccode, bg_ccode, bold=True, reset=True):
     # example: "\u001b[48;5;" + str(bg_ccode) + ";38;5;" + str(fg_ccode) + "m" + input_string + "\u001b[0m"
     result = "\u001b" 
@@ -15,6 +16,28 @@ def prettify(input_string, fg_ccode, bg_ccode, bold=True, reset=True):
         result += "\u001b[0m"
 
     return result
+
+
+def insert_line(new_line, new_line_width, old_lines_list, old_width, fg_ccode, bg_ccode, insert_pos=None):
+
+    # If no insert position is given, append the line to the end of the list
+    if insert_pos is None:
+        insert_pos = len(old_lines_list)
+
+    result_width = 0
+    result_lines_list = old_lines_list
+
+    if new_line_width <= old_width:
+        new_line += prettify(" " * (old_width - new_line_width), fg_ccode, bg_ccode)
+        result_width = old_width
+    else:
+        for i in range(len(result_lines_list)):
+            result_lines_list[i] += prettify(" " * (new_line_width - old_width), fg_ccode, bg_ccode)
+        result_width = new_line_width
+
+    result_lines_list.insert(insert_pos, new_line)
+
+    return result_lines_list, result_width
 
 
 def fill_missing_bg(lines_1, width_1, lines_2, width_2, bg_ccode):

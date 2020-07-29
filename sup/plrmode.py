@@ -1,16 +1,16 @@
 import sys
 import numpy as np
 import h5py
-import sup.defaults
-from sup.utils import get_bin_tuples, get_dataset_names, add_axes, prettify, fill_missing_bg, generate_legend
+import sup.defaults as defaults
+import sup.utils as utils
 
 
 #
 # Variables for colors, markers, padding, etc
 #
 
-ff = sup.defaults.ff
-ff2 = sup.defaults.ff2
+ff = defaults.ff
+ff2 = defaults.ff2
 left_padding = 2*" "
 
 bg_ccode_bb, fg_ccode_bb = 232, 231
@@ -106,19 +106,19 @@ def run(args):
     x_range = args.x_range
     y_range = args.y_range
 
-    # z_min = sup.defaults.z_min
-    # z_max = sup.defaults.z_max
+    # z_min = defaults.z_min
+    # z_max = defaults.z_max
 
-    read_length = sup.defaults.read_length
+    read_length = defaults.read_length
 
     # x_use_abs_val = args.x_use_abs_val
     # y_use_abs_val = args.y_use_abs_val
-    # # z_use_abs_val = sup.defaults.z_use_abs_val
+    # # z_use_abs_val = defaults.z_use_abs_val
     # s_use_abs_val = False
 
     xy_bins = args.xy_bins
     if not xy_bins:
-        xy_bins = sup.defaults.xy_bins
+        xy_bins = defaults.xy_bins
     
     use_capped_loglike = False
     if args.cap_loglike_val is not None:
@@ -150,7 +150,7 @@ def run(args):
 
     f = h5py.File(input_file, "r")
 
-    dset_names = get_dataset_names(f)
+    dset_names = utils.get_dataset_names(f)
     x_name = dset_names[x_index]
     y_name = dset_names[y_index]
     loglike_name = dset_names[loglike_index]
@@ -218,7 +218,7 @@ def run(args):
     # Get a dict with info per bin
     #
 
-    bins_info, x_bin_limits, y_bin_limits = get_bin_tuples(x_data, y_data, z_data, xy_bins, x_range, y_range, s_data, s_type)
+    bins_info, x_bin_limits, y_bin_limits = utils.get_bin_tuples(x_data, y_data, z_data, xy_bins, x_range, y_range, s_data, s_type)
 
 
     #
@@ -228,7 +228,7 @@ def run(args):
     plot_lines = []
     for yi in range(xy_bins[1]):
 
-        yi_line = prettify(" ", fg_ccode, bg_ccode)
+        yi_line = utils.prettify(" ", fg_ccode, bg_ccode)
 
         for xi in range(xy_bins[0]):
 
@@ -246,7 +246,7 @@ def run(args):
                 marker = get_marker(z_norm, use_capped_loglike=use_capped_loglike)
 
             # Add point to line
-            yi_line += prettify(marker, ccode, bg_ccode)
+            yi_line += utils.prettify(marker, ccode, bg_ccode)
 
         plot_lines.append(yi_line)
 
@@ -256,14 +256,14 @@ def run(args):
     plot_width = xy_bins[0] * 2 + 13
 
     # Add axes
-    axes_mod_func = lambda input_str : prettify(input_str, fg_ccode, bg_ccode, bold=True)
-    plot_lines = add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=axes_mod_func, ff=ff)
+    axes_mod_func = lambda input_str : utils.prettify(input_str, fg_ccode, bg_ccode, bold=True)
+    plot_lines = utils.add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=axes_mod_func, ff=ff)
 
-    # Add top line
-    plot_lines = [prettify(" " * plot_width, fg_ccode, bg_ccode)] + plot_lines
+    # Add blank top line
+    plot_lines = [utils.prettify(" " * plot_width, fg_ccode, bg_ccode)] + plot_lines
 
     # Add legend
-    legend_mod_func = lambda input_str, input_fg_ccode : prettify(input_str, input_fg_ccode, bg_ccode, bold=True)
+    legend_mod_func = lambda input_str, input_fg_ccode : utils.prettify(input_str, input_fg_ccode, bg_ccode, bold=True)
     legend_entries = []
 
     # legend_entries.append( ("", fg_ccode, "", fg_ccode) )
@@ -273,17 +273,17 @@ def run(args):
     legend_entries.append( (regular_marker.strip(), ccodes[-2], "2σ", fg_ccode) )
     legend_entries.append( (regular_marker.strip(), ccodes[-3], "3σ", fg_ccode) )
     
-    legend, legend_width = generate_legend(legend_entries, legend_mod_func, sep="  ")
+    legend, legend_width = utils.generate_legend(legend_entries, legend_mod_func, sep="  ")
 
     if legend_width <= plot_width:
-        legend += prettify(" " * (plot_width - legend_width), fg_ccode, bg_ccode)
+        legend += utils.prettify(" " * (plot_width - legend_width), fg_ccode, bg_ccode)
     else:
         for i,line in enumerate(plot_lines):
-            plot_lines[i] += prettify(" " * (legend_width - plot_width), fg_ccode, bg_ccode)
+            plot_lines[i] += utils.prettify(" " * (legend_width - plot_width), fg_ccode, bg_ccode)
         plot_width = legend_width
 
     # Add a blank line and then the legend
-    plot_lines.append(prettify(" " * plot_width, fg_ccode, bg_ccode) )
+    plot_lines.append(utils.prettify(" " * plot_width, fg_ccode, bg_ccode) )
     plot_lines.append(legend)
 
 
@@ -292,7 +292,7 @@ def run(args):
     #
 
     for i,line in enumerate(plot_lines):
-        plot_lines[i] = prettify(left_padding, fg_ccode, bg_ccode) + line
+        plot_lines[i] = utils.prettify(left_padding, fg_ccode, bg_ccode) + line
 
 
     #
@@ -337,14 +337,14 @@ def run(args):
     info_width = max(info_lines_lengths)
 
     for i,line in enumerate(info_lines):
-        info_lines[i] = prettify(line + " "*(info_width - len(line)) + "  ", fg_ccode, bg_ccode, bold=False)
+        info_lines[i] = utils.prettify(line + " "*(info_width - len(line)) + "  ", fg_ccode, bg_ccode, bold=False)
 
 
     #
     # Fill in missing background color
     #
 
-    plot_lines, info_lines = fill_missing_bg(plot_lines, plot_width, info_lines, info_width, bg_ccode)
+    plot_lines, info_lines = utils.fill_missing_bg(plot_lines, plot_width, info_lines, info_width, bg_ccode)
 
 
     #
