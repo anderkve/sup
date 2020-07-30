@@ -57,7 +57,7 @@ ccodes = cmaps[0]
 
 def get_color_code(z_val, z_norm, color_z_lims, s_type, highlight_maxmin_point):
 
-    assert s_type in ["min", "max", "avg"]
+    assert s_type in ["min", "max"]
 
     if (z_norm == 1.0) and (s_type == "max"):
         if highlight_maxmin_point:
@@ -85,7 +85,7 @@ def get_color_code(z_val, z_norm, color_z_lims, s_type, highlight_maxmin_point):
 
 def get_marker(z_norm, s_type, highlight_maxmin_point):
 
-    assert s_type in ["min", "max", "avg"]
+    assert s_type in ["min", "max"]
 
     if highlight_maxmin_point and (z_norm == 1.0) and (s_type == "max"):
         return special_marker
@@ -105,12 +105,9 @@ def run_max(args):
 def run_min(args):
     run(args, "min")
 
-def run_avg(args):
-    run(args, "avg")
-
 def run(args, mode):
 
-    assert mode in ["max", "min", "avg"]
+    assert mode in ["max", "min"]
     assert args.cmap_index in range(len(cmaps))
 
     global ccodes 
@@ -287,7 +284,7 @@ def run(args, mode):
 
     # Add axes
     axes_mod_func = lambda input_str : utils.prettify(input_str, fg_ccode, bg_ccode, bold=True)
-    plot_lines = utils.add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=axes_mod_func, ff=ff)
+    plot_lines = utils.add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=axes_mod_func, floatf=ff)
 
     # Add blank top line
     plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode, insert_pos=0)

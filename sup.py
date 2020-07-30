@@ -30,7 +30,7 @@ import numpy as np
 import h5py
 from sup.utils import get_bin_tuples, get_dataset_names
 from sup.colors import color_codes, n_colors
-from sup import listmode, colorsmode, plrmode, maxminmode, histmode
+from sup import listmode, colorsmode, plrmode, maxminmode, avgmode, histmode
 
 
 def main():
@@ -140,7 +140,7 @@ examples:
 
     # Parser for "avg" mode
     parser_avgmode = subparsers.add_parser("avg")
-    parser_avgmode.set_defaults(func=maxminmode.run_avg)
+    parser_avgmode.set_defaults(func=avgmode.run)
     parser_avgmode.add_argument("input_file", type=str, action="store", help="path to the input data file")
     parser_avgmode.add_argument("x_index", type=int, action="store", help="index of the x-axis dataset")
     parser_avgmode.add_argument("y_index", type=int, action="store", help="index of the y-axis dataset")
