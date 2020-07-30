@@ -113,7 +113,7 @@ examples:
     # parser_maxmode.add_argument("-ya", "--yabs", action="store_true", dest="y_use_abs_val", default=False, help="use the absolute value of the y-axis dataset")
     # parser_maxmode.add_argument("-za", "--zabs", action="store_true", dest="z_use_abs_val", default=False, help="use the absolute value of the z-axis dataset")
     # parser_maxmode.add_argument("-sa", "--sabs", action="store_true", dest="s_use_abs_val", default=False, help="use the absolute value of the sort dataset")
-    parser_maxmode.add_argument("-c", "--cap-z", type=float, action="store", dest="cap_z_val", default=None, help="cap the z-axis dataset at the given value", metavar="CAP_VAL")
+    # parser_maxmode.add_argument("-c", "--cap-z", type=float, action="store", dest="cap_z_val", default=None, help="cap the z-axis dataset at the given value", metavar="CAP_VAL")
     parser_maxmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
     parser_maxmode.add_argument("-w", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
     parser_maxmode.add_argument("-nc", "--num-colors", type=int, action="store", dest="n_colors", default=10, help="number of colors in colorbar (max 10)", metavar="N_COLORS")
@@ -122,6 +122,7 @@ examples:
     parser_maxmode.add_argument("-yt", "--y-transf", type=str, action="store", dest="y_transf_expr", default="", help="tranformation for the y-axis dataset, using numpy as 'np' (e.g. -yt \"np.log10(y)\")", metavar="EXPR")
     parser_maxmode.add_argument("-zt", "--z-transf", type=str, action="store", dest="z_transf_expr", default="", help="tranformation for the z-axis dataset, using numpy as 'np' (e.g. -zt \"np.log10(z)\")", metavar="EXPR")
     parser_maxmode.add_argument("-st", "--s-transf", type=str, action="store", dest="s_transf_expr", default="", help="tranformation for the sort dataset, using numpy as 'np' (e.g. -st \"np.log10(s)\")", metavar="EXPR")
+    parser_maxmode.add_argument("-ns", "--no-star", action="store_true", dest="no_star", default=False, help="switch off the star marker for the max/min point(s)")
 
     # Parser for "min" mode
     parser_minmode = subparsers.add_parser("min")
@@ -138,7 +139,7 @@ examples:
     # parser_minmode.add_argument("-ya", "--yabs", action="store_true", dest="y_use_abs_val", default=False, help="use the absolute value of the y-axis dataset")
     # parser_minmode.add_argument("-za", "--zabs", action="store_true", dest="z_use_abs_val", default=False, help="use the absolute value of the z-axis dataset")
     # parser_minmode.add_argument("-sa", "--sabs", action="store_true", dest="s_use_abs_val", default=False, help="use the absolute value of the sort dataset")
-    parser_minmode.add_argument("-c", "--cap-z", type=float, action="store", dest="cap_z_val", default=None, help="cap the z-axis dataset at the given value", metavar="CAP_VAL")
+    # parser_minmode.add_argument("-c", "--cap-z", type=float, action="store", dest="cap_z_val", default=None, help="cap the z-axis dataset at the given value", metavar="CAP_VAL")
     parser_minmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
     parser_minmode.add_argument("-w", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
     parser_minmode.add_argument("-nc", "--num-colors", type=int, action="store", dest="n_colors", default=10, help="number of colors in colorbar (max 10)", metavar="N_COLORS")
@@ -147,6 +148,7 @@ examples:
     parser_minmode.add_argument("-yt", "--y-transf", type=str, action="store", dest="y_transf_expr", default="", help="tranformation for the y-axis dataset, using numpy as 'np' (e.g. -yt \"np.log10(y)\")", metavar="EXPR")
     parser_minmode.add_argument("-zt", "--z-transf", type=str, action="store", dest="z_transf_expr", default="", help="tranformation for the z-axis dataset, using numpy as 'np' (e.g. -zt \"np.log10(z)\")", metavar="EXPR")
     parser_minmode.add_argument("-st", "--s-transf", type=str, action="store", dest="s_transf_expr", default="", help="tranformation for the sort dataset, using numpy as 'np' (e.g. -st \"np.log10(s)\")", metavar="EXPR")
+    parser_minmode.add_argument("-ns", "--no-star", action="store_true", dest="no_star", default=False, help="switch off the star marker the for the max/min point(s)")
 
     # Parse the arguments and run the function for the chosen mode
     args = parser.parse_args()

@@ -1,6 +1,7 @@
 import numpy as np
 from collections import OrderedDict
 import h5py
+from sup.defaults import ff, ff2
 
 
 def prettify(input_string, fg_ccode, bg_ccode, bold=True, reset=True):
@@ -63,6 +64,40 @@ def generate_legend(legend_entries, mod_func, sep="  ", internal_sep=" "):
         legend_width += len(marker) + len(internal_sep) + len(txt) + len(sep)
 
     return legend, legend_width
+
+
+def generate_info_text(x_label, x_range, y_label, y_range, z_label, z_range, s_label, s_type, 
+                       x_transf_expr="", y_transf_expr="", z_transf_expr="", s_transf_expr="",
+                       capped_z=False, capped_label="z-axis", cap_val=1e99,
+                       left_padding=""):
+
+    info_lines = []
+    info_lines.append(left_padding)
+
+    info_lines.append(left_padding + "x-axis: {}".format(x_label))
+    if x_transf_expr != "":
+        info_lines.append(left_padding + "        - transf.: {}".format(x_transf_expr))
+    info_lines.append(left_padding + "        - range: [{}, {}]".format(ff2.format(x_range[0]), ff2.format(x_range[1])))
+
+    info_lines.append(left_padding + "y-axis: {}".format(y_label))
+    if y_transf_expr != "":
+        info_lines.append(left_padding + "        - transf.: {}".format(y_transf_expr))
+    info_lines.append(left_padding + "        - range: [{}, {}]".format(ff2.format(y_range[0]), ff2.format(y_range[1])))
+
+    info_lines.append(left_padding + "z-axis: {}".format(z_label))
+    if z_transf_expr != "":
+        info_lines.append(left_padding + "        - transf.: {}".format(z_transf_expr))
+    info_lines.append(left_padding + "        - range: [{}, {}]".format(ff2.format(z_range[0]), ff2.format(z_range[1])))
+
+    info_lines.append(left_padding + "  sort: {} [{}]".format(s_label, s_type))
+    if s_transf_expr != "":
+        info_lines.append(left_padding + "        - transf.: {}".format(s_transf_expr))
+
+    if capped_z:
+        info_lines.append(left_padding + "capped: {} dataset capped at {}".format(capped_label, ff2.format(cap_val)))
+    info_lines.append(left_padding)
+
+    return info_lines
 
 
 def get_dataset_names(hdf5_file_object):

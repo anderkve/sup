@@ -111,11 +111,6 @@ def run(args):
 
     read_length = defaults.read_length
 
-    # x_use_abs_val = args.x_use_abs_val
-    # y_use_abs_val = args.y_use_abs_val
-    # # z_use_abs_val = defaults.z_use_abs_val
-    # s_use_abs_val = False
-
     xy_bins = args.xy_bins
     if not xy_bins:
         xy_bins = defaults.xy_bins
@@ -176,13 +171,6 @@ def run(args):
         x_data = eval(x_transf_expr)
     if y_transf_expr != "":
         y_data = eval(y_transf_expr)
-
-    # if x_use_abs_val:
-    #     x_data = np.abs(x_data)
-    # if y_use_abs_val:
-    #     y_data = np.abs(y_data)
-    # if s_use_abs_val:
-    #     s_data = np.abs(s_data)
 
     if not x_range:
         x_range = [np.min(x_data), np.max(x_data)]
@@ -307,28 +295,16 @@ def run(args):
     # Add info text
     #
 
-    info_lines = []
-    info_left_padding = left_padding + " "
-    info_lines.append(info_left_padding)
-
-    info_lines.append(info_left_padding + "x-axis: {}".format(x_label))
-    if x_transf_expr != "":
-        info_lines.append(info_left_padding + "        - transf.: {}".format(x_transf_expr))
-    info_lines.append(info_left_padding + "        - range: [{}, {}]".format(ff2.format(x_range[0]), ff2.format(x_range[1])))
-
-    info_lines.append(info_left_padding + "y-axis: {}".format(y_label))
-    if y_transf_expr != "":
-        info_lines.append(info_left_padding + "        - transf.: {}".format(y_transf_expr))
-    info_lines.append(info_left_padding + "        - range: [{}, {}]".format(ff2.format(y_range[0]), ff2.format(y_range[1])))
-
-    info_lines.append(info_left_padding + "z-axis: {}".format(z_label))
-    info_lines.append(info_left_padding + "        - range: [{}, {}]".format(ff2.format(z_range[0]), ff2.format(z_range[1])))
-
-    info_lines.append(info_left_padding + "  sort: {} [{}]".format(s_label, s_type))
-
-    if use_capped_loglike:
-        info_lines.append(info_left_padding + "capped: ln(L) dataset ({}) capped at {}".format(loglike_name, ff2.format(args.cap_loglike_val)))
-    info_lines.append(info_left_padding)
+    info_lines = utils.generate_info_text(x_label, x_range, 
+                                          y_label, y_range, 
+                                          z_label, z_range, 
+                                          s_label, s_type,
+                                          x_transf_expr = x_transf_expr, 
+                                          y_transf_expr = y_transf_expr,
+                                          capped_z=use_capped_loglike,
+                                          capped_label="ln(L)",
+                                          cap_val=args.cap_loglike_val,
+                                          left_padding = left_padding + " ")
 
     for i,line in enumerate(info_lines):
         pretty_line = utils.prettify(line + "  ", fg_ccode, bg_ccode, bold=False)

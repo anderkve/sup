@@ -55,20 +55,24 @@ ccodes = cmaps[0]
 
 
 
-def get_color_code(z_val, z_norm, color_z_lims, s_type, use_capped_z=False):
+def get_color_code(z_val, z_norm, color_z_lims, s_type, highlight_maxmin_point):
 
     assert s_type in ["min", "max"]
 
     if (z_norm == 1.0) and (s_type == "max"):
-        if use_capped_z:
-            return ccodes[-1]
-        else:
+        if highlight_maxmin_point:
             return max_bin_ccode
+        else:
+            return ccodes[-1]
+    elif (z_norm == 0.0) and (s_type == "max"):
+        return ccodes[0]
+    elif (z_norm == 1.0) and (s_type == "min"):
+        return ccodes[-1]
     elif (z_norm == 0.0) and (s_type == "min"):
-        if use_capped_z:
-            return ccodes[-1]
-        else:
+        if highlight_maxmin_point:
             return max_bin_ccode
+        else:
+            return ccodes[0]
 
     i = 0
     for j, lim in enumerate(color_z_lims):
@@ -79,20 +83,14 @@ def get_color_code(z_val, z_norm, color_z_lims, s_type, use_capped_z=False):
     return ccodes[i]
 
 
-def get_marker(z_norm, s_type, use_capped_z=False):
+def get_marker(z_norm, s_type, highlight_maxmin_point):
 
     assert s_type in ["min", "max"]
 
-    if (z_norm == 1.0) and (s_type == "max"):
-        if use_capped_z:
-            return regular_marker
-        else:
-            return special_marker
-    elif (z_norm == 0.0) and (s_type == "min"):
-        if use_capped_z:
-            return regular_marker
-        else:
-            return special_marker
+    if highlight_maxmin_point and (z_norm == 1.0) and (s_type == "max"):
+        return special_marker
+    elif highlight_maxmin_point and (z_norm == 0.0) and (s_type == "min"):
+        return special_marker
     else:
         return regular_marker
 
@@ -154,10 +152,6 @@ def run(args, mode):
     if not xy_bins:
         xy_bins = defaults.xy_bins
     
-    use_capped_z = False
-    if args.cap_z_val is not None:
-        use_capped_z = True
-
     cmap_index = args.cmap_index
     ccodes = cmaps[cmap_index]
     use_white_bg = args.use_white_bg
@@ -187,6 +181,9 @@ def run(args, mode):
     elif n_colors > 10:
         n_colors = 10
     ccodes = [ ccodes[int(i)] for i in np.round( np.linspace(0, len(ccodes)-1, n_colors) ) ]
+
+    highlight_maxmin_point = not(args.no_star)
+
 
     #
     # Read datasets from file
@@ -229,23 +226,10 @@ def run(args, mode):
     if s_transf_expr != "":
         s_data = eval(s_transf_expr)
 
-    # if x_use_abs_val:
-    #     x_data = np.abs(x_data)
-    # if y_use_abs_val:
-    #     y_data = np.abs(y_data)
-    # if z_use_abs_val:
-    #     z_data = np.abs(z_data)
-    # if s_use_abs_val:
-    #     s_data = np.abs(s_data)
-
     if not x_range:
         x_range = [np.min(x_data), np.max(x_data)]
     if not y_range:
         y_range = [np.min(y_data), np.max(y_data)]
-
-    # Cap z dataset?
-    if use_capped_z:
-        z_data = np.minimum(z_data, args.cap_z_val)
 
     # Get z max and minimum
     z_min = np.min(z_data)
@@ -295,8 +279,8 @@ def run(args, mode):
                 z_norm = (z_val - z_min) / (z_max - z_min)
                 # print("DEBUG: xi, yi, z_val, z_norm : ", xi, yi, z_val, z_norm)
 
-                ccode = get_color_code(z_val, z_norm, color_z_lims, s_type, use_capped_z=use_capped_z)
-                marker = get_marker(z_norm, s_type, use_capped_z=use_capped_z)
+                ccode = get_color_code(z_val, z_norm, color_z_lims, s_type, highlight_maxmin_point)
+                marker = get_marker(z_norm, s_type, highlight_maxmin_point)
 
             # Add point to line
             yi_line += utils.prettify(marker, ccode, bg_ccode)
@@ -348,18 +332,19 @@ def run(args, mode):
     plot_lines, fig_width = utils.insert_line(cb_nums_line, cb_nums_width, plot_lines, fig_width, fg_ccode, bg_ccode)
 
     # - max/min 
-    if s_index == z_index:
-        legend_maxmin_entries = []
-        if s_type == "max":
-            point = ("(" + ff2 + ", " + ff2 + ", " + ff2 + ")").format(xyz_max[0], xyz_max[1], xyz_max[2])
-            legend_maxmin_entries.append( (" " + special_marker.strip(), fg_ccode, "max(z) point: (x, y, z) = " + point, fg_ccode) )
-        else:
-            point = ("(" + ff2 + ", " + ff2 + ", " + ff2 + ")").format(xyz_min[0], xyz_min[1], xyz_min[2])
-            legend_maxmin_entries.append( (" " + special_marker.strip(), fg_ccode, "min(z) point: (x, y, z) = " + point, fg_ccode) )
-        legend_maxmin, legend_maxmin_width = utils.generate_legend(legend_maxmin_entries, legend_mod_func, sep=" ", internal_sep="  ")
+    if highlight_maxmin_point:
+        if s_index == z_index:
+            legend_maxmin_entries = []
+            if s_type == "max":
+                point = ("(" + ff2 + ", " + ff2 + ", " + ff2 + ")").format(xyz_max[0], xyz_max[1], xyz_max[2])
+                legend_maxmin_entries.append( (" " + special_marker.strip(), fg_ccode, "max(z) point: (x, y, z) = " + point, fg_ccode) )
+            else:
+                point = ("(" + ff2 + ", " + ff2 + ", " + ff2 + ")").format(xyz_min[0], xyz_min[1], xyz_min[2])
+                legend_maxmin_entries.append( (" " + special_marker.strip(), fg_ccode, "min(z) point: (x, y, z) = " + point, fg_ccode) )
+            legend_maxmin, legend_maxmin_width = utils.generate_legend(legend_maxmin_entries, legend_mod_func, sep=" ", internal_sep="  ")
 
-        plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode)
-        plot_lines, fig_width = utils.insert_line(legend_maxmin, legend_maxmin_width, plot_lines, fig_width, fg_ccode, bg_ccode)
+            plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode)
+            plot_lines, fig_width = utils.insert_line(legend_maxmin, legend_maxmin_width, plot_lines, fig_width, fg_ccode, bg_ccode)
         
 
     #
@@ -384,32 +369,15 @@ def run(args, mode):
     # Add info text
     #
 
-    info_lines = []
-    info_left_padding = left_padding + " "
-    info_lines.append(info_left_padding)
-
-    info_lines.append(info_left_padding + "x-axis: {}".format(x_label))
-    if x_transf_expr != "":
-        info_lines.append(info_left_padding + "        - transf.: {}".format(x_transf_expr))
-    info_lines.append(info_left_padding + "        - range: [{}, {}]".format(ff2.format(x_range[0]), ff2.format(x_range[1])))
-
-    info_lines.append(info_left_padding + "y-axis: {}".format(y_label))
-    if y_transf_expr != "":
-        info_lines.append(info_left_padding + "        - transf.: {}".format(y_transf_expr))
-    info_lines.append(info_left_padding + "        - range: [{}, {}]".format(ff2.format(y_range[0]), ff2.format(y_range[1])))
-
-    info_lines.append(info_left_padding + "z-axis: {}".format(z_label))
-    if z_transf_expr != "":
-        info_lines.append(info_left_padding + "        - transf.: {}".format(z_transf_expr))
-    info_lines.append(info_left_padding + "        - range: [{}, {}]".format(ff2.format(z_range[0]), ff2.format(z_range[1])))
-
-    info_lines.append(info_left_padding + "  sort: {} [{}]".format(z_label, s_type))
-    if s_transf_expr != "":
-        info_lines.append(info_left_padding + "        - transf.: {}".format(s_transf_expr))
-
-    if use_capped_z:
-        info_lines.append(info_left_padding + "capped: z-axis (color) dataset capped at {}".format(ff2.format(args.cap_z_val)))
-    info_lines.append(info_left_padding)
+    info_lines = utils.generate_info_text(x_label, x_range, 
+                                          y_label, y_range, 
+                                          z_label, z_range, 
+                                          s_label, s_type,
+                                          x_transf_expr = x_transf_expr, 
+                                          y_transf_expr = y_transf_expr,
+                                          z_transf_expr = z_transf_expr, 
+                                          s_transf_expr = s_transf_expr,
+                                          left_padding = left_padding + " ")
 
     for i,line in enumerate(info_lines):
         pretty_line = utils.prettify(line + "  ", fg_ccode, bg_ccode, bold=False)
