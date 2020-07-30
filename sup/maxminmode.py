@@ -57,7 +57,7 @@ ccodes = cmaps[0]
 
 def get_color_code(z_val, z_norm, color_z_lims, s_type, highlight_maxmin_point):
 
-    assert s_type in ["min", "max"]
+    assert s_type in ["min", "max", "avg"]
 
     if (z_norm == 1.0) and (s_type == "max"):
         if highlight_maxmin_point:
@@ -85,7 +85,7 @@ def get_color_code(z_val, z_norm, color_z_lims, s_type, highlight_maxmin_point):
 
 def get_marker(z_norm, s_type, highlight_maxmin_point):
 
-    assert s_type in ["min", "max"]
+    assert s_type in ["min", "max", "avg"]
 
     if highlight_maxmin_point and (z_norm == 1.0) and (s_type == "max"):
         return special_marker
@@ -106,14 +106,11 @@ def run_min(args):
     run(args, "min")
 
 def run_avg(args):
-    print("DEBUG: mode: avg")
-    print("DEBUG: args:")
-    print(args)
-    sys.exit()
+    run(args, "avg")
 
 def run(args, mode):
 
-    assert mode in ["max", "min"]
+    assert mode in ["max", "min", "avg"]
     assert args.cmap_index in range(len(cmaps))
 
     global ccodes 
@@ -142,17 +139,7 @@ def run(args, mode):
     x_range = args.x_range
     y_range = args.y_range
 
-    # z_min = defaults.z_min
-    # z_max = defaults.z_max
-
     read_length = defaults.read_length
-
-    # x_use_abs_val = args.x_use_abs_val
-    # y_use_abs_val = args.y_use_abs_val
-    # z_use_abs_val = args.z_use_abs_val
-    # s_use_abs_val = args.s_use_abs_val
-    # if s_index == z_index:
-    #     s_use_abs_val = z_use_abs_val
 
     xy_bins = args.xy_bins
     if not xy_bins:

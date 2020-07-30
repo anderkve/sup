@@ -113,7 +113,7 @@ def get_dataset_names(hdf5_file_object):
 
 def get_bin_tuples(x_data, y_data, z_data, xy_bins, x_minmax, y_minmax, s_data, s_type):
 
-    assert s_type in ['min','max']
+    assert s_type in ["min", "max", "avg"]
     assert len(x_data) == len(y_data)
     assert len(x_data) == len(z_data)
     data_length = len(x_data)
@@ -145,15 +145,15 @@ def get_bin_tuples(x_data, y_data, z_data, xy_bins, x_minmax, y_minmax, s_data, 
         for y_bin_number in range(y_bins):
             bin_key = (x_bin_number, y_bin_number)
             bins_dict[bin_key] = {}
-            bins_dict[bin_key]['x_centre'] = x_bin_centres[x_bin_number]
-            bins_dict[bin_key]['y_centre'] = y_bin_centres[y_bin_number]
-            bins_dict[bin_key]['z_vals'] = []
-            bins_dict[bin_key]['s_vals'] = []
-            bins_dict[bin_key]['data_indices'] = []
-            # bins_dict[bin_key]['max_z_val'] = -1
-            # bins_dict[bin_key]['max_z_data_index'] = -1
+            bins_dict[bin_key]["x_centre"] = x_bin_centres[x_bin_number]
+            bins_dict[bin_key]["y_centre"] = y_bin_centres[y_bin_number]
+            bins_dict[bin_key]["z_vals"] = []
+            bins_dict[bin_key]["s_vals"] = []
+            bins_dict[bin_key]["data_indices"] = []
+            # bins_dict[bin_key]["max_z_val"] = -1
+            # bins_dict[bin_key]["max_z_data_index"] = -1
 
-    # Fill the arrays 'z_vals' and 'data_indices' for each bin
+    # Fill the arrays "z_vals" and "data_indices" for each bin
     for di in range(data_length):
 
         # if di % 1000 == 0:
@@ -171,46 +171,45 @@ def get_bin_tuples(x_data, y_data, z_data, xy_bins, x_minmax, y_minmax, s_data, 
 
         if bin_key in bins_dict.keys():
 
-            bins_dict[bin_key]['z_vals'].append(z_val)
-            bins_dict[bin_key]['s_vals'].append(s_val)
-            bins_dict[bin_key]['data_indices'].append(di)
+            bins_dict[bin_key]["z_vals"].append(z_val)
+            bins_dict[bin_key]["s_vals"].append(s_val)
+            bins_dict[bin_key]["data_indices"].append(di)
 
 
     # Convert to numpy arrays
     for bin_key in bins_dict.keys():
-        bins_dict[bin_key]['z_vals'] = np.array(bins_dict[bin_key]['z_vals'])
-        bins_dict[bin_key]['s_vals'] = np.array(bins_dict[bin_key]['s_vals'])
-        bins_dict[bin_key]['data_indices'] = np.array(bins_dict[bin_key]['data_indices'])
+        bins_dict[bin_key]["z_vals"] = np.array(bins_dict[bin_key]["z_vals"])
+        bins_dict[bin_key]["s_vals"] = np.array(bins_dict[bin_key]["s_vals"])
+        bins_dict[bin_key]["data_indices"] = np.array(bins_dict[bin_key]["data_indices"])
 
 
     # For each bin, sort the arrays according to s_data dataset
     result_dict = OrderedDict()
-    # result_list = []
     for bin_key in bins_dict.keys():
 
         # Get data index of the z-value for this bin, based on s_data sorting
         ordering = None
-        ordering_low_to_high = np.argsort( bins_dict[bin_key]['s_vals'] )
-        if s_type == 'max':
+        ordering_low_to_high = np.argsort( bins_dict[bin_key]["s_vals"] )
+        if s_type == "max":
             ordering = ordering_low_to_high[::-1]
-        elif s_type == 'min':
+        elif s_type == "min":
             ordering = ordering_low_to_high
 
-        bins_dict[bin_key]['z_vals'] = bins_dict[bin_key]['z_vals'][ordering]
-        bins_dict[bin_key]['data_indices'] = bins_dict[bin_key]['data_indices'][ordering]
+        bins_dict[bin_key]["z_vals"] = bins_dict[bin_key]["z_vals"][ordering]
+        bins_dict[bin_key]["data_indices"] = bins_dict[bin_key]["data_indices"][ordering]
 
-        if len(bins_dict[bin_key]['z_vals']) > 0:
+        if len(bins_dict[bin_key]["z_vals"]) > 0:
 
             result_dict[bin_key] = (x_bin_centres[bin_key[0]], 
                                     y_bin_centres[bin_key[1]], 
-                                    bins_dict[bin_key]['z_vals'][0], 
-                                    bins_dict[bin_key]['data_indices'][0])
+                                    bins_dict[bin_key]["z_vals"][0], 
+                                    bins_dict[bin_key]["data_indices"][0])
 
     return result_dict, x_bin_limits, y_bin_limits
 
 
 
-def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None, ff="{: .1e}"):
+def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None, floatf="{: .1e}"):
 
     if mod_func is None:
         mod_func = lambda x : x
@@ -251,9 +250,9 @@ def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None, ff="{: .
     #
 
     # y ticks
-    y_tick_1 = "{}".format(ff.format(y_bin_limits[0]))
-    y_tick_2 = "{}".format(ff.format(y_bin_limits[mid_y_index]))
-    y_tick_3 = "{}".format(ff.format(y_bin_limits[-1]))
+    y_tick_1 = "{}".format(floatf.format(y_bin_limits[0]))
+    y_tick_2 = "{}".format(floatf.format(y_bin_limits[mid_y_index]))
+    y_tick_3 = "{}".format(floatf.format(y_bin_limits[-1]))
 
     lines[0] += mod_func("" + y_tick_3 + "  ")
     lines[mid_y_index + 1*(not even_y_bins)] += mod_func("" + y_tick_2 + "  ")
@@ -266,9 +265,9 @@ def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None, ff="{: .
             lines[i] += mod_func("" + " "*len(y_tick_1) + "  ")
 
     # x ticks
-    x_tick_1 = "{}".format(ff.format(x_bin_limits[0]))
-    x_tick_2 = "{}".format(ff.format(x_bin_limits[mid_x_index]))
-    x_tick_3 = "{}".format(ff.format(x_bin_limits[-1]))
+    x_tick_1 = "{}".format(floatf.format(x_bin_limits[0]))
+    x_tick_2 = "{}".format(floatf.format(x_bin_limits[mid_x_index]))
+    x_tick_3 = "{}".format(floatf.format(x_bin_limits[-1]))
 
     x_ticks = x_tick_1
     x_ticks += " " * (1 * xy_bins[0] - len(x_tick_1)) + " "*even_x_bins
