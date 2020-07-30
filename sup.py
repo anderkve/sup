@@ -26,10 +26,6 @@ examples:
 import sys
 import os
 import argparse
-import numpy as np
-import h5py
-from sup.utils import get_bin_tuples, get_dataset_names
-from sup.colors import color_codes, n_colors
 from sup import listmode, colorsmode, plrmode, maxminmode, avgmode, histmode
 
 

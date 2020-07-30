@@ -244,7 +244,7 @@ def run(args, mode):
     # Get a dict with info per bin
     #
 
-    bins_info, x_bin_limits, y_bin_limits = utils.get_bin_tuples(x_data, y_data, z_data, xy_bins, x_range, y_range, s_data, s_type)
+    bins_info, x_bin_limits, y_bin_limits = utils.get_bin_tuples_maxmin(x_data, y_data, z_data, xy_bins, x_range, y_range, s_data, s_type)
 
 
     #
@@ -361,7 +361,7 @@ def run(args, mode):
     info_lines = utils.generate_info_text(x_label, x_range, 
                                           y_label, y_range, 
                                           z_label, z_range, 
-                                          s_label, s_type,
+                                          s_label=s_label, s_type=s_type,
                                           x_transf_expr = x_transf_expr, 
                                           y_transf_expr = y_transf_expr,
                                           z_transf_expr = z_transf_expr, 

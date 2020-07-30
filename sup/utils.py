@@ -66,7 +66,8 @@ def generate_legend(legend_entries, mod_func, sep="  ", internal_sep=" "):
     return legend, legend_width
 
 
-def generate_info_text(x_label, x_range, y_label, y_range, z_label, z_range, s_label, s_type, 
+def generate_info_text(x_label, x_range, y_label, y_range, z_label, z_range, 
+                       s_label=None, s_type=None, 
                        x_transf_expr="", y_transf_expr="", z_transf_expr="", s_transf_expr="",
                        capped_z=False, capped_label="z-axis", cap_val=1e99,
                        left_padding=""):
@@ -89,9 +90,10 @@ def generate_info_text(x_label, x_range, y_label, y_range, z_label, z_range, s_l
         info_lines.append(left_padding + "        - transf.: {}".format(z_transf_expr))
     info_lines.append(left_padding + "        - range: [{}, {}]".format(ff2.format(z_range[0]), ff2.format(z_range[1])))
 
-    info_lines.append(left_padding + "  sort: {} [{}]".format(s_label, s_type))
-    if s_transf_expr != "":
-        info_lines.append(left_padding + "        - transf.: {}".format(s_transf_expr))
+    if (s_label is not None) and (s_type is not None):
+        info_lines.append(left_padding + "  sort: {} [{}]".format(s_label, s_type))
+        if s_transf_expr != "":
+            info_lines.append(left_padding + "        - transf.: {}".format(s_transf_expr))
 
     if capped_z:
         info_lines.append(left_padding + "capped: {} dataset capped at {}".format(capped_label, ff2.format(cap_val)))
@@ -110,23 +112,18 @@ def get_dataset_names(hdf5_file_object):
     return result
 
 
+def get_bin_tuples_maxmin(x_data, y_data, z_data, xy_bins, x_range, y_range, s_data, s_type):
 
-def get_bin_tuples(x_data, y_data, z_data, xy_bins, x_minmax, y_minmax, s_data, s_type):
-
-    assert s_type in ["min", "max", "avg"]
+    assert s_type in ["min", "max"]
     assert len(x_data) == len(y_data)
     assert len(x_data) == len(z_data)
     data_length = len(x_data)
 
     x_bins, y_bins = xy_bins
-    x_min, x_max = x_minmax
-    y_min, y_max = y_minmax
+    x_min, x_max = x_range
+    y_min, y_max = y_range
 
-
-    #
     # Get index of max-z point in each bin
-    #
-
     x_bin_limits = np.linspace(x_min, x_max, x_bins + 1)
     y_bin_limits = np.linspace(y_min, y_max, y_bins + 1)
 
@@ -175,13 +172,11 @@ def get_bin_tuples(x_data, y_data, z_data, xy_bins, x_minmax, y_minmax, s_data, 
             bins_dict[bin_key]["s_vals"].append(s_val)
             bins_dict[bin_key]["data_indices"].append(di)
 
-
     # Convert to numpy arrays
     for bin_key in bins_dict.keys():
         bins_dict[bin_key]["z_vals"] = np.array(bins_dict[bin_key]["z_vals"])
         bins_dict[bin_key]["s_vals"] = np.array(bins_dict[bin_key]["s_vals"])
         bins_dict[bin_key]["data_indices"] = np.array(bins_dict[bin_key]["data_indices"])
-
 
     # For each bin, sort the arrays according to s_data dataset
     result_dict = OrderedDict()
@@ -207,6 +202,74 @@ def get_bin_tuples(x_data, y_data, z_data, xy_bins, x_minmax, y_minmax, s_data, 
 
     return result_dict, x_bin_limits, y_bin_limits
 
+
+def get_bin_tuples_avg(x_data, y_data, z_data, xy_bins, x_range, y_range):
+
+    assert len(x_data) == len(y_data)
+    assert len(x_data) == len(z_data)
+    data_length = len(x_data)
+
+    x_bins, y_bins = xy_bins
+    x_min, x_max = x_range
+    y_min, y_max = y_range
+
+    # Get index of max-z point in each bin
+    x_bin_limits = np.linspace(x_min, x_max, x_bins + 1)
+    y_bin_limits = np.linspace(y_min, y_max, y_bins + 1)
+
+    dx = x_bin_limits[1] - x_bin_limits[0]
+    dy = y_bin_limits[1] - y_bin_limits[0]
+
+    x_bin_centres = x_bin_limits[:-1] + 0.5 * dx
+    y_bin_centres = y_bin_limits[:-1] + 0.5 * dy
+
+    xdata_xbin_numbers = np.digitize(x_data, x_bin_limits) - 1
+    ydata_ybin_numbers = np.digitize(y_data, y_bin_limits) - 1
+
+    # Prepare dictionary: (x_bin_index, y_bin_index) --> [(z_val, data_index), (z_val, data_index), ...]
+    bins_dict = OrderedDict()
+    for x_bin_number in range(x_bins):
+        for y_bin_number in range(y_bins):
+            bin_key = (x_bin_number, y_bin_number)
+            bins_dict[bin_key] = {}
+            bins_dict[bin_key]["x_centre"] = x_bin_centres[x_bin_number]
+            bins_dict[bin_key]["y_centre"] = y_bin_centres[y_bin_number]
+            bins_dict[bin_key]["z_vals"] = []
+
+    # Fill the arrays "z_vals" and "data_indices" for each bin
+    for di in range(data_length):
+
+        z_val = z_data[di]
+
+        x_bin_number = xdata_xbin_numbers[di]
+        y_bin_number = ydata_ybin_numbers[di]
+
+        bin_key = (x_bin_number, y_bin_number)
+
+        if bin_key in bins_dict.keys():
+
+            bins_dict[bin_key]["z_vals"].append(z_val)
+
+
+    # Convert to numpy arrays
+    for bin_key in bins_dict.keys():
+        bins_dict[bin_key]["z_vals"] = np.array(bins_dict[bin_key]["z_vals"])
+
+
+    # For each bin, take the average z value
+    result_dict = OrderedDict()
+    for bin_key in bins_dict.keys():
+
+
+        if len(bins_dict[bin_key]["z_vals"]) > 0:
+
+            avg_z_val = np.average(bins_dict[bin_key]["z_vals"])
+
+            result_dict[bin_key] = (x_bin_centres[bin_key[0]], 
+                                    y_bin_centres[bin_key[1]], 
+                                    avg_z_val)
+
+    return result_dict, x_bin_limits, y_bin_limits
 
 
 def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None, floatf="{: .1e}"):
