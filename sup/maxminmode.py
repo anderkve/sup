@@ -105,6 +105,12 @@ def run_max(args):
 def run_min(args):
     run(args, "min")
 
+def run_avg(args):
+    print("DEBUG: mode: avg")
+    print("DEBUG: args:")
+    print(args)
+    sys.exit()
+
 def run(args, mode):
 
     assert mode in ["max", "min"]
@@ -277,7 +283,6 @@ def run(args, mode):
             if xiyi in bins_info.keys():
                 z_val = bins_info[xiyi][2]
                 z_norm = (z_val - z_min) / (z_max - z_min)
-                # print("DEBUG: xi, yi, z_val, z_norm : ", xi, yi, z_val, z_norm)
 
                 ccode = get_color_code(z_val, z_norm, color_z_lims, s_type, highlight_maxmin_point)
                 marker = get_marker(z_norm, s_type, highlight_maxmin_point)
