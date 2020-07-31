@@ -50,6 +50,7 @@ ccodes = cmaps[0]
 
 def get_color_code(z_val, z_norm, color_z_lims):
 
+    # print("DEBUG: z_val:", z_val, "   z_norm:", z_norm)
     if z_norm == 1.0:
         return ccodes[-1]
     elif z_norm == 0.0:
@@ -97,6 +98,9 @@ def run(args):
 
     x_range = args.x_range
     y_range = args.y_range
+
+    z_range_user = args.z_range
+    user_defined_z_range = bool(z_range_user is not None)
 
     read_length = defaults.read_length
 
@@ -202,10 +206,13 @@ def run(args):
             if bin_count > 0:
                 bins_info[bin_key] = (xi, yj, z_val)
 
-    # Get z max and minimum
-    z_min = np.min(bins_content)
-    z_max = np.max(bins_content)
-    z_range = [z_min, z_max]
+    # Get z max and minimum from data if not set by the user
+    z_range = None
+    if user_defined_z_range:
+        z_range = z_range_user
+    else:
+        z_range = [np.min(bins_content), np.max(bins_content)]
+    z_min, z_max = z_range 
 
     # Set color limits
     color_z_lims = list( np.linspace(z_min, z_max, len(ccodes)+1) )
@@ -233,6 +240,10 @@ def run(args):
                 z_norm = 0.0
                 if (z_max != z_min):
                     z_norm = (z_val - z_min) / (z_max - z_min)
+                if z_norm > 1.0:
+                    z_norm = 1.0
+                elif z_norm < 0.0:
+                    z_norm = 0.0
 
                 ccode = get_color_code(z_val, z_norm, color_z_lims)
                 marker = get_marker(z_norm)

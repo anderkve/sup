@@ -16,11 +16,11 @@ modes:
 examples:
   ./sup.py list data.hdf5
 
-  ./sup.py plr data.hdf5 0 1 4 --xrange 0 10 --yrange 0 10 --bins 20 20
+  ./sup.py plr data.hdf5 0 1 4 --x-range 0 10 --y-range 0 10 --bins 20 20
 
-  ./sup.py plr data.hdf5 2 1 4 --xrange 0 10 --yrange 0 10 --bins 20 20 -g
+  ./sup.py plr data.hdf5 2 1 4 --x-range 0 10 --y-range 0 10 --bins 20 20 -g
 
-  ./sup.py plr data.hdf5 2 1 4 --xrange 0 10 --yrange 0 20 --bins 20 40 --x-transf "np.abs(x)"
+  ./sup.py plr data.hdf5 2 1 4 --x-range 0 10 --y-range 0 20 --bins 20 40 --x-transf "np.abs(x)"
 """
 
 import sys
@@ -56,11 +56,11 @@ modes:
 examples:
   ./sup.py list data.hdf5
 
-  ./sup.py plr data.hdf5 0 1 4 --xrange 0 10 --yrange 0 10 --bins 20 20
+  ./sup.py plr data.hdf5 0 1 4 --x-range 0 10 --y-range 0 10 --bins 20 20
 
-  ./sup.py plr data.hdf5 2 1 4 --xrange 0 10 --yrange 0 10 --bins 20 20 -g
+  ./sup.py plr data.hdf5 2 1 4 --x-range 0 10 --y-range 0 10 --bins 20 20 -g
 
-  ./sup.py plr data.hdf5 2 1 4 --xrange 0 10 --yrange 0 20 --bins 20 40 --x-transf "np.abs(x)"
+  ./sup.py plr data.hdf5 2 1 4 --x-range 0 10 --y-range 0 20 --bins 20 40 --x-transf "np.abs(x)"
         """,
   # sup post    plot the z posterior probability density
     )
@@ -83,8 +83,8 @@ examples:
     parser_plrmode.add_argument("x_index", type=int, action="store", help="index of the x-axis dataset")
     parser_plrmode.add_argument("y_index", type=int, action="store", help="index of the y-axis dataset")
     parser_plrmode.add_argument("loglike_index", type=int, action="store", help="index of the ln(L) dataset")
-    parser_plrmode.add_argument("-xr", "--xrange", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
-    parser_plrmode.add_argument("-yr", "--yrange", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
+    parser_plrmode.add_argument("-xr", "--x-range", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
+    parser_plrmode.add_argument("-yr", "--y-range", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
     parser_plrmode.add_argument("-b", "--bins", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="number of bins for each axis", metavar=("X_BINS", "Y_BINS"))
     parser_plrmode.add_argument("-c", "--cap-loglike", type=float, action="store", dest="cap_loglike_val", default=None, help="cap the ln(L) at the given value", metavar="CAP_VAL")
     parser_plrmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
@@ -100,8 +100,8 @@ examples:
     parser_maxmode.add_argument("y_index", type=int, action="store", help="index of the y-axis dataset")
     parser_maxmode.add_argument("z_index", type=int, action="store", help="index of the z-axis dataset")
     parser_maxmode.add_argument("-s", "--sort", type=int, action="store", dest="s_index", default=None, help="index of the sort dataset", metavar="S_INDEX")
-    parser_maxmode.add_argument("-xr", "--xrange", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
-    parser_maxmode.add_argument("-yr", "--yrange", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
+    parser_maxmode.add_argument("-xr", "--x-range", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
+    parser_maxmode.add_argument("-yr", "--y-range", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
     parser_maxmode.add_argument("-b", "--bins", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="number of bins for each axis", metavar=("X_BINS", "Y_BINS"))
     parser_maxmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
     parser_maxmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
@@ -121,8 +121,8 @@ examples:
     parser_minmode.add_argument("y_index", type=int, action="store", help="index of the y-axis dataset")
     parser_minmode.add_argument("z_index", type=int, action="store", help="index of the z-axis dataset")
     parser_minmode.add_argument("-s", "--sort", type=int, action="store", dest="s_index", default=None, help="index of the sort dataset", metavar="S_INDEX")
-    parser_minmode.add_argument("-xr", "--xrange", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
-    parser_minmode.add_argument("-yr", "--yrange", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
+    parser_minmode.add_argument("-xr", "--x-range", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
+    parser_minmode.add_argument("-yr", "--y-range", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
     parser_minmode.add_argument("-b", "--bins", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="number of bins for each axis", metavar=("X_BINS", "Y_BINS"))
     parser_minmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
     parser_minmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
@@ -142,8 +142,8 @@ examples:
     parser_avgmode.add_argument("y_index", type=int, action="store", help="index of the y-axis dataset")
     parser_avgmode.add_argument("z_index", type=int, action="store", help="index of the z-axis dataset")
     # parser_avgmode.add_argument("-s", "--sort", type=int, action="store", dest="s_index", default=None, help="index of the sort dataset", metavar="S_INDEX")
-    parser_avgmode.add_argument("-xr", "--xrange", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
-    parser_avgmode.add_argument("-yr", "--yrange", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
+    parser_avgmode.add_argument("-xr", "--x-range", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
+    parser_avgmode.add_argument("-yr", "--y-range", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
     parser_avgmode.add_argument("-b", "--bins", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="number of bins for each axis", metavar=("X_BINS", "Y_BINS"))
     parser_avgmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
     parser_avgmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
@@ -162,8 +162,9 @@ examples:
     parser_histmode.add_argument("x_index", type=int, action="store", help="index of the x-axis dataset")
     parser_histmode.add_argument("y_index", type=int, action="store", help="index of the y-axis dataset")
     parser_histmode.add_argument("-w", "--weights", type=int, action="store", dest="w_index", default=None, help="index of the weights dataset", metavar="W_INDEX")
-    parser_histmode.add_argument("-xr", "--xrange", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
-    parser_histmode.add_argument("-yr", "--yrange", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
+    parser_histmode.add_argument("-xr", "--x-range", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
+    parser_histmode.add_argument("-yr", "--y-range", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
+    parser_histmode.add_argument("-zr", "--z-range", nargs=2, type=float, action="store", dest="z_range", default=None, help="y-axis range", metavar=("Z_MIN", "Z_MAX"))
     parser_histmode.add_argument("-b", "--bins", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="number of bins for each axis", metavar=("X_BINS", "Y_BINS"))
     parser_histmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
     parser_histmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
