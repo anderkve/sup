@@ -3,6 +3,7 @@ import numpy as np
 import h5py
 import sup.defaults as defaults
 import sup.utils as utils
+from collections import OrderedDict
 
 
 #
@@ -171,21 +172,36 @@ def run(args):
         y_range = [np.min(y_data), np.max(y_data)]
 
 
-    # _Anders: Need to put this below the get_bin_tuples stuff
-
-    # Get z max and minimum
-    z_min = np.min(z_data)
-    z_max = np.max(z_data)
-    z_range = [z_min, z_max]
-
-    # Set color limits
-    color_z_lims = list( np.linspace(z_min, z_max, len(ccodes)+1) )
 
     #
     # Get a dict with info per bin
     #
 
-    bins_info, x_bin_limits, y_bin_limits = utils.get_bin_tuples_avg(x_data, y_data, z_data, xy_bins, x_range, y_range)
+    bins_content, x_bin_limits, y_bin_limits = np.histogram2d(x_data, y_data, bins=xy_bins, range=[x_range, y_range]) 
+
+    dx = x_bin_limits[1] - x_bin_limits[0]
+    dy = y_bin_limits[1] - y_bin_limits[0]
+
+    x_bin_centres = x_bin_limits[:-1] + 0.5 * dx
+    y_bin_centres = y_bin_limits[:-1] + 0.5 * dy
+
+    bins_info = OrderedDict()
+    for i,xi in enumerate(x_bin_centres):
+        for j,yj in enumerate(y_bin_centres):
+
+            bin_key = (i,j)
+            z_val = bins_content[bin_key]      
+
+            if z_val != 0.0:
+                bins_info[bin_key] = (xi, yj, z_val)
+
+    # Get z max and minimum
+    z_min = np.min(bins_content)
+    z_max = np.max(bins_content)
+    z_range = [z_min, z_max]
+
+    # Set color limits
+    color_z_lims = list( np.linspace(z_min, z_max, len(ccodes)+1) )
 
 
     #
@@ -276,7 +292,7 @@ def run(args):
 
     x_label = x_name
     y_label = y_name
-    z_label = z_name + " [binned average]"
+    z_label = "bin height"
 
 
     #
@@ -288,7 +304,6 @@ def run(args):
                                           z_label, z_range, 
                                           x_transf_expr = x_transf_expr, 
                                           y_transf_expr = y_transf_expr,
-                                          z_transf_expr = z_transf_expr, 
                                           left_padding = left_padding + " ")
 
     for i,line in enumerate(info_lines):
