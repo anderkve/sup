@@ -159,12 +159,17 @@ def run(args):
 
     x_transf_expr = args.x_transf_expr
     y_transf_expr = args.y_transf_expr
+    w_transf_expr = args.w_transf_expr
+    # @todo: add the x,y,w variables to a dictionary of allowed arguments to eval()
     x = x_data
     y = y_data
+    w = w_data
     if x_transf_expr != "":
         x_data = eval(x_transf_expr)
     if y_transf_expr != "":
         y_data = eval(y_transf_expr)
+    if w_transf_expr != "":
+        w_data = eval(w_transf_expr)
 
     if not x_range:
         x_range = [np.min(x_data), np.max(x_data)]
@@ -177,7 +182,8 @@ def run(args):
     # Get a dict with info per bin
     #
 
-    bins_content, x_bin_limits, y_bin_limits = np.histogram2d(x_data, y_data, bins=xy_bins, range=[x_range, y_range]) 
+    bins_content_unweighted,_ ,_  = np.histogram2d(x_data, y_data, bins=xy_bins, range=[x_range, y_range]) 
+    bins_content, x_bin_limits, y_bin_limits = np.histogram2d(x_data, y_data, bins=xy_bins, range=[x_range, y_range], weights=w_data) 
 
     dx = x_bin_limits[1] - x_bin_limits[0]
     dy = y_bin_limits[1] - y_bin_limits[0]
@@ -191,8 +197,9 @@ def run(args):
 
             bin_key = (i,j)
             z_val = bins_content[bin_key]      
+            bin_count = bins_content_unweighted[bin_key]
 
-            if z_val != 0.0:
+            if bin_count > 0:
                 bins_info[bin_key] = (xi, yj, z_val)
 
     # Get z max and minimum
@@ -223,7 +230,9 @@ def run(args):
 
             if xiyi in bins_info.keys():
                 z_val = bins_info[xiyi][2]
-                z_norm = (z_val - z_min) / (z_max - z_min)
+                z_norm = 0.0
+                if (z_max != z_min):
+                    z_norm = (z_val - z_min) / (z_max - z_min)
 
                 ccode = get_color_code(z_val, z_norm, color_z_lims)
                 marker = get_marker(z_norm)
@@ -293,7 +302,7 @@ def run(args):
     x_label = x_name
     y_label = y_name
     z_label = "bin height"
-
+    w_label = w_name
 
     #
     # Add info text
@@ -304,6 +313,8 @@ def run(args):
                                           z_label, z_range, 
                                           x_transf_expr = x_transf_expr, 
                                           y_transf_expr = y_transf_expr,
+                                          w_label = w_label,
+                                          w_transf_expr = w_transf_expr,
                                           left_padding = left_padding + " ")
 
     for i,line in enumerate(info_lines):

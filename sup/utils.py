@@ -67,8 +67,9 @@ def generate_legend(legend_entries, mod_func, sep="  ", internal_sep=" "):
 
 
 def generate_info_text(x_label, x_range, y_label, y_range, z_label, z_range, 
-                       s_label=None, s_type=None, 
-                       x_transf_expr="", y_transf_expr="", z_transf_expr="", s_transf_expr="",
+                       x_transf_expr="", y_transf_expr="", z_transf_expr="", 
+                       s_label=None, s_type=None, s_transf_expr="", 
+                       w_label=None, w_transf_expr="",
                        capped_z=False, capped_label="z-axis", cap_val=1e99,
                        left_padding=""):
 
@@ -77,26 +78,32 @@ def generate_info_text(x_label, x_range, y_label, y_range, z_label, z_range,
 
     info_lines.append(left_padding + "x-axis: {}".format(x_label))
     if x_transf_expr != "":
-        info_lines.append(left_padding + "        - transf.: {}".format(x_transf_expr))
-    info_lines.append(left_padding + "        - range: [{}, {}]".format(ff2.format(x_range[0]), ff2.format(x_range[1])))
+        info_lines.append(left_padding + "  - transf.: {}".format(x_transf_expr))
+    info_lines.append(left_padding + "  - range: [{}, {}]".format(ff2.format(x_range[0]), ff2.format(x_range[1])))
 
     info_lines.append(left_padding + "y-axis: {}".format(y_label))
     if y_transf_expr != "":
-        info_lines.append(left_padding + "        - transf.: {}".format(y_transf_expr))
-    info_lines.append(left_padding + "        - range: [{}, {}]".format(ff2.format(y_range[0]), ff2.format(y_range[1])))
+        info_lines.append(left_padding + "  - transf.: {}".format(y_transf_expr))
+    info_lines.append(left_padding + "  - range: [{}, {}]".format(ff2.format(y_range[0]), ff2.format(y_range[1])))
 
     info_lines.append(left_padding + "z-axis: {}".format(z_label))
     if z_transf_expr != "":
-        info_lines.append(left_padding + "        - transf.: {}".format(z_transf_expr))
-    info_lines.append(left_padding + "        - range: [{}, {}]".format(ff2.format(z_range[0]), ff2.format(z_range[1])))
+        info_lines.append(left_padding + "  - transf.: {}".format(z_transf_expr))
+    info_lines.append(left_padding + "  - range: [{}, {}]".format(ff2.format(z_range[0]), ff2.format(z_range[1])))
 
     if (s_label is not None) and (s_type is not None):
         info_lines.append(left_padding + "  sort: {} [{}]".format(s_label, s_type))
         if s_transf_expr != "":
-            info_lines.append(left_padding + "        - transf.: {}".format(s_transf_expr))
+            info_lines.append(left_padding + "  - transf.: {}".format(s_transf_expr))
+
+    if w_label is not None:
+        info_lines.append(left_padding + "weights: {}".format(w_label))
+        if w_transf_expr != "":
+            info_lines.append(left_padding + "  - transf.: {}".format(w_transf_expr))
 
     if capped_z:
         info_lines.append(left_padding + "capped: {} dataset capped at {}".format(capped_label, ff2.format(cap_val)))
+
     info_lines.append(left_padding)
 
     return info_lines

@@ -203,6 +203,7 @@ def run(args, mode):
     y_transf_expr = args.y_transf_expr
     z_transf_expr = args.z_transf_expr
     s_transf_expr = args.s_transf_expr
+    # @todo: add the x,y,z,s variables to a dictionary of allowed arguments to eval()
     x = x_data
     y = y_data
     z = z_data
@@ -266,7 +267,9 @@ def run(args, mode):
 
             if xiyi in bins_info.keys():
                 z_val = bins_info[xiyi][2]
-                z_norm = (z_val - z_min) / (z_max - z_min)
+                z_norm = 0.0
+                if (z_max != z_min):
+                    z_norm = (z_val - z_min) / (z_max - z_min)
 
                 ccode = get_color_code(z_val, z_norm, color_z_lims, s_type, highlight_maxmin_point)
                 marker = get_marker(z_norm, s_type, highlight_maxmin_point)
