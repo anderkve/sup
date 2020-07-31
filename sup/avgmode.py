@@ -170,19 +170,13 @@ def run(args):
 
     # Get z max and minimum
     z_min = np.min(z_data)
-    z_min_index = np.argmin(z_data)
     z_max = np.max(z_data)
-    z_max_index = np.argmax(z_data)
     z_range = [z_min, z_max]
-
 
     # z_norm = (z_data - z_min) / (z_max - z_min)
 
-
     # Set color limits
     color_z_lims = list( np.linspace(z_min, z_max, len(ccodes)+1) )
-    # color_z_norm_lims = list( np.linspace(0.0, 1.0, len(ccodes)+1) )
-    # print("DEBUG:", color_z_norm_lims)
 
     #
     # Get a dict with info per bin
