@@ -164,6 +164,7 @@ def run(args):
     x_transf_expr = args.x_transf_expr
     y_transf_expr = args.y_transf_expr
     w_transf_expr = args.w_transf_expr
+    z_transf_expr = args.z_transf_expr
     # @todo: add the x,y,w variables to a dictionary of allowed arguments to eval()
     x = x_data
     y = y_data
@@ -188,6 +189,13 @@ def run(args):
 
     bins_content_unweighted,_ ,_  = np.histogram2d(x_data, y_data, bins=xy_bins, range=[x_range, y_range]) 
     bins_content, x_bin_limits, y_bin_limits = np.histogram2d(x_data, y_data, bins=xy_bins, range=[x_range, y_range], weights=w_data) 
+
+    # Apply z-axis transformation to non-empty bins
+    z = bins_content[bins_content_unweighted > 0]
+    if z_transf_expr != "":
+        bins_content[bins_content_unweighted > 0] = eval(z_transf_expr)
+
+
 
     dx = x_bin_limits[1] - x_bin_limits[0]
     dy = y_bin_limits[1] - y_bin_limits[0]
@@ -324,6 +332,7 @@ def run(args):
                                           z_label, z_range, 
                                           x_transf_expr = x_transf_expr, 
                                           y_transf_expr = y_transf_expr,
+                                          z_transf_expr = z_transf_expr,
                                           w_label = w_label,
                                           w_transf_expr = w_transf_expr,
                                           left_padding = left_padding + " ")
