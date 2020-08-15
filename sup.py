@@ -176,8 +176,15 @@ examples:
     parser_histmode.add_argument("-wt", "--w-transf", type=str, action="store", dest="w_transf_expr", default="", help="tranformation for the weights dataset, using numpy as 'np' (e.g. -zt \"np.ones(w.shape\")", metavar="EXPR")
 
 
-    # Parse the arguments and run the function for the chosen mode
+    # Parse the arguments
     args = parser.parse_args()
+
+    # If no arguments, print usage string and exit
+    if len(sys.argv) < 2:
+        parser.print_usage()
+        sys.exit(1)
+
+    # Run the function for the chosen mode
     args.func(args)
 
 
