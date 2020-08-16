@@ -133,6 +133,11 @@ def run(args, mode):
         s_index = args.s_index
     s_type = mode
 
+    use_filters = False 
+    filter_indices = args.filter_indices
+    if filter_indices is not None:
+        use_filters = True
+
     x_range = args.x_range
     y_range = args.y_range
 
@@ -192,7 +197,18 @@ def run(args, mode):
     z_data = np.array(f[z_name])[:read_length]
     s_data = np.array(f[s_name])[:read_length]
 
+    filter_names = []
+    filter_datasets = []
+    if use_filters:
+        for filter_index in filter_indices:
+            filter_name = dset_names[filter_index]
+            filter_names.append(filter_name)
+            filter_datasets.append(np.array(f[filter_name])[:read_length])
+
     f.close()
+
+    if use_filters:
+        x_data, y_data, z_data, s_data = utils.apply_filters([x_data, y_data, z_data, s_data], filter_datasets)
 
     assert len(x_data) == len(y_data)
     assert len(x_data) == len(z_data)

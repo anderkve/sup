@@ -179,7 +179,6 @@ def run(args):
     if use_filters:
         x_data, y_data, loglike_data, s_data = utils.apply_filters([x_data, y_data, loglike_data, s_data], filter_datasets)
 
-
     x_transf_expr = args.x_transf_expr
     y_transf_expr = args.y_transf_expr
     x = x_data
