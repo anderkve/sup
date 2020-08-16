@@ -105,7 +105,8 @@ def run(args):
     z_range_user = args.z_range
     user_defined_z_range = bool(z_range_user is not None)
 
-    read_length = defaults.read_length
+    read_length = args.read_length
+    read_step = args.read_step
 
     xy_bins = args.xy_bins
     if not xy_bins:
@@ -149,16 +150,16 @@ def run(args):
     x_name = dset_names[x_index]
     y_name = dset_names[y_index]
 
-    x_data = np.array(f[x_name])[:read_length]
-    y_data = np.array(f[y_name])[:read_length]
+    x_data = np.array(f[x_name])[:read_length][::read_step]
+    y_data = np.array(f[y_name])[:read_length][::read_step]
 
     w_name = "weights"
     w_data = np.ones(len(x_data))
     if use_weights:
         w_name = dset_names[w_index]
-        w_data = np.array(f[w_name])[:read_length]
+        w_data = np.array(f[w_name])[:read_length][::read_step]
 
-    filter_names, filter_datasets = utils.get_filters_hdf5(f, filter_indices, read_length=read_length)
+    filter_names, filter_datasets = utils.get_filters_hdf5(f, filter_indices, read_length=read_length, read_step=read_step)
 
     f.close()
 

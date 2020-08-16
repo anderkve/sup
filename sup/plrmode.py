@@ -112,7 +112,8 @@ def run(args):
     # z_min = defaults.z_min
     # z_max = defaults.z_max
 
-    read_length = defaults.read_length
+    read_length = args.read_length
+    read_step = args.read_step
 
     xy_bins = args.xy_bins
     if not xy_bins:
@@ -154,12 +155,12 @@ def run(args):
     loglike_name = dset_names[loglike_index]
     s_name = dset_names[s_index]
 
-    x_data = np.array(f[x_name])[:read_length]
-    y_data = np.array(f[y_name])[:read_length]
-    loglike_data = np.array(f[loglike_name])[:read_length]
-    s_data = np.array(f[s_name])[:read_length]
+    x_data = np.array(f[x_name])[:read_length][::read_step]
+    y_data = np.array(f[y_name])[:read_length][::read_step]
+    loglike_data = np.array(f[loglike_name])[:read_length][::read_step]
+    s_data = np.array(f[s_name])[:read_length][::read_step]
 
-    filter_names, filter_datasets = utils.get_filters_hdf5(f, filter_indices, read_length=read_length)
+    filter_names, filter_datasets = utils.get_filters_hdf5(f, filter_indices, read_length=read_length, read_step=read_step)
 
     f.close()
 

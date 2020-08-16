@@ -11,7 +11,8 @@ y_name = None
 z_name = None
 s_name = None
 
-read_length = 1000 # -1
+read_length = -1
+read_step = 1
 
 x_use_abs_val = False
 y_use_abs_val = False
