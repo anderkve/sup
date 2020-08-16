@@ -164,6 +164,9 @@ examples:
     parser_avgmode.add_argument("-zt", "--z-transf", type=str, action="store", dest="z_transf_expr", default="", help="tranformation for the z-axis dataset, using numpy as 'np' (e.g. -zt \"np.log10(z)\")", metavar="EXPR")
     # parser_avgmode.add_argument("-st", "--s-transf", type=str, action="store", dest="s_transf_expr", default="", help="tranformation for the sort dataset, using numpy as 'np' (e.g. -st \"np.log10(s)\")", metavar="EXPR")
     # parser_avgmode.add_argument("-ns", "--no-star", action="store_true", dest="no_star", default=False, help="switch off the star marker for the max/min point(s)")
+    parser_avgmode.add_argument("-rl", "--read-length", type=int, action="store", dest="read_length", default=-1, help="read only the LENGTH first points of each dataset", metavar="LENGTH")
+    parser_avgmode.add_argument("-rs", "--read-step", type=int, action="store", dest="read_step", default=1, help="step through each dataset in steps of size STEP", metavar="STEP")
+
 
     # Parser for "hist" mode
     parser_histmode = subparsers.add_parser("hist")
@@ -185,6 +188,8 @@ examples:
     parser_histmode.add_argument("-yt", "--y-transf", type=str, action="store", dest="y_transf_expr", default="", help="tranformation for the y-axis dataset, using numpy as 'np' (e.g. -yt \"np.log10(y)\")", metavar="EXPR")
     parser_histmode.add_argument("-zt", "--z-transf", type=str, action="store", dest="z_transf_expr", default="", help="tranformation for the z-axis dataset, using numpy as 'np' (e.g. -zt \"np.log10(z)\")", metavar="EXPR")
     parser_histmode.add_argument("-wt", "--w-transf", type=str, action="store", dest="w_transf_expr", default="", help="tranformation for the weights dataset, using numpy as 'np' (e.g. -zt \"np.ones(w.shape\")", metavar="EXPR")
+    parser_histmode.add_argument("-rl", "--read-length", type=int, action="store", dest="read_length", default=-1, help="read only the LENGTH first points of each dataset", metavar="LENGTH")
+    parser_histmode.add_argument("-rs", "--read-step", type=int, action="store", dest="read_step", default=1, help="step through each dataset in steps of size STEP", metavar="STEP")
 
 
     # Parse the arguments
