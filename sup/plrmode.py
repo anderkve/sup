@@ -103,10 +103,8 @@ def run(args):
     s_index = args.loglike_index
     s_type = "max"
 
-    use_filters = False 
     filter_indices = args.filter_indices
-    if filter_indices is not None:
-        use_filters = True
+    use_filters = bool(filter_indices is not None) 
 
     x_range = args.x_range
     y_range = args.y_range

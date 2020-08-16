@@ -96,6 +96,9 @@ def run(args):
     w_index = args.w_index
     use_weights = bool(w_index is not None)
 
+    filter_indices = args.filter_indices
+    use_filters = bool(filter_indices is not None) 
+
     x_range = args.x_range
     y_range = args.y_range
 
@@ -155,11 +158,22 @@ def run(args):
         w_name = dset_names[w_index]
         w_data = np.array(f[w_name])[:read_length]
 
+    filter_names = []
+    filter_datasets = []
+    if use_filters:
+        for filter_index in filter_indices:
+            filter_name = dset_names[filter_index]
+            filter_names.append(filter_name)
+            filter_datasets.append(np.array(f[filter_name])[:read_length])
+
     f.close()
 
     assert len(x_data) == len(y_data)
     assert len(x_data) == len(w_data)
     # data_length = len(x_data)
+
+    if use_filters:
+        x_data, y_data, w_data = utils.apply_filters([x_data, y_data, w_data], filter_datasets)
 
     x_transf_expr = args.x_transf_expr
     y_transf_expr = args.y_transf_expr
@@ -335,6 +349,7 @@ def run(args):
                                           z_transf_expr = z_transf_expr,
                                           w_label = w_label,
                                           w_transf_expr = w_transf_expr,
+                                          filter_names=filter_names,
                                           left_padding = left_padding + " ")
 
     for i,line in enumerate(info_lines):

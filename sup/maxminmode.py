@@ -133,10 +133,8 @@ def run(args, mode):
         s_index = args.s_index
     s_type = mode
 
-    use_filters = False 
     filter_indices = args.filter_indices
-    if filter_indices is not None:
-        use_filters = True
+    use_filters = bool(filter_indices is not None) 
 
     x_range = args.x_range
     y_range = args.y_range
@@ -385,6 +383,7 @@ def run(args, mode):
                                           y_transf_expr = y_transf_expr,
                                           z_transf_expr = z_transf_expr, 
                                           s_transf_expr = s_transf_expr,
+                                          filter_names=filter_names,
                                           left_padding = left_padding + " ")
 
     for i,line in enumerate(info_lines):

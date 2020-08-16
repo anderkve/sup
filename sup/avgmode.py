@@ -92,6 +92,9 @@ def run(args):
     y_index = args.y_index
     z_index = args.z_index
 
+    filter_indices = args.filter_indices
+    use_filters = bool(filter_indices is not None) 
+
     x_range = args.x_range
     y_range = args.y_range
 
@@ -144,11 +147,22 @@ def run(args):
     y_data = np.array(f[y_name])[:read_length]
     z_data = np.array(f[z_name])[:read_length]
 
+    filter_names = []
+    filter_datasets = []
+    if use_filters:
+        for filter_index in filter_indices:
+            filter_name = dset_names[filter_index]
+            filter_names.append(filter_name)
+            filter_datasets.append(np.array(f[filter_name])[:read_length])
+
     f.close()
 
     assert len(x_data) == len(y_data)
     assert len(x_data) == len(z_data)
     # data_length = len(x_data)
+
+    if use_filters:
+        x_data, y_data, z_data = utils.apply_filters([x_data, y_data, z_data], filter_datasets)
 
     x_transf_expr = args.x_transf_expr
     y_transf_expr = args.y_transf_expr
@@ -288,6 +302,7 @@ def run(args):
                                           x_transf_expr = x_transf_expr, 
                                           y_transf_expr = y_transf_expr,
                                           z_transf_expr = z_transf_expr, 
+                                          filter_names=filter_names,
                                           left_padding = left_padding + " ")
 
     for i,line in enumerate(info_lines):
