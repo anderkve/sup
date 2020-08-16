@@ -165,6 +165,7 @@ examples:
     parser_histmode.add_argument("input_file", type=str, action="store", help="path to the input data file")
     parser_histmode.add_argument("x_index", type=int, action="store", help="index of the x-axis dataset")
     parser_histmode.add_argument("y_index", type=int, action="store", help="index of the y-axis dataset")
+    parser_histmode.add_argument("-f", "--filter", nargs="+", type=int, action="store", dest="filter_indices", default=None, help="indices of boolean datasets used for filtering", metavar="F_INDEX")
     parser_histmode.add_argument("-w", "--weights", type=int, action="store", dest="w_index", default=None, help="index of the weights dataset", metavar="W_INDEX")
     parser_histmode.add_argument("-xr", "--x-range", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
     parser_histmode.add_argument("-yr", "--y-range", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
