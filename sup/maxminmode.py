@@ -290,7 +290,7 @@ def run(args, mode):
     plot_lines.reverse()
 
     # Save plot width
-    plot_width = xy_bins[0] * 2 + 13
+    plot_width = xy_bins[0] * 2 + 5 + len(ff.format(0))
     fig_width = plot_width
 
     # Add axes
@@ -310,9 +310,16 @@ def run(args, mode):
     # - colorbar
     cb_entries = []
     cb_entries.append( ("", fg_ccode, "", fg_ccode) )
-    for i in range(0, len(color_z_lims)-1):
-        cb_entries.append( ("|", fg_ccode, 6*regular_marker.strip(), ccodes[i]) )
-    cb_entries.append( ("|", fg_ccode, "", fg_ccode) )
+    n_color_lims = len(color_z_lims)
+    for i in range(0, n_color_lims):
+        bar_ccode = fg_ccode
+        if i % 2 == 1:
+            bar_ccode = empty_bin_ccode
+
+        if i < (n_color_lims - 1):
+            cb_entries.append( ("|", bar_ccode, 6*regular_marker.strip(), ccodes[i]) )
+        else:
+            cb_entries.append( ("|", bar_ccode, "", fg_ccode) )
 
     cb_line, cb_width = utils.generate_legend(cb_entries, legend_mod_func, sep=" ", internal_sep="")
 
@@ -321,12 +328,16 @@ def run(args, mode):
 
     # - numbers below the colorbar
     cb_nums_entries = []
-    for i in range(0, len(color_z_lims)):
+    for i in range(0, n_color_lims):
         txt = ff.format(color_z_lims[i])
         if i % 2 == 0:
             cb_nums_entries.append( ("", fg_ccode, txt, fg_ccode) )
         else:
-            cb_nums_entries.append( ("", fg_ccode, " " * len(txt), fg_ccode) )
+            gap_length = 8
+            if len(txt) > gap_length:
+                gap_length = gap_length - (len(txt) - gap_length) 
+            cb_nums_entries.append( ("", fg_ccode, " " * gap_length, fg_ccode) )
+
     cb_nums_line, cb_nums_width = utils.generate_legend(cb_nums_entries, legend_mod_func, sep="", internal_sep="")
 
     plot_lines, fig_width = utils.insert_line(cb_nums_line, cb_nums_width, plot_lines, fig_width, fg_ccode, bg_ccode)

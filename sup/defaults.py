@@ -11,7 +11,7 @@ y_name = None
 z_name = None
 s_name = None
 
-read_length = -1
+read_length = 1000 # -1
 
 x_use_abs_val = False
 y_use_abs_val = False
@@ -27,7 +27,7 @@ y_max = None
 z_min = None
 z_max = None
 
-ff = "{: .1e}"
-ff2 = "{:.1e}"
+ff = "{: .2e}"
+ff2 = "{:.2e}"
 # ffx = "{: .1e}"
 # ffy = "{: .1e}"

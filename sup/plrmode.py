@@ -250,7 +250,7 @@ def run(args):
     plot_lines.reverse()
 
     # Save plot width
-    plot_width = xy_bins[0] * 2 + 13
+    plot_width = xy_bins[0] * 2 + 5 + len(ff.format(0))
     fig_width = plot_width
 
     # Add axes
