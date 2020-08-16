@@ -71,6 +71,7 @@ def generate_info_text(x_label, x_range, y_label, y_range, z_label, z_range,
                        s_label=None, s_type=None, s_transf_expr="", 
                        w_label=None, w_transf_expr="",
                        capped_z=False, capped_label="z-axis", cap_val=1e99,
+                       filter_names=[],
                        left_padding=""):
 
     info_lines = []
@@ -92,7 +93,7 @@ def generate_info_text(x_label, x_range, y_label, y_range, z_label, z_range,
     info_lines.append(left_padding + "  - range: [{}, {}]".format(ff2.format(z_range[0]), ff2.format(z_range[1])))
 
     if (s_label is not None) and (s_type is not None):
-        info_lines.append(left_padding + "  sort: {} [{}]".format(s_label, s_type))
+        info_lines.append(left_padding + "sort: {} [{}]".format(s_label, s_type))
         if s_transf_expr != "":
             info_lines.append(left_padding + "  - transf.: {}".format(s_transf_expr))
 
@@ -103,6 +104,9 @@ def generate_info_text(x_label, x_range, y_label, y_range, z_label, z_range,
 
     if capped_z:
         info_lines.append(left_padding + "capped: {} dataset capped at {}".format(capped_label, ff2.format(cap_val)))
+
+    for f_name in filter_names:
+        info_lines.append(left_padding + "filter: {}".format(f_name))
 
     info_lines.append(left_padding)
 

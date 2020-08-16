@@ -329,6 +329,7 @@ def run(args):
                                           capped_z=use_capped_loglike,
                                           capped_label="ln(L)",
                                           cap_val=args.cap_loglike_val,
+                                          filter_names=filter_names,
                                           left_padding = left_padding + " ")
 
     for i,line in enumerate(info_lines):
