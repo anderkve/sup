@@ -354,3 +354,18 @@ def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None, floatf="
     return lines
 
 
+def apply_filters(datasets, filters):
+
+    for filter_dset in filters:
+        assert len(filters[0]) == len(filter_dset)
+
+    joint_filter = np.array([np.all(l) for l in zip(*filters)], dtype=np.bool)
+
+    filtered_datasets = []
+    for dset in datasets:
+        assert len(dset) == len(joint_filter)
+        filtered_datasets.append(dset[joint_filter])
+
+    return filtered_datasets
+
+

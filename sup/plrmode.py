@@ -177,15 +177,7 @@ def run(args):
     # data_length = len(x_data)
 
     if use_filters:
-        for filter_data in filter_datasets:
-            assert len(x_data) == len(filter_data)
-
-        joint_filter = np.array([np.all(l) for l in zip(*filter_datasets)], dtype=np.bool)
-        # Apply filter
-        x_data = x_data[joint_filter]
-        y_data = y_data[joint_filter]
-        loglike_data = loglike_data[joint_filter]
-        s_data = s_data[joint_filter]
+        x_data, y_data, loglike_data, s_data = utils.apply_filters([x_data, y_data, loglike_data, s_data], filter_datasets)
 
 
     x_transf_expr = args.x_transf_expr
