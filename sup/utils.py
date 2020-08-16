@@ -354,6 +354,22 @@ def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None, floatf="
     return lines
 
 
+def get_filters_hdf5(data_file, filter_indices, read_length=-1):
+
+    dset_names = get_dataset_names(data_file)
+
+    filter_names = []
+    filter_datasets = []
+
+    if filter_indices is not None:
+        for filter_index in filter_indices:
+            filter_name = dset_names[filter_index]
+            filter_names.append(filter_name)
+            filter_datasets.append(np.array(data_file[filter_name])[:read_length])
+
+    return filter_names, filter_datasets
+
+
 def apply_filters(datasets, filters):
 
     for filter_dset in filters:

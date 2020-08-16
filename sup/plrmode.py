@@ -159,13 +159,7 @@ def run(args):
     loglike_data = np.array(f[loglike_name])[:read_length]
     s_data = np.array(f[s_name])[:read_length]
 
-    filter_names = []
-    filter_datasets = []
-    if use_filters:
-        for filter_index in filter_indices:
-            filter_name = dset_names[filter_index]
-            filter_names.append(filter_name)
-            filter_datasets.append(np.array(f[filter_name])[:read_length])
+    filter_names, filter_datasets = utils.get_filters_hdf5(f, filter_indices, read_length=read_length)
 
     f.close()
 
