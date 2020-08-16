@@ -128,7 +128,7 @@ examples:
     parser_minmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
     parser_minmode.add_argument("-nc", "--num-colors", type=int, action="store", dest="n_colors", default=10, help="number of colors in colorbar (max 10)", metavar="N_COLORS")
     parser_minmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish", metavar="CM")
-    parser_minmode.add_argument("-xt", "--x-transf", type=str, action="store", dest="x_transf_expr", default="", help="tranformation for the x-axis dataset, using numpy as 'np' (e.g. -xt \"np.log10(x)\")", metavar="EXPRESSION")
+    parser_minmode.add_argument("-xt", "--x-transf", type=str, action="store", dest="x_transf_expr", default="", help="tranformation for the x-axis dataset, using numpy as 'np' (e.g. -xt \"np.log10(x)\")", metavar="EXPR")
     parser_minmode.add_argument("-yt", "--y-transf", type=str, action="store", dest="y_transf_expr", default="", help="tranformation for the y-axis dataset, using numpy as 'np' (e.g. -yt \"np.log10(y)\")", metavar="EXPR")
     parser_minmode.add_argument("-zt", "--z-transf", type=str, action="store", dest="z_transf_expr", default="", help="tranformation for the z-axis dataset, using numpy as 'np' (e.g. -zt \"np.log10(z)\")", metavar="EXPR")
     parser_minmode.add_argument("-st", "--s-transf", type=str, action="store", dest="s_transf_expr", default="", help="tranformation for the sort dataset, using numpy as 'np' (e.g. -st \"np.log10(s)\")", metavar="EXPR")
