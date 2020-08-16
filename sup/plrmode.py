@@ -13,8 +13,8 @@ ff = defaults.ff
 ff2 = defaults.ff2
 left_padding = 2*" "
 
-bg_ccode_bb, fg_ccode_bb = 232, 231
-bg_ccode_wb, fg_ccode_wb = 231, 232
+bg_ccode_bb, fg_ccode_bb = 16, 231  # 232, 231
+bg_ccode_wb, fg_ccode_wb = 231, 16  # 231, 232
 bg_ccode = bg_ccode_bb
 fg_ccode = fg_ccode_bb
 
@@ -103,6 +103,11 @@ def run(args):
     s_index = args.loglike_index
     s_type = "max"
 
+    use_filters = False 
+    filter_indices = args.filter_indices
+    if filter_indices is not None:
+        use_filters = True
+
     x_range = args.x_range
     y_range = args.y_range
 
@@ -156,12 +161,32 @@ def run(args):
     loglike_data = np.array(f[loglike_name])[:read_length]
     s_data = np.array(f[s_name])[:read_length]
 
+    filter_names = []
+    filter_datasets = []
+    if use_filters:
+        for filter_index in filter_indices:
+            filter_name = dset_names[filter_index]
+            filter_names.append(filter_name)
+            filter_datasets.append(np.array(f[filter_name])[:read_length])
+
     f.close()
 
     assert len(x_data) == len(y_data)
     assert len(x_data) == len(loglike_data)
     assert len(x_data) == len(s_data)
     # data_length = len(x_data)
+
+    if use_filters:
+        for filter_data in filter_datasets:
+            assert len(x_data) == len(filter_data)
+
+        joint_filter = np.array([np.all(l) for l in zip(*filter_datasets)], dtype=np.bool)
+        # Apply filter
+        x_data = x_data[joint_filter]
+        y_data = y_data[joint_filter]
+        loglike_data = loglike_data[joint_filter]
+        s_data = s_data[joint_filter]
+
 
     x_transf_expr = args.x_transf_expr
     y_transf_expr = args.y_transf_expr
