@@ -92,8 +92,7 @@ examples:
     parser_plrmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
     parser_plrmode.add_argument("-xt", "--x-transf", type=str, action="store", dest="x_transf_expr", default="", help="tranformation for the x-axis dataset, using numpy as 'np' (e.g. -xt \"np.log10(x)\")", metavar="EXPR")
     parser_plrmode.add_argument("-yt", "--y-transf", type=str, action="store", dest="y_transf_expr", default="", help="tranformation for the y-axis dataset, using numpy as 'np' (e.g. -yt \"np.log10(y)\")", metavar="EXPR")
-    parser_plrmode.add_argument("-rl", "--read-length", type=int, action="store", dest="read_length", default=-1, help="read only the LENGTH first points of each dataset", metavar="LENGTH")
-    parser_plrmode.add_argument("-rs", "--read-step", type=int, action="store", dest="read_step", default=1, help="step through each dataset in steps of size STEP", metavar="STEP")
+    parser_plrmode.add_argument("-rs", "--read-slice", nargs=3, type=int, action="store", dest="read_slice", default=[0,-1,1], help="read only the given slice of each dataset", metavar=("START", "END", "STEP"))
 
     # Parser for "max" mode
     parser_maxmode = subparsers.add_parser("max")
@@ -116,8 +115,7 @@ examples:
     parser_maxmode.add_argument("-zt", "--z-transf", type=str, action="store", dest="z_transf_expr", default="", help="tranformation for the z-axis dataset, using numpy as 'np' (e.g. -zt \"np.log10(z)\")", metavar="EXPR")
     parser_maxmode.add_argument("-st", "--s-transf", type=str, action="store", dest="s_transf_expr", default="", help="tranformation for the sort dataset, using numpy as 'np' (e.g. -st \"np.log10(s)\")", metavar="EXPR")
     parser_maxmode.add_argument("-ns", "--no-star", action="store_true", dest="no_star", default=False, help="switch off the star marker for the max/min point(s)")
-    parser_maxmode.add_argument("-rl", "--read-length", type=int, action="store", dest="read_length", default=-1, help="read only the LENGTH first points of each dataset", metavar="LENGTH")
-    parser_maxmode.add_argument("-rs", "--read-step", type=int, action="store", dest="read_step", default=1, help="step through each dataset in steps of size STEP", metavar="STEP")
+    parser_maxmode.add_argument("-rs", "--read-slice", nargs=3, type=int, action="store", dest="read_slice", default=[0,-1,1], help="read only the given slice of each dataset", metavar=("START", "END", "STEP"))
 
     # Parser for "min" mode
     parser_minmode = subparsers.add_parser("min")
@@ -140,8 +138,7 @@ examples:
     parser_minmode.add_argument("-zt", "--z-transf", type=str, action="store", dest="z_transf_expr", default="", help="tranformation for the z-axis dataset, using numpy as 'np' (e.g. -zt \"np.log10(z)\")", metavar="EXPR")
     parser_minmode.add_argument("-st", "--s-transf", type=str, action="store", dest="s_transf_expr", default="", help="tranformation for the sort dataset, using numpy as 'np' (e.g. -st \"np.log10(s)\")", metavar="EXPR")
     parser_minmode.add_argument("-ns", "--no-star", action="store_true", dest="no_star", default=False, help="switch off the star marker the for the max/min point(s)")
-    parser_minmode.add_argument("-rl", "--read-length", type=int, action="store", dest="read_length", default=-1, help="read only the LENGTH first points of each dataset", metavar="LENGTH")
-    parser_minmode.add_argument("-rs", "--read-step", type=int, action="store", dest="read_step", default=1, help="step through each dataset in steps of size STEP", metavar="STEP")
+    parser_minmode.add_argument("-rs", "--read-slice", nargs=3, type=int, action="store", dest="read_slice", default=[0,-1,1], help="read only the given slice of each dataset", metavar=("START", "END", "STEP"))
 
     # Parser for "avg" mode
     parser_avgmode = subparsers.add_parser("avg")
@@ -164,9 +161,7 @@ examples:
     parser_avgmode.add_argument("-zt", "--z-transf", type=str, action="store", dest="z_transf_expr", default="", help="tranformation for the z-axis dataset, using numpy as 'np' (e.g. -zt \"np.log10(z)\")", metavar="EXPR")
     # parser_avgmode.add_argument("-st", "--s-transf", type=str, action="store", dest="s_transf_expr", default="", help="tranformation for the sort dataset, using numpy as 'np' (e.g. -st \"np.log10(s)\")", metavar="EXPR")
     # parser_avgmode.add_argument("-ns", "--no-star", action="store_true", dest="no_star", default=False, help="switch off the star marker for the max/min point(s)")
-    parser_avgmode.add_argument("-rl", "--read-length", type=int, action="store", dest="read_length", default=-1, help="read only the LENGTH first points of each dataset", metavar="LENGTH")
-    parser_avgmode.add_argument("-rs", "--read-step", type=int, action="store", dest="read_step", default=1, help="step through each dataset in steps of size STEP", metavar="STEP")
-
+    parser_avgmode.add_argument("-rs", "--read-slice", nargs=3, type=int, action="store", dest="read_slice", default=[0,-1,1], help="read only the given slice of each dataset", metavar=("START", "END", "STEP"))
 
     # Parser for "hist" mode
     parser_histmode = subparsers.add_parser("hist")
@@ -188,8 +183,7 @@ examples:
     parser_histmode.add_argument("-yt", "--y-transf", type=str, action="store", dest="y_transf_expr", default="", help="tranformation for the y-axis dataset, using numpy as 'np' (e.g. -yt \"np.log10(y)\")", metavar="EXPR")
     parser_histmode.add_argument("-zt", "--z-transf", type=str, action="store", dest="z_transf_expr", default="", help="tranformation for the z-axis dataset, using numpy as 'np' (e.g. -zt \"np.log10(z)\")", metavar="EXPR")
     parser_histmode.add_argument("-wt", "--w-transf", type=str, action="store", dest="w_transf_expr", default="", help="tranformation for the weights dataset, using numpy as 'np' (e.g. -zt \"np.ones(w.shape\")", metavar="EXPR")
-    parser_histmode.add_argument("-rl", "--read-length", type=int, action="store", dest="read_length", default=-1, help="read only the LENGTH first points of each dataset", metavar="LENGTH")
-    parser_histmode.add_argument("-rs", "--read-step", type=int, action="store", dest="read_step", default=1, help="step through each dataset in steps of size STEP", metavar="STEP")
+    parser_histmode.add_argument("-rs", "--read-slice", nargs=3, type=int, action="store", dest="read_slice", default=[0,-1,1], help="read only the given slice of each dataset", metavar=("START", "END", "STEP"))
 
 
     # Parse the arguments

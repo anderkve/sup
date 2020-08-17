@@ -139,8 +139,7 @@ def run(args, mode):
     x_range = args.x_range
     y_range = args.y_range
 
-    read_length = args.read_length
-    read_step = args.read_step
+    read_slice = slice(*args.read_slice)
 
     xy_bins = args.xy_bins
     if not xy_bins:
@@ -191,12 +190,12 @@ def run(args, mode):
     z_name = dset_names[z_index]
     s_name = dset_names[s_index]
 
-    x_data = np.array(f[x_name])[:read_length][::read_step]
-    y_data = np.array(f[y_name])[:read_length][::read_step]
-    z_data = np.array(f[z_name])[:read_length][::read_step]
-    s_data = np.array(f[s_name])[:read_length][::read_step]
+    x_data = np.array(f[x_name])[read_slice]
+    y_data = np.array(f[y_name])[read_slice]
+    z_data = np.array(f[z_name])[read_slice]
+    s_data = np.array(f[s_name])[read_slice]
 
-    filter_names, filter_datasets = utils.get_filters_hdf5(f, filter_indices, read_length=read_length, read_step=read_step)
+    filter_names, filter_datasets = utils.get_filters_hdf5(f, filter_indices, read_slice=read_slice)
 
     f.close()
 
