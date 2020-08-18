@@ -158,7 +158,7 @@ def run(args):
     x_data = np.array(f[x_name])[read_slice]
     y_data = np.array(f[y_name])[read_slice]
 
-    w_name = "weights"
+    w_name = None
     w_data = np.ones(len(x_data))
     if use_weights:
         w_name = dset_names[w_index]
