@@ -121,6 +121,8 @@ def run(args, mode):
     global empty_bin_marker
     global special_marker
     global color_z_lims
+    global ff
+    global ff2
 
     input_file = args.input_file
 
@@ -176,6 +178,10 @@ def run(args, mode):
     ccodes = [ ccodes[int(i)] for i in np.round( np.linspace(0, len(ccodes)-1, n_colors) ) ]
 
     highlight_maxmin_point = not(args.no_star)
+
+    n_decimals = args.n_decimals
+    ff = "{: ." + str(n_decimals) + "e}"
+    ff2 = "{:." + str(n_decimals) + "e}"
 
 
     #
@@ -305,45 +311,15 @@ def run(args, mode):
     # Add colorbar, legend, etc
     #
 
-    legend_mod_func = lambda input_str, input_fg_ccode : utils.prettify(input_str, input_fg_ccode, bg_ccode, bold=True)
+    plot_lines, fig_width = utils.generate_colorbar(plot_lines, fig_width, ff,
+                                                    ccodes, color_z_lims, 
+                                                    fg_ccode, bg_ccode, empty_bin_ccode)
 
-    # - colorbar
-    cb_entries = []
-    cb_entries.append( ("", fg_ccode, "", fg_ccode) )
-    n_color_lims = len(color_z_lims)
-    for i in range(0, n_color_lims):
-        bar_ccode = fg_ccode
-        if i % 2 == 1:
-            bar_ccode = empty_bin_ccode
-
-        if i < (n_color_lims - 1):
-            cb_entries.append( ("|", bar_ccode, 6*regular_marker.strip(), ccodes[i]) )
-        else:
-            cb_entries.append( ("|", bar_ccode, "", fg_ccode) )
-
-    cb_line, cb_width = utils.generate_legend(cb_entries, legend_mod_func, sep=" ", internal_sep="")
-
-    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode)
-    plot_lines, fig_width = utils.insert_line(cb_line, cb_width, plot_lines, fig_width, fg_ccode, bg_ccode)
-
-    # - numbers below the colorbar
-    cb_nums_entries = []
-    for i in range(0, n_color_lims):
-        txt = ff.format(color_z_lims[i])
-        if i % 2 == 0:
-            cb_nums_entries.append( ("", fg_ccode, txt, fg_ccode) )
-        else:
-            gap_length = 8
-            if len(txt) > gap_length:
-                gap_length = gap_length - (len(txt) - gap_length) 
-            cb_nums_entries.append( ("", fg_ccode, " " * gap_length, fg_ccode) )
-
-    cb_nums_line, cb_nums_width = utils.generate_legend(cb_nums_entries, legend_mod_func, sep="", internal_sep="")
-
-    plot_lines, fig_width = utils.insert_line(cb_nums_line, cb_nums_width, plot_lines, fig_width, fg_ccode, bg_ccode)
-
-    # - max/min 
+    # max/min legend
     if highlight_maxmin_point:
+
+        legend_mod_func = lambda input_str, input_fg_ccode : utils.prettify(input_str, input_fg_ccode, bg_ccode, bold=True)
+
         if s_index == z_index:
             legend_maxmin_entries = []
             if s_type == "max":
@@ -380,7 +356,8 @@ def run(args, mode):
     # Add info text
     #
 
-    info_lines = utils.generate_info_text(x_label, x_range, 
+    info_lines = utils.generate_info_text(ff2, 
+                                          x_label, x_range, 
                                           y_label, y_range, 
                                           z_label, z_range, 
                                           s_label=s_label, s_type=s_type,

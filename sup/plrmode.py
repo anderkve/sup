@@ -95,6 +95,8 @@ def run(args):
     global empty_bin_ccode_grayscale
     global empty_bin_marker
     global special_marker
+    global ff
+    global ff2
 
     input_file = args.input_file
     x_index = args.x_index
@@ -140,6 +142,10 @@ def run(args):
             max_bin_ccode = max_bin_ccode_grayscale_bb
             empty_bin_ccode = empty_bin_ccode_grayscale_bb
         empty_bin_marker = empty_bin_marker_grayscale
+
+    n_decimals = args.n_decimals
+    ff = "{: ." + str(n_decimals) + "e}"
+    ff2 = "{:." + str(n_decimals) + "e}"
 
 
     #
@@ -303,7 +309,8 @@ def run(args):
     # Add info text
     #
 
-    info_lines = utils.generate_info_text(x_label, x_range, 
+    info_lines = utils.generate_info_text(ff2,
+                                          x_label, x_range, 
                                           y_label, y_range, 
                                           z_label, z_range, 
                                           s_label=s_label, s_type=s_type,
