@@ -331,43 +331,42 @@ def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None, floatf="
     if mod_func is None:
         mod_func = lambda x : x
 
-    even_x_bins = False
-    if xy_bins[0] % 2 == 0:
-        even_x_bins = True
-    even_y_bins = False
-    if xy_bins[1] % 2 == 0:
-        even_y_bins = True
-
-    mid_x_index = int( np.floor( 0.5 * xy_bins[0] ) )
-    mid_y_index = int( np.floor( 0.5 * xy_bins[1] ) )
-
     x_tick_indicies = []
     tick_spacing = 0
     tick_width = len( "{}".format(floatf.format(0.0)))
-    for n_ticks in range(2,10):
+    for n_ticks in range(2,100):
         new_indicies = [ int(i) for i in np.floor( np.linspace(0, xy_bins[0], n_ticks) ) ]
         tick_spacing = (new_indicies[1] - new_indicies[0]) * 2
-        print("DEBUG: tick_spacing:", tick_spacing, "    tick_width:", tick_width)
         if tick_spacing < tick_width + 1:
-            print("DEBUG: BREAK!")
             break
         x_tick_indicies = new_indicies
     n_x_ticks = len(x_tick_indicies)
 
-    print("DEBUG: x_tick_indicies: ", x_tick_indicies)
+
+    max_y_ticks = int( np.ceil(xy_bins[1] / 2.) )
+    min_y_ticks = int( np.floor(xy_bins[1] / 10.) + 3)
+    yx_bins_ratio = float(xy_bins[1]) / xy_bins[0]
+    n_y_ticks = min(max_y_ticks, int(np.ceil(n_x_ticks * yx_bins_ratio))) 
+    n_y_ticks = max(n_y_ticks, min_y_ticks) 
+    y_tick_indicies = [ int(i) for i in np.floor( np.linspace(0, xy_bins[1], n_y_ticks) ) ]
+
+    # Reverse the list of indices, since we're printing the plot from top down
+    y_tick_indicies = y_tick_indicies[::-1]
 
 
     #
     # Add axis lines
     #
 
-    # y axis:
-    for i in range(xy_bins[1]):
-        lines[i] += mod_func(" │")
-    lines[mid_y_index - 1*even_y_bins] = lines[mid_y_index - 1*even_y_bins][:-5] + mod_func("│\u0332")
-    lines[xy_bins[1]-1] = lines[xy_bins[1]-1][:-5] + mod_func("│\u0332")
     top_line = mod_func(" " + "  " * xy_bins[0] + " _")
     lines = [top_line] + lines
+    for i in range(len(lines)):
+        if i == 0:
+            continue
+        if i in y_tick_indicies:
+            lines[i] = lines[i] + mod_func(" │\u0332")
+        else:
+            lines[i] += mod_func(" │")
 
     # x axis:
     x_axis = " "
@@ -384,38 +383,26 @@ def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None, floatf="
     x_axis = mod_func(x_axis)
     lines.append(x_axis)
 
-    # x_axis = " ├─"
-    # x_axis += "─" * (xy_bins[0] - 1 - 1*(not even_x_bins)) 
-    # x_axis += "┼" 
-    # x_axis += "─" * (xy_bins[0] - 1 - 1*even_x_bins) 
-    # x_axis += "─┤"
-    # x_axis = mod_func(x_axis)
-    # lines.append(x_axis)
-
     #
     # Add x and y ticks
     #
 
     # y ticks
-    y_tick_1 = "{}".format(floatf.format(y_bin_limits[0]))
-    y_tick_2 = "{}".format(floatf.format(y_bin_limits[mid_y_index]))
-    y_tick_3 = "{}".format(floatf.format(y_bin_limits[-1]))
+    y_tick_labels = [ "{}".format(floatf.format(y_bin_limits[::-1][i])) for i in y_tick_indicies ]
+    print("DEBUG: y_tick_labels: ", y_tick_labels)
 
-    lines[0] += mod_func("" + y_tick_3 + "  ")
-    lines[mid_y_index + 1*(not even_y_bins)] += mod_func("" + y_tick_2 + "  ")
-    lines[-2] += mod_func("" + y_tick_1 + "  ")
+    for i, tick_index in enumerate(y_tick_indicies):
+        lines[tick_index] += mod_func("" + y_tick_labels[i] + "  ")
 
     for i,line in enumerate(lines):
-        if i in [0, mid_y_index + 1*(not even_y_bins), len(lines)-2]:
+        # print("DEBUG: i:", i, "  line:", line)
+        if i in y_tick_indicies:
             pass
         else:
-            lines[i] += mod_func("" + " "*len(y_tick_1) + "  ")
+            lines[i] += mod_func("" + " "*tick_width + "  ")
 
     # x ticks
-    # print("DEBUG: x_bin_limits: ", x_bin_limits)
-    # print("DEBUG: x_tick_indicies: ", x_tick_indicies)
     x_tick_labels = [ "{}".format(floatf.format(x_bin_limits[i])) for i in x_tick_indicies ]
-    # print("DEBUG: x_tick_labels: ", x_tick_labels)
     x_ticks = ""
     for i in range(n_x_ticks):
         tick_label = x_tick_labels[i]
