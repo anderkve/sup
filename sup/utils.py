@@ -389,7 +389,6 @@ def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None, floatf="
 
     # y ticks
     y_tick_labels = [ "{}".format(floatf.format(y_bin_limits[::-1][i])) for i in y_tick_indicies ]
-    print("DEBUG: y_tick_labels: ", y_tick_labels)
 
     for i, tick_index in enumerate(y_tick_indicies):
         lines[tick_index] += mod_func("" + y_tick_labels[i] + "  ")
