@@ -341,6 +341,22 @@ def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None, floatf="
     mid_x_index = int( np.floor( 0.5 * xy_bins[0] ) )
     mid_y_index = int( np.floor( 0.5 * xy_bins[1] ) )
 
+    x_tick_indicies = []
+    tick_spacing = 0
+    tick_width = len( "{}".format(floatf.format(0.0)))
+    for n_ticks in range(2,10):
+        new_indicies = [ int(i) for i in np.floor( np.linspace(0, xy_bins[0], n_ticks) ) ]
+        tick_spacing = (new_indicies[1] - new_indicies[0]) * 2
+        print("DEBUG: tick_spacing:", tick_spacing, "    tick_width:", tick_width)
+        if tick_spacing < tick_width + 1:
+            print("DEBUG: BREAK!")
+            break
+        x_tick_indicies = new_indicies
+    n_x_ticks = len(x_tick_indicies)
+
+    print("DEBUG: x_tick_indicies: ", x_tick_indicies)
+
+
     #
     # Add axis lines
     #
@@ -354,13 +370,27 @@ def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None, floatf="
     lines = [top_line] + lines
 
     # x axis:
-    x_axis = " ├─"
-    x_axis += "─" * (xy_bins[0] - 1 - 1*(not even_x_bins)) 
-    x_axis += "┼" 
-    x_axis += "─" * (xy_bins[0] - 1 - 1*even_x_bins) 
-    x_axis += "─┤"
+    x_axis = " "
+    for i in range(n_x_ticks):
+        if i == 0:
+            x_axis += "├─"
+        elif i == (n_x_ticks-1):
+            x_axis += "┤"
+            break
+        else:
+            x_axis += "┼"
+        bin_diff = x_tick_indicies[i+1] - x_tick_indicies[i]
+        x_axis += "─" * (bin_diff * 2 - 1)
     x_axis = mod_func(x_axis)
     lines.append(x_axis)
+
+    # x_axis = " ├─"
+    # x_axis += "─" * (xy_bins[0] - 1 - 1*(not even_x_bins)) 
+    # x_axis += "┼" 
+    # x_axis += "─" * (xy_bins[0] - 1 - 1*even_x_bins) 
+    # x_axis += "─┤"
+    # x_axis = mod_func(x_axis)
+    # lines.append(x_axis)
 
     #
     # Add x and y ticks
@@ -382,15 +412,21 @@ def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None, floatf="
             lines[i] += mod_func("" + " "*len(y_tick_1) + "  ")
 
     # x ticks
-    x_tick_1 = "{}".format(floatf.format(x_bin_limits[0]))
-    x_tick_2 = "{}".format(floatf.format(x_bin_limits[mid_x_index]))
-    x_tick_3 = "{}".format(floatf.format(x_bin_limits[-1]))
+    # print("DEBUG: x_bin_limits: ", x_bin_limits)
+    # print("DEBUG: x_tick_indicies: ", x_tick_indicies)
+    x_tick_labels = [ "{}".format(floatf.format(x_bin_limits[i])) for i in x_tick_indicies ]
+    # print("DEBUG: x_tick_labels: ", x_tick_labels)
+    x_ticks = ""
+    for i in range(n_x_ticks):
+        tick_label = x_tick_labels[i]
+        x_ticks += tick_label
+        if i == 0:
+            x_ticks += " "    
+        if i == (n_x_ticks-1):
+            break
+        bin_diff = x_tick_indicies[i+1] - x_tick_indicies[i]
+        x_ticks += " " * ((bin_diff * 2) - len(tick_label))
 
-    x_ticks = x_tick_1
-    x_ticks += " " * (1 * xy_bins[0] - len(x_tick_1)) + " "*even_x_bins
-    x_ticks += x_tick_2
-    x_ticks += " " * (1 * xy_bins[0] - len(x_tick_2)) + " "*(not even_x_bins)
-    x_ticks += x_tick_3
     x_ticks = mod_func(x_ticks + "    ")
     lines.append(x_ticks)
 
