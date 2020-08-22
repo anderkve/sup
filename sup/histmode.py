@@ -35,17 +35,14 @@ empty_bin_ccode_color_wb = 252
 empty_bin_ccode = empty_bin_ccode_color_bb
 
 cmaps_grayscale = [
-    # [237, 239, 241, 243, 245, 247, 249, 251, 253, 255],  # for black background
     [233, 236, 239, 242, 244, 247, 250, 253, 255, 231],  # for black background
     [232, 235, 238, 240, 243, 246, 248, 251, 253, 255][::-1],  # for white background
-    # [233, 236, 239, 242, 244, 247, 250, 253, 255, 231][::-1],  # for white background
-    # [235, 237, 239, 241, 243, 245, 247, 249, 251, 253],  # for white background
 ]
 ccodes_grayscale = cmaps_grayscale[0]
 
 cmaps = [
-    [53,56,62,26,31,36,42,47,154,226],      # viridis
-    [18,20,27,45,122,155,226,214,202,196],  # jet
+    [53,56,62,26,31,36,42,47,154,226],      # viridis-ish
+    [18,20,27,45,122,155,226,214,202,196],  # jet-ish
 ]
 ccodes = cmaps[0]
 
@@ -142,6 +139,9 @@ def run(args):
     elif n_colors > 10:
         n_colors = 10
     ccodes = [ ccodes[int(i)] for i in np.round( np.linspace(0, len(ccodes)-1, n_colors) ) ]
+
+    if args.reverse_colormap:
+        ccodes = ccodes[::-1]
 
     n_decimals = args.n_decimals
     ff = "{: ." + str(n_decimals) + "e}"

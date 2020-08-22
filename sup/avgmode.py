@@ -133,6 +133,9 @@ def run(args):
         n_colors = 10
     ccodes = [ ccodes[int(i)] for i in np.round( np.linspace(0, len(ccodes)-1, n_colors) ) ]
 
+    if args.reverse_colormap:
+        ccodes = ccodes[::-1]
+
     n_decimals = args.n_decimals
     ff = "{: ." + str(n_decimals) + "e}"
     ff2 = "{:." + str(n_decimals) + "e}"

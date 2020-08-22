@@ -177,6 +177,9 @@ def run(args, mode):
         n_colors = 10
     ccodes = [ ccodes[int(i)] for i in np.round( np.linspace(0, len(ccodes)-1, n_colors) ) ]
 
+    if args.reverse_colormap:
+        ccodes = ccodes[::-1]
+
     highlight_maxmin_point = not(args.no_star)
 
     n_decimals = args.n_decimals
