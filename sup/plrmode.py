@@ -51,10 +51,10 @@ ccodes = ccodes_color_bb
 
 color_z_lims = [0.0, 0.003, 0.046, 0.317]
 
-def get_color_code(z_norm, use_capped_loglike=False):
+def get_color_code(z_norm, highlight_maxlike_point, use_capped_loglike=False):
 
     if z_norm == 1.0:
-        if use_capped_loglike:
+        if use_capped_loglike or (not highlight_maxlike_point):
             return ccodes[-1]
         else:
             return max_bin_ccode
@@ -68,10 +68,10 @@ def get_color_code(z_norm, use_capped_loglike=False):
     return ccodes[i]
 
 
-def get_marker(z_norm, use_capped_loglike=False):
+def get_marker(z_norm, highlight_maxlike_point, use_capped_loglike=False):
 
     if z_norm == 1.0:
-        if use_capped_loglike:
+        if use_capped_loglike or (not highlight_maxlike_point):
             return regular_marker
         else:
             return special_marker
@@ -142,6 +142,8 @@ def run(args):
             max_bin_ccode = max_bin_ccode_grayscale_bb
             empty_bin_ccode = empty_bin_ccode_grayscale_bb
         empty_bin_marker = empty_bin_marker_grayscale
+
+    highlight_maxlike_point = not(args.no_star)
 
     n_decimals = args.n_decimals
     ff = "{: ." + str(n_decimals) + "e}"
@@ -245,8 +247,8 @@ def run(args):
                 z_norm = z_val
                 # z_norm = (z_val - z_min) / (z_max - z_min)
 
-                ccode = get_color_code(z_norm, use_capped_loglike=use_capped_loglike)
-                marker = get_marker(z_norm, use_capped_loglike=use_capped_loglike)
+                ccode = get_color_code(z_norm, highlight_maxlike_point, use_capped_loglike=use_capped_loglike)
+                marker = get_marker(z_norm, highlight_maxlike_point, use_capped_loglike=use_capped_loglike)
 
             # Add point to line
             yi_line += utils.prettify(marker, ccode, bg_ccode)
@@ -275,7 +277,7 @@ def run(args):
     legend_entries = []
 
     # legend_entries.append( ("", fg_ccode, "", fg_ccode) )
-    if not use_capped_loglike:
+    if (not use_capped_loglike) and highlight_maxlike_point:
         legend_entries.append( (" " + special_marker.strip(), max_bin_ccode, "best-fit", fg_ccode) )
     legend_entries.append( (" " * use_capped_loglike + regular_marker.strip(), ccodes[-1], "1σ", fg_ccode) )
     legend_entries.append( (regular_marker.strip(), ccodes[-2], "2σ", fg_ccode) )

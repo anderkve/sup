@@ -92,6 +92,7 @@ examples:
     parser_plrmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
     parser_plrmode.add_argument("-xt", "--x-transf", type=str, action="store", dest="x_transf_expr", default="", help="tranformation for the x-axis dataset, using numpy as 'np' (e.g. -xt \"np.log10(x)\")", metavar="EXPR")
     parser_plrmode.add_argument("-yt", "--y-transf", type=str, action="store", dest="y_transf_expr", default="", help="tranformation for the y-axis dataset, using numpy as 'np' (e.g. -yt \"np.log10(y)\")", metavar="EXPR")
+    parser_plrmode.add_argument("-ns", "--no-star", action="store_true", dest="no_star", default=False, help="switch off the star marker for the max likelihood point(s)")
     parser_plrmode.add_argument("-rs", "--read-slice", nargs=3, type=int, action="store", dest="read_slice", default=[0,-1,1], help="read only the given slice of each dataset", metavar=("START", "END", "STEP"))
     parser_plrmode.add_argument("-d", "--decimals", type=int, action="store", dest="n_decimals", default=2, help="set the number of decimals for axis and colorbar tick labels", metavar="N_DECIMALS")
 
