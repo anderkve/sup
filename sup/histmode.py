@@ -98,6 +98,8 @@ def run(args):
     w_index = args.w_index
     use_weights = bool(w_index is not None)
 
+    normalise_histogram = args.normalise_histogram
+
     filter_indices = args.filter_indices
     use_filters = bool(filter_indices is not None) 
 
@@ -204,8 +206,8 @@ def run(args):
     # Get a dict with info per bin
     #
 
-    bins_content_unweighted,_ ,_  = np.histogram2d(x_data, y_data, bins=xy_bins, range=[x_range, y_range]) 
-    bins_content, x_bin_limits, y_bin_limits = np.histogram2d(x_data, y_data, bins=xy_bins, range=[x_range, y_range], weights=w_data) 
+    bins_content_unweighted,_ ,_  = np.histogram2d(x_data, y_data, bins=xy_bins, range=[x_range, y_range], density=normalise_histogram) 
+    bins_content, x_bin_limits, y_bin_limits = np.histogram2d(x_data, y_data, bins=xy_bins, range=[x_range, y_range], weights=w_data, density=normalise_histogram) 
 
     # Apply z-axis transformation to non-empty bins
     z = bins_content[bins_content_unweighted > 0]
