@@ -47,11 +47,11 @@ def main():
 modes:
   sup list    list dataset names and indices
   sup colors  display the colors available for colormaps
-  sup plr     plot the profile likeliood ratio
-  sup max     plot the maximum z value
-  sup min     plot the minimum z value
-  sup avg     plot the average z value
-  sup hist    plot a histogram
+  sup plr     plot the profile likeliood ratio across the (x,y) plane
+  sup max     plot the maximum z value across the (x,y) plane
+  sup min     plot the minimum z value across the (x,y) plane
+  sup avg     plot the average z value across the (x,y) plane
+  sup hist    plot the (x,y) histogram
 
 examples:
   ./sup.py list data.hdf5
