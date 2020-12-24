@@ -56,13 +56,15 @@ def get_color_code(z_val, z_norm, color_z_lims):
     elif z_norm == 0.0:
         return ccodes[0]
 
-    i = 0
-    for j, lim in enumerate(color_z_lims):
-        if z_val >= lim:
-            i = j
-        else:
-            break
+    i = z_val
     return ccodes[i]
+    # i = 0
+    # for j, lim in enumerate(color_z_lims):
+    #     if z_val >= lim:
+    #         i = j
+    #     else:
+    #         break
+    # return ccodes[i]
 
 
 def get_marker(z_norm):
@@ -101,6 +103,8 @@ def run(args):
     credible_regions = args.credible_regions
     if not credible_regions:
         credible_regions = [68., 95.]
+    if credible_regions[-1] < 100.:
+        credible_regions.append(100.0)
 
     filter_indices = args.filter_indices
     use_filters = bool(filter_indices is not None) 
@@ -137,13 +141,20 @@ def run(args):
             empty_bin_ccode = empty_bin_ccode_grayscale_bb
         empty_bin_marker = empty_bin_marker_grayscale
 
-    n_colors = args.n_colors
-    if n_colors < 1:
-        n_colors = 1
-    elif n_colors > 10:
-        n_colors = 10
+    # n_colors = args.n_colors
+    # if n_colors < 1:
+    #     n_colors = 1
+    # elif n_colors > 10:
+    #     n_colors = 10
+    # n_colors = args.n_colors
+    n_colors = len(credible_regions)
     ccodes = [ ccodes[int(i)] for i in np.round( np.linspace(0, len(ccodes)-1, n_colors) ) ]
 
+    # In posterior mode we use a reversed colormap by default, to assign 
+    # the "warmest" colour to the first credible region (z_val = region index = 0)
+    ccodes = ccodes[::-1]
+
+    # The user can still reverse it, though.
     if args.reverse_colormap:
         ccodes = ccodes[::-1]
 
@@ -216,31 +227,46 @@ def run(args):
     if z_transf_expr != "":
         bins_content[bins_content_unweighted > 0] = eval(z_transf_expr)
 
-
-
     dx = x_bin_limits[1] - x_bin_limits[0]
     dy = y_bin_limits[1] - y_bin_limits[0]
 
     x_bin_centres = x_bin_limits[:-1] + 0.5 * dx
     y_bin_centres = y_bin_limits[:-1] + 0.5 * dy
 
+    bins_content_flat = bins_content.flatten()
+    sort = np.argsort(bins_content_flat)
+    sort = sort[::-1]
+
+    bin_keys_list = []
+    for i in range(len(x_bin_centres)):
+        for j in range(len(y_bin_centres)):
+            bin_keys_list.append( (i,j) )
+    # print(bin_keys_list)
+
     bins_info = OrderedDict()
-    for i,xi in enumerate(x_bin_centres):
-        for j,yj in enumerate(y_bin_centres):
+    cred_region_index = 0
+    integrated_post_prob = 0.0
+    for si in sort:
+        bin_key = bin_keys_list[si]
+        i,j = bin_key
+        xi = x_bin_centres[i]
+        yj = y_bin_centres[j]
 
-            bin_key = (i,j)
-            z_val = bins_content[bin_key]      
-            bin_count = bins_content_unweighted[bin_key]
+        # We take the z value to simply be the index
+        # of the corresponding credible region
+        z_val = cred_region_index
+        integrated_post_prob += 100. * bins_content[bin_key] * dx * dy
+        if integrated_post_prob > 100.0:
+            integrated_post_prob = 100.0
+            # raise Exception("Posterior probability not properly normalized. This shouldn't happen...")
+        if integrated_post_prob > credible_regions[cred_region_index]:
+            cred_region_index += 1
 
-            if bin_count > 0:
-                bins_info[bin_key] = (xi, yj, z_val)
+        bin_count = bins_content_unweighted[bin_key]
+        if bin_count > 0:
+            bins_info[bin_key] = (xi, yj, z_val)
 
-    # Get z max and minimum from data if not set by the user
-    z_range = None
-    if user_defined_z_range:
-        z_range = z_range_user
-    else:
-        z_range = [np.min(bins_content), np.max(bins_content)]
+    z_range = (0, len(credible_regions))
     z_min, z_max = z_range 
 
     # Set color limits
