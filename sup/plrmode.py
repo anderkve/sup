@@ -211,9 +211,9 @@ def run(args):
     likelihood_ratio = np.exp(loglike_data) / np.exp(loglike_max)
 
     z_data = likelihood_ratio
-    z_min = np.min(z_data)
-    z_max = np.max(z_data)
-    z_range = [z_min, z_max]
+    # z_min = np.min(z_data)
+    # z_max = np.max(z_data)
+    # z_range = [z_min, z_max]
 
     s_data = z_data  # sort according to likelihood_ratio
 
@@ -303,8 +303,7 @@ def run(args):
 
     x_label = x_name
     y_label = y_name
-    z_label = "likelihood ratio (L/L_max)"
-    s_label = z_label
+    s_label = "likelihood ratio, L(x,y)/L_max"
 
 
     #
@@ -314,7 +313,7 @@ def run(args):
     info_lines = utils.generate_info_text(ff2,
                                           x_label, x_range, 
                                           y_label, y_range, 
-                                          z_label, z_range, 
+                                          # z_label=z_label, z_range=z_range, 
                                           s_label=s_label, s_type=s_type,
                                           x_transf_expr = x_transf_expr, 
                                           y_transf_expr = y_transf_expr,
@@ -322,6 +321,7 @@ def run(args):
                                           capped_label="ln(L)",
                                           cap_val=args.cap_loglike_val,
                                           filter_names=filter_names,
+                                          mode_name="profile likelihood ratio, L(x,y)/L_max",
                                           left_padding = left_padding + " ")
 
     for i,line in enumerate(info_lines):

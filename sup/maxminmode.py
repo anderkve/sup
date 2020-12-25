@@ -362,13 +362,14 @@ def run(args, mode):
     info_lines = utils.generate_info_text(ff2, 
                                           x_label, x_range, 
                                           y_label, y_range, 
-                                          z_label, z_range, 
+                                          z_label=z_label, z_range=z_range, 
                                           s_label=s_label, s_type=s_type,
                                           x_transf_expr = x_transf_expr, 
                                           y_transf_expr = y_transf_expr,
                                           z_transf_expr = z_transf_expr, 
                                           s_transf_expr = s_transf_expr,
                                           filter_names=filter_names,
+                                          mode_name=mode+"(z(x,y))",
                                           left_padding = left_padding + " ")
 
     for i,line in enumerate(info_lines):

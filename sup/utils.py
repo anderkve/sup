@@ -109,12 +109,13 @@ def generate_colorbar(plot_lines, fig_width, ff,
     return plot_lines, fig_width
 
 
-def generate_info_text(ff2, x_label, x_range, y_label, y_range, z_label, z_range, 
+def generate_info_text(ff2, x_label, x_range, y_label, y_range, z_label=None, z_range=None, 
                        x_transf_expr="", y_transf_expr="", z_transf_expr="", 
                        s_label=None, s_type=None, s_transf_expr="", 
                        w_label=None, w_transf_expr="",
                        capped_z=False, capped_label="z-axis", cap_val=1e99,
                        filter_names=[],
+                       mode_name=None,
                        left_padding=""):
 
     info_lines = []
@@ -130,10 +131,12 @@ def generate_info_text(ff2, x_label, x_range, y_label, y_range, z_label, z_range
         info_lines.append(left_padding + "  - transf.: {}".format(y_transf_expr))
     info_lines.append(left_padding + "  - range: [{}, {}]".format(ff2.format(y_range[0]), ff2.format(y_range[1])))
 
-    info_lines.append(left_padding + "z-axis: {}".format(z_label))
-    if z_transf_expr != "":
-        info_lines.append(left_padding + "  - transf.: {}".format(z_transf_expr))
-    info_lines.append(left_padding + "  - range: [{}, {}]".format(ff2.format(z_range[0]), ff2.format(z_range[1])))
+    if z_label is not None:
+        info_lines.append(left_padding + "z-axis: {}".format(z_label))
+        if z_transf_expr != "":
+            info_lines.append(left_padding + "  - transf.: {}".format(z_transf_expr))
+        if z_range is not None:
+            info_lines.append(left_padding + "  - range: [{}, {}]".format(ff2.format(z_range[0]), ff2.format(z_range[1])))
 
     if (s_label is not None) and (s_type is not None):
         info_lines.append(left_padding + "sort: {} [{}]".format(s_label, s_type))
@@ -150,6 +153,10 @@ def generate_info_text(ff2, x_label, x_range, y_label, y_range, z_label, z_range
 
     for f_name in filter_names:
         info_lines.append(left_padding + "filter: {}".format(f_name))
+
+    if mode_name is not None:
+        info_lines.append(left_padding)
+        info_lines.append(left_padding + "plot type: {}".format(mode_name))
 
     info_lines.append(left_padding)
 

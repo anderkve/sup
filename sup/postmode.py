@@ -50,7 +50,6 @@ ccodes = cmaps[0]
 
 def get_color_code(z_val, z_norm, color_z_lims):
 
-    # print("DEBUG: z_val:", z_val, "   z_norm:", z_norm)
     if z_norm == 1.0:
         return ccodes[-1]
     elif z_norm == 0.0:
@@ -58,13 +57,6 @@ def get_color_code(z_val, z_norm, color_z_lims):
 
     i = z_val
     return ccodes[i]
-    # i = 0
-    # for j, lim in enumerate(color_z_lims):
-    #     if z_val >= lim:
-    #         i = j
-    #     else:
-    #         break
-    # return ccodes[i]
 
 
 def get_marker(z_norm):
@@ -112,9 +104,6 @@ def run(args):
     x_range = args.x_range
     y_range = args.y_range
 
-    z_range_user = args.z_range
-    user_defined_z_range = bool(z_range_user is not None)
-
     read_slice = slice(*args.read_slice)
 
     xy_bins = args.xy_bins
@@ -141,12 +130,6 @@ def run(args):
             empty_bin_ccode = empty_bin_ccode_grayscale_bb
         empty_bin_marker = empty_bin_marker_grayscale
 
-    # n_colors = args.n_colors
-    # if n_colors < 1:
-    #     n_colors = 1
-    # elif n_colors > 10:
-    #     n_colors = 10
-    # n_colors = args.n_colors
     n_colors = len(credible_regions)
     ccodes = [ ccodes[int(i)] for i in np.round( np.linspace(0, len(ccodes)-1, n_colors) ) ]
 
@@ -196,7 +179,7 @@ def run(args):
     x_transf_expr = args.x_transf_expr
     y_transf_expr = args.y_transf_expr
     w_transf_expr = args.w_transf_expr
-    z_transf_expr = args.z_transf_expr
+    # z_transf_expr = args.z_transf_expr
     # @todo: add the x,y,w variables to a dictionary of allowed arguments to eval()
     x = x_data
     y = y_data
@@ -222,11 +205,6 @@ def run(args):
     bins_content_unweighted,_ ,_  = np.histogram2d(x_data, y_data, bins=xy_bins, range=[x_range, y_range], density=True) 
     bins_content, x_bin_limits, y_bin_limits = np.histogram2d(x_data, y_data, bins=xy_bins, range=[x_range, y_range], weights=w_data, density=True) 
 
-    # Apply z-axis transformation to non-empty bins
-    z = bins_content[bins_content_unweighted > 0]
-    if z_transf_expr != "":
-        bins_content[bins_content_unweighted > 0] = eval(z_transf_expr)
-
     dx = x_bin_limits[1] - x_bin_limits[0]
     dy = y_bin_limits[1] - y_bin_limits[0]
 
@@ -241,7 +219,6 @@ def run(args):
     for i in range(len(x_bin_centres)):
         for j in range(len(y_bin_centres)):
             bin_keys_list.append( (i,j) )
-    # print(bin_keys_list)
 
     bins_info = OrderedDict()
     cred_region_index = 0
@@ -252,13 +229,13 @@ def run(args):
         xi = x_bin_centres[i]
         yj = y_bin_centres[j]
 
-        # We take the z value to simply be the index
-        # of the corresponding credible region
+        # In posterior mode we take the z value to simply be 
+        # the index of the corresponding credible region
         z_val = cred_region_index
         integrated_post_prob += 100. * bins_content[bin_key] * dx * dy
+        # Avoid rounding errors
         if integrated_post_prob > 100.0:
             integrated_post_prob = 100.0
-            # raise Exception("Posterior probability not properly normalized. This shouldn't happen...")
         if integrated_post_prob > credible_regions[cred_region_index]:
             cred_region_index += 1
 
@@ -266,8 +243,8 @@ def run(args):
         if bin_count > 0:
             bins_info[bin_key] = (xi, yj, z_val)
 
-    z_range = (0, len(credible_regions))
-    z_min, z_max = z_range 
+    z_min = 0
+    z_max = len(credible_regions)
 
     # Set color limits
     color_z_lims = list( np.linspace(z_min, z_max, len(ccodes)+1) )
@@ -354,7 +331,6 @@ def run(args):
 
     x_label = x_name
     y_label = y_name
-    z_label = "bin height"
     w_label = w_name
 
     #
@@ -364,13 +340,12 @@ def run(args):
     info_lines = utils.generate_info_text(ff2,
                                           x_label, x_range, 
                                           y_label, y_range, 
-                                          z_label, z_range, 
                                           x_transf_expr = x_transf_expr, 
                                           y_transf_expr = y_transf_expr,
-                                          z_transf_expr = z_transf_expr,
                                           w_label = w_label,
                                           w_transf_expr = w_transf_expr,
                                           filter_names=filter_names,
+                                          mode_name="posterior(x,y)",
                                           left_padding = left_padding + " ")
 
     for i,line in enumerate(info_lines):
