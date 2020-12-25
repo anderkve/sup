@@ -325,11 +325,20 @@ def run(args):
     #
     # Add colorbar, legend, etc
     #
-
-    plot_lines, fig_width = utils.generate_colorbar(plot_lines, fig_width, ff,
-                                                    ccodes, color_z_lims, 
-                                                    fg_ccode, bg_ccode, empty_bin_ccode)
         
+    legend_mod_func = lambda input_str, input_fg_ccode : utils.prettify(input_str, input_fg_ccode, bg_ccode, bold=True)
+    legend_entries = []
+
+    # legend_entries.append( ("", fg_ccode, "", fg_ccode) )
+    for i,cred_reg in enumerate(credible_regions[:-1]):
+        cred_reg_str = "{:.12g}% CR".format(cred_reg)
+        legend_entries.append( (regular_marker.strip(), ccodes[i], cred_reg_str, fg_ccode) )
+    
+    legend, legend_width = utils.generate_legend(legend_entries, legend_mod_func, sep="  ")
+
+    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode)
+    plot_lines, fig_width = utils.insert_line(legend, legend_width, plot_lines, fig_width, fg_ccode, bg_ccode)
+
 
     #
     # Add left padding
