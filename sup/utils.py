@@ -174,7 +174,9 @@ def get_dataset_names(hdf5_file_object):
     hdf5_file_object.visititems(get_datasets)
     return result
 
-def get_bin_tuples_maxmin_1d(x_data, y_data, xy_bins, x_range, y_range, s_data, s_type):
+
+def get_bin_tuples_maxmin_1d(x_data, y_data, xy_bins, x_range, y_range, s_data, s_type, 
+                             fill_below=True, fill_z_val=-1):
 
     assert s_type in ["min", "max"]
     assert len(x_data) == len(y_data)
@@ -184,7 +186,6 @@ def get_bin_tuples_maxmin_1d(x_data, y_data, xy_bins, x_range, y_range, s_data, 
     x_min, x_max = x_range
     y_min, y_max = y_range
 
-    # Get index of max-z point in each bin
     x_bin_limits = np.linspace(x_min, x_max, x_bins + 1)
     y_bin_limits = np.linspace(y_min, y_max, y_bins + 1)
 
@@ -194,75 +195,82 @@ def get_bin_tuples_maxmin_1d(x_data, y_data, xy_bins, x_range, y_range, s_data, 
     x_bin_centres = x_bin_limits[:-1] + 0.5 * dx
     y_bin_centres = y_bin_limits[:-1] + 0.5 * dy
 
+    # Digitize x data
     xdata_xbin_numbers = np.digitize(x_data, x_bin_limits) - 1
-    ydata_ybin_numbers = np.digitize(y_data, y_bin_limits, right=True) - 1
 
-    # Prepare dictionary: (x_bin_index, y_bin_index) --> [(z_val, data_index), (z_val, data_index), ...]
-    bins_dict = OrderedDict()
+    # Prepare dictionary: x_bin_index --> {"x_centre": ..., "y_vals": [...], "s_vals": [...]}
+    x_bins_dict = OrderedDict()
     for x_bin_number in range(x_bins):
-        for y_bin_number in range(y_bins):
-            bin_key = (x_bin_number, y_bin_number)
-            bins_dict[bin_key] = {}
-            bins_dict[bin_key]["x_centre"] = x_bin_centres[x_bin_number]
-            bins_dict[bin_key]["y_centre"] = y_bin_centres[y_bin_number]
-            bins_dict[bin_key]["z_vals"] = []
-            bins_dict[bin_key]["s_vals"] = []
-            bins_dict[bin_key]["data_indices"] = []
-            # bins_dict[bin_key]["max_z_val"] = -1
-            # bins_dict[bin_key]["max_z_data_index"] = -1
+        bin_key = x_bin_number
+        x_bins_dict[bin_key] = {}
+        x_bins_dict[bin_key]["x_centre"] = x_bin_centres[x_bin_number]
+        x_bins_dict[bin_key]["y_vals"] = []
+        x_bins_dict[bin_key]["s_vals"] = []
 
-    # Fill the arrays "z_vals" and "data_indices" for each bin
+    # Fill the arrays "y_vals" and "s_vals" for each bin
     for di in range(data_length):
 
-        # if di % 1000 == 0:
-        #     print("Point", di)
-
-        # x_val = x_data[di]
-        # y_val = y_data[di]
-        z_val = y_data[di]
+        y_val = y_data[di]
         s_val = s_data[di]
 
         x_bin_number = xdata_xbin_numbers[di]
-        y_bin_number = ydata_ybin_numbers[di]
 
-        bin_key = (x_bin_number, y_bin_number)
+        bin_key = x_bin_number
 
-        if bin_key in bins_dict.keys():
+        if bin_key in x_bins_dict.keys():
 
-            bins_dict[bin_key]["z_vals"].append(z_val)
-            bins_dict[bin_key]["s_vals"].append(s_val)
-            bins_dict[bin_key]["data_indices"].append(di)
+            x_bins_dict[bin_key]["y_vals"].append(y_val)
+            x_bins_dict[bin_key]["s_vals"].append(s_val)
 
     # Convert to numpy arrays
-    for bin_key in bins_dict.keys():
-        bins_dict[bin_key]["z_vals"] = np.array(bins_dict[bin_key]["z_vals"])
-        bins_dict[bin_key]["s_vals"] = np.array(bins_dict[bin_key]["s_vals"])
-        bins_dict[bin_key]["data_indices"] = np.array(bins_dict[bin_key]["data_indices"])
+    for bin_key in x_bins_dict.keys():
+        x_bins_dict[bin_key]["y_vals"] = np.array(x_bins_dict[bin_key]["y_vals"])
+        x_bins_dict[bin_key]["s_vals"] = np.array(x_bins_dict[bin_key]["s_vals"])
+
 
     # For each bin, sort the arrays according to s_data dataset
-    result_dict = OrderedDict()
-    for bin_key in bins_dict.keys():
+    new_xdata = []
+    new_ydata = []
+    for bin_key in x_bins_dict.keys():
 
         # Get data index of the z-value for this bin, based on s_data sorting
         ordering = None
-        ordering_low_to_high = np.argsort( bins_dict[bin_key]["s_vals"] )
+        ordering_low_to_high = np.argsort( x_bins_dict[bin_key]["s_vals"] )
         if s_type == "max":
             ordering = ordering_low_to_high[::-1]
         elif s_type == "min":
             ordering = ordering_low_to_high
 
-        bins_dict[bin_key]["z_vals"] = bins_dict[bin_key]["z_vals"][ordering]
-        bins_dict[bin_key]["data_indices"] = bins_dict[bin_key]["data_indices"][ordering]
+        x_bins_dict[bin_key]["y_vals"] = x_bins_dict[bin_key]["y_vals"][ordering]
 
-        if len(bins_dict[bin_key]["z_vals"]) > 0:
+        if len(x_bins_dict[bin_key]["y_vals"]) > 0:
 
-            # # _Anders DEBUG
-            # print(bin_key)
-            # print(bins_dict[bin_key]["z_vals"][:5])
-            result_dict[bin_key] = (x_bin_centres[bin_key[0]], 
-                                    y_bin_centres[bin_key[1]], 
-                                    bins_dict[bin_key]["z_vals"][0], 
-                                    bins_dict[bin_key]["data_indices"][0])
+            new_xdata.append(x_bin_centres[bin_key])
+            new_ydata.append(x_bins_dict[bin_key]["y_vals"][0])
+
+    new_xdata = np.array(new_xdata)
+    new_ydata = np.array(new_ydata)
+
+    # Digitize new x and y data
+    new_xdata_xbin_numbers = np.digitize(new_xdata, x_bin_limits) - 1
+    new_ydata_ybin_numbers = np.digitize(new_ydata, y_bin_limits, right=True) - 1
+
+    # Create result dict
+    result_dict = OrderedDict()
+    assert len(new_xdata_xbin_numbers) == len(new_ydata_ybin_numbers)
+    for i in range(len(new_xdata_xbin_numbers)):
+
+        x_bin_number = new_xdata_xbin_numbers[i]
+        y_bin_number = new_ydata_ybin_numbers[i]
+
+        bin_key = (x_bin_number, y_bin_number)
+        result_dict[bin_key] = (x_bin_centres[x_bin_number], y_bin_centres[y_bin_number], 1)
+
+        # Fill bins below the (x,y) bin of the actual function value
+        if fill_below:
+            for ybn in range(y_bin_number-1, -1, fill_z_val):
+                bin_key = (x_bin_number, ybn)
+                result_dict[bin_key] = (x_bin_centres[x_bin_number], y_bin_centres[ybn], -1)
 
     return result_dict, x_bin_limits, y_bin_limits
 
