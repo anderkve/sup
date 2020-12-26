@@ -109,7 +109,9 @@ def generate_colorbar(plot_lines, fig_width, ff,
     return plot_lines, fig_width
 
 
-def generate_info_text(ff2, x_label, x_range, y_label, y_range, z_label=None, z_range=None, 
+def generate_info_text(ff2, x_label, x_range, 
+                       y_label=None, y_range=None, 
+                       z_label=None, z_range=None, 
                        x_transf_expr="", y_transf_expr="", z_transf_expr="", 
                        s_label=None, s_type=None, s_transf_expr="", 
                        w_label=None, w_transf_expr="",
@@ -171,6 +173,98 @@ def get_dataset_names(hdf5_file_object):
 
     hdf5_file_object.visititems(get_datasets)
     return result
+
+def get_bin_tuples_maxmin_1d(x_data, y_data, xy_bins, x_range, y_range, s_data, s_type):
+
+    assert s_type in ["min", "max"]
+    assert len(x_data) == len(y_data)
+    data_length = len(x_data)
+
+    x_bins, y_bins = xy_bins
+    x_min, x_max = x_range
+    y_min, y_max = y_range
+
+    # Get index of max-z point in each bin
+    x_bin_limits = np.linspace(x_min, x_max, x_bins + 1)
+    y_bin_limits = np.linspace(y_min, y_max, y_bins + 1)
+
+    dx = x_bin_limits[1] - x_bin_limits[0]
+    dy = y_bin_limits[1] - y_bin_limits[0]
+
+    x_bin_centres = x_bin_limits[:-1] + 0.5 * dx
+    y_bin_centres = y_bin_limits[:-1] + 0.5 * dy
+
+    xdata_xbin_numbers = np.digitize(x_data, x_bin_limits) - 1
+    ydata_ybin_numbers = np.digitize(y_data, y_bin_limits, right=True) - 1
+
+    # Prepare dictionary: (x_bin_index, y_bin_index) --> [(z_val, data_index), (z_val, data_index), ...]
+    bins_dict = OrderedDict()
+    for x_bin_number in range(x_bins):
+        for y_bin_number in range(y_bins):
+            bin_key = (x_bin_number, y_bin_number)
+            bins_dict[bin_key] = {}
+            bins_dict[bin_key]["x_centre"] = x_bin_centres[x_bin_number]
+            bins_dict[bin_key]["y_centre"] = y_bin_centres[y_bin_number]
+            bins_dict[bin_key]["z_vals"] = []
+            bins_dict[bin_key]["s_vals"] = []
+            bins_dict[bin_key]["data_indices"] = []
+            # bins_dict[bin_key]["max_z_val"] = -1
+            # bins_dict[bin_key]["max_z_data_index"] = -1
+
+    # Fill the arrays "z_vals" and "data_indices" for each bin
+    for di in range(data_length):
+
+        # if di % 1000 == 0:
+        #     print("Point", di)
+
+        # x_val = x_data[di]
+        # y_val = y_data[di]
+        z_val = y_data[di]
+        s_val = s_data[di]
+
+        x_bin_number = xdata_xbin_numbers[di]
+        y_bin_number = ydata_ybin_numbers[di]
+
+        bin_key = (x_bin_number, y_bin_number)
+
+        if bin_key in bins_dict.keys():
+
+            bins_dict[bin_key]["z_vals"].append(z_val)
+            bins_dict[bin_key]["s_vals"].append(s_val)
+            bins_dict[bin_key]["data_indices"].append(di)
+
+    # Convert to numpy arrays
+    for bin_key in bins_dict.keys():
+        bins_dict[bin_key]["z_vals"] = np.array(bins_dict[bin_key]["z_vals"])
+        bins_dict[bin_key]["s_vals"] = np.array(bins_dict[bin_key]["s_vals"])
+        bins_dict[bin_key]["data_indices"] = np.array(bins_dict[bin_key]["data_indices"])
+
+    # For each bin, sort the arrays according to s_data dataset
+    result_dict = OrderedDict()
+    for bin_key in bins_dict.keys():
+
+        # Get data index of the z-value for this bin, based on s_data sorting
+        ordering = None
+        ordering_low_to_high = np.argsort( bins_dict[bin_key]["s_vals"] )
+        if s_type == "max":
+            ordering = ordering_low_to_high[::-1]
+        elif s_type == "min":
+            ordering = ordering_low_to_high
+
+        bins_dict[bin_key]["z_vals"] = bins_dict[bin_key]["z_vals"][ordering]
+        bins_dict[bin_key]["data_indices"] = bins_dict[bin_key]["data_indices"][ordering]
+
+        if len(bins_dict[bin_key]["z_vals"]) > 0:
+
+            # # _Anders DEBUG
+            # print(bin_key)
+            # print(bins_dict[bin_key]["z_vals"][:5])
+            result_dict[bin_key] = (x_bin_centres[bin_key[0]], 
+                                    y_bin_centres[bin_key[1]], 
+                                    bins_dict[bin_key]["z_vals"][0], 
+                                    bins_dict[bin_key]["data_indices"][0])
+
+    return result_dict, x_bin_limits, y_bin_limits
 
 
 def get_bin_tuples_maxmin(x_data, y_data, z_data, xy_bins, x_range, y_range, s_data, s_type):

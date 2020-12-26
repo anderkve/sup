@@ -26,7 +26,7 @@ examples:
 import sys
 import os
 import argparse
-from sup import listmode, colorsmode, plrmode, maxminmode, avgmode, histmode, postmode
+from sup import listmode, colorsmode, plrmode, plr1dmode, maxminmode, avgmode, histmode, postmode
 
 
 def main():
@@ -47,6 +47,7 @@ def main():
 modes:
   sup list    list dataset names and indices
   sup colors  display the colors available for colormaps
+  sup plr1d   plot the profile likelihood ratio across the x axis
   sup plr     plot the profile likelihood ratio across the (x,y) plane
   sup max     plot the maximum z value across the (x,y) plane
   sup min     plot the minimum z value across the (x,y) plane
@@ -76,6 +77,26 @@ examples:
     # Parser for "colors" mode
     parser_colorsmode = subparsers.add_parser("colors")
     parser_colorsmode.set_defaults(func=colorsmode.run)
+
+    # Parser for "plr1d" mode
+    parser_plr1dmode = subparsers.add_parser("plr1d")
+    parser_plr1dmode.set_defaults(func=plr1dmode.run)
+    parser_plr1dmode.add_argument("input_file", type=str, action="store", help="path to the input data file")
+    parser_plr1dmode.add_argument("x_index", type=int, action="store", help="index of the x-axis dataset")
+    # parser_plr1dmode.add_argument("y_index", type=int, action="store", help="index of the y-axis dataset")
+    parser_plr1dmode.add_argument("loglike_index", type=int, action="store", help="index of the ln(L) dataset")
+    parser_plr1dmode.add_argument("-f", "--filter", nargs="+", type=int, action="store", dest="filter_indices", default=None, help="indices of boolean datasets used for filtering", metavar="F_INDEX")
+    parser_plr1dmode.add_argument("-xr", "--x-range", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
+    parser_plr1dmode.add_argument("-yr", "--y-range", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
+    parser_plr1dmode.add_argument("-b", "--bins", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="number of bins for each axis", metavar=("X_BINS", "Y_BINS"))
+    parser_plr1dmode.add_argument("-c", "--cap-loglike", type=float, action="store", dest="cap_loglike_val", default=None, help="cap the ln(L) at the given value", metavar="CAP_VAL")
+    parser_plr1dmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
+    parser_plr1dmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
+    parser_plr1dmode.add_argument("-xt", "--x-transf", type=str, action="store", dest="x_transf_expr", default="", help="tranformation for the x-axis dataset, using numpy as 'np' (e.g. -xt \"np.log10(x)\")", metavar="EXPR")
+    # parser_plr1dmode.add_argument("-yt", "--y-transf", type=str, action="store", dest="y_transf_expr", default="", help="tranformation for the y-axis dataset, using numpy as 'np' (e.g. -yt \"np.log10(y)\")", metavar="EXPR")
+    # parser_plr1dmode.add_argument("-ns", "--no-star", action="store_true", dest="no_star", default=False, help="switch off the star marker for the max likelihood point(s)")
+    parser_plr1dmode.add_argument("-rs", "--read-slice", nargs=3, type=int, action="store", dest="read_slice", default=[0,-1,1], help="read only the given slice of each dataset", metavar=("START", "END", "STEP"))
+    parser_plr1dmode.add_argument("-d", "--decimals", type=int, action="store", dest="n_decimals", default=2, help="set the number of decimals for axis and colorbar tick labels", metavar="N_DECIMALS")
 
     # Parser for "plr" mode
     parser_plrmode = subparsers.add_parser("plr")
