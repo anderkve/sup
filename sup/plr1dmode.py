@@ -18,32 +18,36 @@ bg_ccode_wb, fg_ccode_wb = 231, 16  # 231, 232
 bg_ccode = bg_ccode_bb
 fg_ccode = fg_ccode_bb
 
-# regular_marker = " ━"
-# regular_marker = " ■"
-regular_marker = " ●"
+regular_marker_up = " ▀"
+# regular_marker_up = " █"
+regular_marker_down = " ▄"
+
+# regular_marker = " ●"
 # regular_marker = " ▁"
 # regular_marker = " ▔"
 
 special_marker = " 🟊"  # " ★" " 🟊" " ✱"
 
-fill_marker = " ■"
+fill_marker = "  "
+# fill_marker = " ■"
+# fill_marker = " █"
 
-# empty_bin_marker_grayscale = "  "
-empty_bin_marker_grayscale = " ▁"
+empty_bin_marker_grayscale = "  "
+# empty_bin_marker_grayscale = " ▁"
 # empty_bin_marker_grayscale = " □"
 # empty_bin_marker_grayscale = " ■"
-# empty_bin_marker_color = "  "
-empty_bin_marker_color = " ▁"
+empty_bin_marker_color = "  "
+# empty_bin_marker_color = " ▁"
 # empty_bin_marker_color = " □"
 # empty_bin_marker_color = " ■"
 empty_bin_marker = empty_bin_marker_color
 
-empty_bin_ccode_grayscale_bb = 234
-empty_bin_ccode_grayscale_wb = 254
+empty_bin_ccode_grayscale_bb = 235
+empty_bin_ccode_grayscale_wb = 253
 empty_bin_ccode_grayscale = empty_bin_ccode_grayscale_bb
 
-empty_bin_ccode_color_bb = 234
-empty_bin_ccode_color_wb = 255
+empty_bin_ccode_color_bb = 235
+empty_bin_ccode_color_wb = 253
 empty_bin_ccode = empty_bin_ccode_color_bb
 
 max_bin_ccode_grayscale_bb = 231
@@ -53,6 +57,14 @@ max_bin_ccode_grayscale = max_bin_ccode_grayscale_bb
 max_bin_ccode_color_bb = 231
 max_bin_ccode_color_wb = 232
 max_bin_ccode = max_bin_ccode_color_bb
+
+fill_bin_ccode_grayscale_bb = empty_bin_ccode_grayscale_bb
+fill_bin_ccode_grayscale_wb = empty_bin_ccode_grayscale_wb
+fill_bin_ccode_grayscale = empty_bin_ccode_grayscale_bb
+
+fill_bin_ccode_color_bb = empty_bin_ccode_color_bb
+fill_bin_ccode_color_wb = empty_bin_ccode_color_wb
+fill_bin_ccode = fill_bin_ccode_color_bb
 
 ccode_grayscale_bb = 231
 ccode_grayscale_wb = 232
@@ -66,11 +78,10 @@ color_z_lims = [0.0, 0.003, 0.046, 0.317]
 
 def get_color_code(z_val, highlight_maxlike_point, use_capped_loglike=False):
 
-    if z_val == 1:
+    if z_val in [1,2]:
         return ccode
     elif z_val == -1:
-        return empty_bin_ccode# + 1
-        # return ccode
+        return fill_bin_ccode
     elif z_val == 0:
         return empty_bin_ccode
     else:
@@ -79,8 +90,10 @@ def get_color_code(z_val, highlight_maxlike_point, use_capped_loglike=False):
 
 def get_marker(z_val, highlight_maxlike_point, use_capped_loglike=False):
 
-    if z_val == 1:
-        return regular_marker
+    if z_val == 2:
+        return regular_marker_up
+    elif z_val == 1:
+        return regular_marker_down
     elif z_val == -1:
         return fill_marker
     elif z_val == 0:
@@ -103,6 +116,8 @@ def run(args):
     global max_bin_ccode_grayscale
     global empty_bin_ccode
     global empty_bin_ccode_grayscale
+    global fill_bin_ccode
+    global fill_bin_ccode_grayscale
     global empty_bin_marker
     global special_marker
     global ff
@@ -137,6 +152,7 @@ def run(args):
         fg_ccode = fg_ccode_wb
         empty_bin_ccode = empty_bin_ccode_color_wb
         max_bin_ccode = max_bin_ccode_color_wb
+        fill_bin_ccode = fill_bin_ccode_color_wb
         ccode = ccode_color_wb
 
     if args.use_grayscale:
@@ -144,10 +160,12 @@ def run(args):
             ccode = ccode_grayscale_wb
             max_bin_ccode = max_bin_ccode_grayscale_wb
             empty_bin_ccode = empty_bin_ccode_grayscale_wb
+            fill_bin_ccode = fill_bin_ccode_grayscale_wb
         else:
             ccode = ccode_grayscale_bb
             max_bin_ccode = max_bin_ccode_grayscale_bb
             empty_bin_ccode = empty_bin_ccode_grayscale_bb
+            fill_bin_ccode = fill_bin_ccode_grayscale_bb
         empty_bin_marker = empty_bin_marker_grayscale
 
     # highlight_maxlike_point = not(args.no_star)
@@ -228,7 +246,7 @@ def run(args):
     # Get a dict with info per bin
     #
 
-    bins_info, x_bin_limits, y_bin_limits = utils.get_bin_tuples_maxmin_1d(x_data, y_data, xy_bins, x_range, y_range, s_data, s_type, fill_below=False)
+    bins_info, x_bin_limits, y_bin_limits = utils.get_bin_tuples_maxmin_1d(x_data, y_data, xy_bins, x_range, y_range, s_data, s_type, fill_below=False, split_marker=True)
 
     #
     # Generate string to be printed
@@ -266,7 +284,8 @@ def run(args):
 
     # Add axes
     axes_mod_func = lambda input_str : utils.prettify(input_str, fg_ccode, bg_ccode, bold=True)
-    plot_lines = utils.add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=axes_mod_func, floatf=ff)
+    fill_mod_func = lambda input_str : utils.prettify(input_str, empty_bin_ccode, bg_ccode, bold=True)
+    plot_lines = utils.add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=axes_mod_func, mod_func_2=fill_mod_func, floatf=ff, add_y_grid_lines=True)
 
     # Add blank top line
     plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode, insert_pos=0)

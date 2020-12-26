@@ -176,7 +176,7 @@ def get_dataset_names(hdf5_file_object):
 
 
 def get_bin_tuples_maxmin_1d(x_data, y_data, xy_bins, x_range, y_range, s_data, s_type, 
-                             fill_below=True, fill_z_val=-1):
+                             fill_below=True, fill_z_val=-1, split_marker=False):
 
     assert s_type in ["min", "max"]
     assert len(x_data) == len(y_data)
@@ -264,7 +264,14 @@ def get_bin_tuples_maxmin_1d(x_data, y_data, xy_bins, x_range, y_range, s_data, 
         y_bin_number = new_ydata_ybin_numbers[i]
 
         bin_key = (x_bin_number, y_bin_number)
-        result_dict[bin_key] = (x_bin_centres[x_bin_number], y_bin_centres[y_bin_number], 1)
+        if split_marker:
+            use_z_val = 1
+            if new_ydata[i] > y_bin_centres[y_bin_number]:
+                use_z_val = 2
+            result_dict[bin_key] = (x_bin_centres[x_bin_number], y_bin_centres[y_bin_number], use_z_val)
+            # print("DEBUG:", new_ydata[i], " vs ", [y_bin_limits[y_bin_number], y_bin_limits[y_bin_number+1]], " --> z_val = ", use_z_val)
+        else:
+            result_dict[bin_key] = (x_bin_centres[x_bin_number], y_bin_centres[y_bin_number], 1)
 
         # Fill bins below the (x,y) bin of the actual function value
         if fill_below:
@@ -435,7 +442,8 @@ def get_bin_tuples_avg(x_data, y_data, z_data, xy_bins, x_range, y_range):
     return result_dict, x_bin_limits, y_bin_limits
 
 
-def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None, floatf="{: .1e}"):
+def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None, mod_func_2=None,
+             floatf="{: .1e}", add_y_grid_lines=False):
 
     if mod_func is None:
         mod_func = lambda x : x
@@ -499,11 +507,23 @@ def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None, floatf="
     # y ticks
     y_tick_labels = [ "{}".format(floatf.format(y_bin_limits[::-1][i])) for i in y_tick_indicies ]
 
-    for i, tick_index in enumerate(y_tick_indicies):
-        lines[tick_index] += mod_func("" + y_tick_labels[i] + "  ")
+    if add_y_grid_lines:
+        for i, tick_index in enumerate(y_tick_indicies):
+            # top line
+            if tick_index == y_tick_indicies[-1]:
+                lines[tick_index] = mod_func_2(" " + " _" * xy_bins[0]) + mod_func(" _")
+            # other lines
+            else:
+                lines[tick_index] = lines[tick_index].replace("  ", mod_func_2(" _") )
+
+            # Add y tick
+            lines[tick_index] += mod_func("" + y_tick_labels[i] + "  ")
+    else:
+        for i, tick_index in enumerate(y_tick_indicies):
+            lines[tick_index] += mod_func("" + y_tick_labels[i] + "  ")
+
 
     for i,line in enumerate(lines):
-        # print("DEBUG: i:", i, "  line:", line)
         if i in y_tick_indicies:
             pass
         else:
