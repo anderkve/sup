@@ -380,6 +380,103 @@ def get_bin_tuples_maxmin(x_data, y_data, z_data, xy_bins, x_range, y_range, s_d
     return result_dict, x_bin_limits, y_bin_limits
 
 
+def get_bin_tuples_avg_1d(x_data, y_data, xy_bins, x_range, y_range,
+                          fill_below=True, fill_z_val=-1, split_marker=False):
+
+    assert len(x_data) == len(y_data)
+    data_length = len(x_data)
+
+    x_bins, y_bins = xy_bins
+    x_min, x_max = x_range
+    y_min, y_max = y_range
+
+    x_bin_limits = np.linspace(x_min, x_max, x_bins + 1)
+    y_bin_limits = np.linspace(y_min, y_max, y_bins + 1)
+
+    dx = x_bin_limits[1] - x_bin_limits[0]
+    dy = y_bin_limits[1] - y_bin_limits[0]
+
+    x_bin_centres = x_bin_limits[:-1] + 0.5 * dx
+    y_bin_centres = y_bin_limits[:-1] + 0.5 * dy
+
+    # Digitize x data
+    xdata_xbin_numbers = np.digitize(x_data, x_bin_limits) - 1
+
+    # Prepare dictionary: x_bin_index --> {"x_centre": ..., "y_vals": [...], "s_vals": [...]}
+    x_bins_dict = OrderedDict()
+    for x_bin_number in range(x_bins):
+        bin_key = x_bin_number
+        x_bins_dict[bin_key] = {}
+        x_bins_dict[bin_key]["x_centre"] = x_bin_centres[x_bin_number]
+        x_bins_dict[bin_key]["y_vals"] = []
+
+    # Fill the array "y_vals"
+    for di in range(data_length):
+
+        y_val = y_data[di]
+
+        x_bin_number = xdata_xbin_numbers[di]
+
+        bin_key = x_bin_number
+
+        if bin_key in x_bins_dict.keys():
+
+            x_bins_dict[bin_key]["y_vals"].append(y_val)
+
+    # Convert to numpy arrays
+    for bin_key in x_bins_dict.keys():
+        x_bins_dict[bin_key]["y_vals"] = np.array(x_bins_dict[bin_key]["y_vals"])
+
+
+    # For each bin, calculate the average y value. Fill new datasets:
+    # - new_xdata: dataset with the x bin centers of non-empty bins
+    # - new_ydata: the corrsponding average y values for each x bin
+    new_xdata = []
+    new_ydata = []
+    for bin_key in x_bins_dict.keys():
+
+        if len(x_bins_dict[bin_key]["y_vals"]) > 0:
+
+            new_xdata.append(x_bin_centres[bin_key])
+            new_ydata.append( np.average( x_bins_dict[bin_key]["y_vals"] ) )
+
+    new_xdata = np.array(new_xdata)
+    new_ydata = np.array(new_ydata)
+
+    # Digitize new x and y data
+    new_xdata_xbin_numbers = np.digitize(new_xdata, x_bin_limits) - 1
+    new_ydata_ybin_numbers = np.digitize(new_ydata, y_bin_limits, right=True) - 1
+
+    # Create result dict
+    result_dict = OrderedDict()
+    assert len(new_xdata_xbin_numbers) == len(new_ydata_ybin_numbers)
+    for i in range(len(new_xdata_xbin_numbers)):
+
+        x_bin_number = new_xdata_xbin_numbers[i]
+        y_bin_number = new_ydata_ybin_numbers[i]
+
+        if y_bin_number >= y_bins:
+            continue
+
+        bin_key = (x_bin_number, y_bin_number)
+        if split_marker:
+            use_z_val = 1
+            if new_ydata[i] > y_bin_centres[y_bin_number]:
+                use_z_val = 2
+            result_dict[bin_key] = (x_bin_centres[x_bin_number], y_bin_centres[y_bin_number], use_z_val)
+            # print("DEBUG:", new_ydata[i], " vs ", [y_bin_limits[y_bin_number], y_bin_limits[y_bin_number+1]], " --> z_val = ", use_z_val)
+        else:
+            result_dict[bin_key] = (x_bin_centres[x_bin_number], y_bin_centres[y_bin_number], 1)
+
+        # Fill bins below the (x,y) bin of the actual function value
+        if fill_below:
+            for ybn in range(y_bin_number-1, -1, fill_z_val):
+                bin_key = (x_bin_number, ybn)
+                result_dict[bin_key] = (x_bin_centres[x_bin_number], y_bin_centres[ybn], -1)
+
+    return result_dict, x_bin_limits, y_bin_limits
+
+
 def get_bin_tuples_avg(x_data, y_data, z_data, xy_bins, x_range, y_range):
 
     assert len(x_data) == len(y_data)

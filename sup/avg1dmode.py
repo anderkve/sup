@@ -70,8 +70,8 @@ ccode_grayscale_bb = 231
 ccode_grayscale_wb = 232
 ccode_grayscale = ccode_grayscale_bb
 
-ccode_color_bb = 1   # 231
-ccode_color_wb = 9   # 232
+ccode_color_bb = 5  # 231
+ccode_color_wb = 13 # 232
 ccode = ccode_color_bb
 
 def get_color_code(z_val):
@@ -122,11 +122,9 @@ def run(args):
     global ff2
 
     input_file = args.input_file
+
     x_index = args.x_index
-    # y_index = args.y_index
-    loglike_index = args.loglike_index
-    s_index = args.loglike_index
-    s_type = "max"
+    y_index = args.y_index
 
     filter_indices = args.filter_indices
     use_filters = bool(filter_indices is not None) 
@@ -140,10 +138,6 @@ def run(args):
     if not xy_bins:
         xy_bins = defaults.xy_bins
     
-    use_capped_loglike = False
-    if args.cap_loglike_val is not None:
-        use_capped_loglike = True
-
     use_white_bg = args.use_white_bg
     if use_white_bg:
         bg_ccode = bg_ccode_wb
@@ -166,9 +160,6 @@ def run(args):
             fill_bin_ccode = fill_bin_ccode_grayscale_bb
         empty_bin_marker = empty_bin_marker_grayscale
 
-    # highlight_maxlike_point = not(args.no_star)
-    highlight_maxlike_point = False
-
     n_decimals = args.n_decimals
     ff = "{: ." + str(n_decimals) + "e}"
     ff2 = "{:." + str(n_decimals) + "e}"
@@ -182,69 +173,43 @@ def run(args):
 
     dset_names = utils.get_dataset_names(f)
     x_name = dset_names[x_index]
-    # y_name = dset_names[y_index]
-    loglike_name = dset_names[loglike_index]
-    s_name = dset_names[s_index]
+    y_name = dset_names[y_index]
 
     x_data = np.array(f[x_name])[read_slice]
-    # y_data = np.array(f[y_name])[read_slice]
-    loglike_data = np.array(f[loglike_name])[read_slice]
-    s_data = np.array(f[s_name])[read_slice]
+    y_data = np.array(f[y_name])[read_slice]
 
     filter_names, filter_datasets = utils.get_filters_hdf5(f, filter_indices, read_slice=read_slice)
 
     f.close()
 
-    # assert len(x_data) == len(y_data)
-    assert len(x_data) == len(loglike_data)
-    assert len(x_data) == len(s_data)
-    # data_length = len(x_data)
+    assert len(x_data) == len(y_data)
 
     if use_filters:
-        x_data, loglike_data, s_data = utils.apply_filters([x_data, loglike_data, s_data], filter_datasets)
+        x_data, y_data = utils.apply_filters([x_data, y_data], filter_datasets)
 
     x_transf_expr = args.x_transf_expr
-    # y_transf_expr = args.y_transf_expr
+    y_transf_expr = args.y_transf_expr
 
     # Need this declaration such the 'x' can be used in the eval input string
     x = x_data
-    # y = y_data
+    y = y_data
     if x_transf_expr != "":
         x_data = eval(x_transf_expr)
-    # if y_transf_expr != "":
-    #     y_data = eval(y_transf_expr)
+    if y_transf_expr != "":
+        y_data = eval(y_transf_expr)
 
     if not x_range:
         x_range = [np.min(x_data), np.max(x_data)]
     if not y_range:
-        y_range = [0.0, 1.0]
-
-    # if not z_min:
-    #     z_min = np.min(z_data)
-    # if not z_max:
-    #     z_max = np.max(z_data)
-
-    # Cap loglike?
-    if use_capped_loglike:
-        loglike_data = np.minimum(loglike_data, args.cap_loglike_val)
-
-
-    #
-    # Create likelihood ratio dataset
-    #
-
-    loglike_max = np.max(loglike_data)
-    likelihood_ratio = np.exp(loglike_data) / np.exp(loglike_max)
-
-    y_data = likelihood_ratio
-    s_data = y_data  # sort according to likelihood_ratio
+        y_range = [np.min(y_data), np.max(y_data)]
 
 
     #
     # Get a dict with info per bin
     #
 
-    bins_info, x_bin_limits, y_bin_limits = utils.get_bin_tuples_maxmin_1d(x_data, y_data, xy_bins, x_range, y_range, s_data, s_type, fill_below=False, split_marker=True)
+    bins_info, x_bin_limits, y_bin_limits = utils.get_bin_tuples_avg_1d(x_data, y_data, xy_bins, x_range, y_range, fill_below=False, split_marker=True)
+
 
     #
     # Generate string to be printed
@@ -293,20 +258,30 @@ def run(args):
     # # Add legend
     # #
 
+    # # max/min legend
     # legend_mod_func = lambda input_str, input_fg_ccode : utils.prettify(input_str, input_fg_ccode, bg_ccode, bold=True)
-    # legend_entries = []
 
-    # # legend_entries.append( ("", fg_ccode, "", fg_ccode) )
-    # if (not use_capped_loglike) and highlight_maxlike_point:
-    #     legend_entries.append( (" " + special_marker.strip(), max_bin_ccode, "best-fit", fg_ccode) )
-    # legend_entries.append( (" " * use_capped_loglike + regular_marker.strip(), ccode[-1], "1σ", fg_ccode) )
-    # legend_entries.append( (regular_marker.strip(), ccode[-2], "2σ", fg_ccode) )
-    # legend_entries.append( (regular_marker.strip(), ccode[-3], "3σ", fg_ccode) )
-    
-    # legend, legend_width = utils.generate_legend(legend_entries, legend_mod_func, sep="  ")
+    # point_str = ""
+    # if s_index != y_index:
+    #     point_str = "sort_" + s_type + " point: (x, y, sort) = "
+    # else:
+    #     point_str = "y_" + s_type + " point: (x, y) = "
+
+    # legend_maxmin_entries = []
+
+    # marker_str = ""
+
+    # if s_index != y_index:
+    #     point = ("(" + ff2 + ", " + ff2 + ", " + ff2 + ")").format(xys_maxmin[0], xys_maxmin[1], xys_maxmin[2])
+    # else:
+    #     point = ("(" + ff2 + ", " + ff2 + ")").format(xys_maxmin[0], xys_maxmin[1])
+
+    # point_str += point
+    # legend_maxmin_entries.append( (marker_str, fg_ccode, point_str, fg_ccode) )
+    # legend_maxmin, legend_maxmin_width = utils.generate_legend(legend_maxmin_entries, legend_mod_func, sep="  ", internal_sep=" ")
 
     # plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode)
-    # plot_lines, fig_width = utils.insert_line(legend, legend_width, plot_lines, fig_width, fg_ccode, bg_ccode)
+    # plot_lines, fig_width = utils.insert_line(legend_maxmin, legend_maxmin_width, plot_lines, fig_width, fg_ccode, bg_ccode)
 
 
     #
@@ -322,8 +297,7 @@ def run(args):
     #
 
     x_label = x_name
-    y_label = "likelihood ratio, L(x)/L_max"
-    s_label = y_label
+    y_label = y_name
 
 
     #
@@ -333,15 +307,10 @@ def run(args):
     info_lines = utils.generate_info_text(ff2,
                                           x_label, x_range, 
                                           y_label=y_label, y_range=y_range, 
-                                          # z_label=z_label, z_range=z_range, 
-                                          s_label=s_label, s_type=s_type,
-                                          x_transf_expr = x_transf_expr, 
-                                          # y_transf_expr = y_transf_expr,
-                                          capped_z=use_capped_loglike,
-                                          capped_label="ln(L)",
-                                          cap_val=args.cap_loglike_val,
+                                          x_transf_expr=x_transf_expr, 
+                                          y_transf_expr=y_transf_expr,
                                           filter_names=filter_names,
-                                          mode_name="profile likelihood ratio, L/L_max",
+                                          mode_name="average",
                                           left_padding=left_padding + " ")
 
     for i,line in enumerate(info_lines):
