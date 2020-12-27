@@ -26,7 +26,8 @@ examples:
 import sys
 import os
 import argparse
-from sup import listmode, colorsmode, plr2dmode, plr1dmode, maxmin2dmode, maxmin1dmode, avg1dmode, avg2dmode, hist2dmode, post2dmode
+from sup import listmode, colorsmode, plr2dmode, plr1dmode, maxmin2dmode, maxmin1dmode, avg1dmode, avg2dmode, hist2dmode, post2dmode, graph1dmode
+
 
 
 def main():
@@ -45,18 +46,20 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 modes:
-  sup list    list dataset names and indices
-  sup hist2d  plot the (x,y) histogram
-  sup post2d  plot the (x,y) posterior probability distribution
-  sup max1d   plot the maximum y value across the x axis
-  sup max2d   plot the maximum z value across the (x,y) plane
-  sup min1d   plot the minimum y value across the x axis
-  sup min2d   plot the minimum z value across the (x,y) plane
-  sup avg1d   plot the average y value across the x axis
-  sup avg2d   plot the average z value across the (x,y) plane
-  sup plr1d   plot the profile likelihood ratio across the x axis
-  sup plr2d   plot the profile likelihood ratio across the (x,y) plane
-  sup colors  display the colors available for colormaps (for development)
+  sup list      list dataset names and indices
+  sup hist2d    plot the (x,y) histogram
+  sup post2d    plot the (x,y) posterior probability distribution
+  sup max1d     plot the maximum y value across the x axis
+  sup max2d     plot the maximum z value across the (x,y) plane
+  sup min1d     plot the minimum y value across the x axis
+  sup min2d     plot the minimum z value across the (x,y) plane
+  sup avg1d     plot the average y value across the x axis
+  sup avg2d     plot the average z value across the (x,y) plane
+  sup plr1d     plot the profile likelihood ratio across the x axis
+  sup plr2d     plot the profile likelihood ratio across the (x,y) plane
+  sup graph1d   plot a function f(x)
+  sup graph2d   plot a function f(x,y)
+  sup colors    display the colors available for colormaps (for development)
 
 examples:
   ./sup.py list data.hdf5
@@ -66,6 +69,8 @@ examples:
   ./sup.py plr2d data.hdf5 2 1 4 --x-range 0 10 --y-range 0 10 --bins 20 20 -g
 
   ./sup.py plr2d data.hdf5 2 1 4 --x-range 0 10 --y-range 0 20 --bins 20 40 --x-transf "np.abs(x)"
+
+  ./sup.py graph1d "x * np.cos(2 * np.pi * x)" --x-range 0.0 2.0 --y-range -2 2 --bins 40 20
         """,
   # sup post    plot the z posterior probability density
     )
@@ -296,6 +301,17 @@ examples:
     parser_plr2dmode.add_argument("-ns", "--no-star", action="store_true", dest="no_star", default=False, help="switch off the star marker for the max likelihood point(s)")
     parser_plr2dmode.add_argument("-rs", "--read-slice", nargs=3, type=int, action="store", dest="read_slice", default=[0,-1,1], help="read only the given slice of each dataset", metavar=("START", "END", "STEP"))
     parser_plr2dmode.add_argument("-d", "--decimals", type=int, action="store", dest="n_decimals", default=2, help="set the number of decimals for axis and colorbar tick labels", metavar="N_DECIMALS")
+
+    # Parser for "graph1d" mode
+    parser_graph1dmode = subparsers.add_parser("graph1d")
+    parser_graph1dmode.set_defaults(func=graph1dmode.run)
+    parser_graph1dmode.add_argument("function", type=str, action="store", help="definition of function f(x), using numpy as 'np' (e.g. \"np.sin(x) * 1 / x\")")
+    parser_graph1dmode.add_argument("-xr", "--x-range", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
+    parser_graph1dmode.add_argument("-yr", "--y-range", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
+    parser_graph1dmode.add_argument("-b", "--bins", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="number of bins for each axis", metavar=("X_BINS", "Y_BINS"))
+    parser_graph1dmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
+    parser_graph1dmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
+    parser_graph1dmode.add_argument("-d", "--decimals", type=int, action="store", dest="n_decimals", default=2, help="set the number of decimals for axis and colorbar tick labels", metavar="N_DECIMALS")
 
     # Parser for "colors" mode
     parser_colorsmode = subparsers.add_parser("colors")
