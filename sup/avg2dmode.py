@@ -99,6 +99,7 @@ def run(args):
 
     x_range = args.x_range
     y_range = args.y_range
+    z_range = args.z_range
 
     read_slice = slice(*args.read_slice)
 
@@ -184,11 +185,11 @@ def run(args):
         x_range = [np.min(x_data), np.max(x_data)]
     if not y_range:
         y_range = [np.min(y_data), np.max(y_data)]
+    if not z_range:
+        z_range = [np.min(z_data), np.max(z_data)]
 
     # Get z max and minimum
-    z_min = np.min(z_data)
-    z_max = np.max(z_data)
-    z_range = [z_min, z_max]
+    z_min, z_max = z_range
 
     # z_norm = (z_data - z_min) / (z_max - z_min)
 

@@ -1,6 +1,5 @@
 import sys
 import numpy as np
-import h5py
 import sup.defaults as defaults
 import sup.utils as utils
 
@@ -55,59 +54,28 @@ ccodes = cmaps[0]
 
 
 
-def get_color_code(z_val, z_norm, color_z_lims, s_type, highlight_maxmin_point):
-
-    assert s_type in ["min", "max"]
-
-    if (z_norm == 1.0) and (s_type == "max"):
-        if highlight_maxmin_point:
-            return max_bin_ccode
-        else:
-            return ccodes[-1]
-    elif (z_norm == 0.0) and (s_type == "max"):
-        return ccodes[0]
-    elif (z_norm == 1.0) and (s_type == "min"):
-        return ccodes[-1]
-    elif (z_norm == 0.0) and (s_type == "min"):
-        if highlight_maxmin_point:
-            return max_bin_ccode
-        else:
-            return ccodes[0]
+def get_color_code(z_val, color_z_lims):
 
     i = 0
     for j, lim in enumerate(color_z_lims):
-        if z_val >= lim:
+        if z_val > lim:
             i = j
         else:
             break
     return ccodes[i]
 
 
-def get_marker(z_norm, s_type, highlight_maxmin_point):
+def get_marker():
 
-    assert s_type in ["min", "max"]
-
-    if highlight_maxmin_point and (z_norm == 1.0) and (s_type == "max"):
-        return special_marker
-    elif highlight_maxmin_point and (z_norm == 0.0) and (s_type == "min"):
-        return special_marker
-    else:
-        return regular_marker
+    return regular_marker
 
 
 #
 # Run
 #
 
-def run_max(args):
-    run(args, "max")
+def run(args):
 
-def run_min(args):
-    run(args, "min")
-
-def run(args, mode):
-
-    assert mode in ["max", "min"]
     assert args.cmap_index in range(len(cmaps))
 
     global ccodes 
@@ -124,25 +92,11 @@ def run(args, mode):
     global ff
     global ff2
 
-    input_file = args.input_file
-
-    x_index = args.x_index
-    y_index = args.y_index
-    z_index = args.z_index
-
-    s_index = args.z_index
-    if args.s_index is not None:
-        s_index = args.s_index
-    s_type = mode
-
-    filter_indices = args.filter_indices
-    use_filters = bool(filter_indices is not None) 
+    function_str = args.function
 
     x_range = args.x_range
     y_range = args.y_range
     z_range = args.z_range
-
-    read_slice = slice(*args.read_slice)
 
     xy_bins = args.xy_bins
     if not xy_bins:
@@ -181,59 +135,49 @@ def run(args, mode):
     if args.reverse_colormap:
         ccodes = ccodes[::-1]
 
-    highlight_maxmin_point = not(args.no_star)
-
     n_decimals = args.n_decimals
     ff = "{: ." + str(n_decimals) + "e}"
     ff2 = "{:." + str(n_decimals) + "e}"
 
 
     #
-    # Read datasets from file
+    # Generate datasets from function defintion
     #
 
-    f = h5py.File(input_file, "r")
+    # Generate x dataset based on x range and number of bins
+    if not x_range:
+        x_range = [0.0, 1.0]
+    if not y_range:
+        y_range = [0.0, 1.0]
 
-    dset_names = utils.get_dataset_names(f)
-    x_name = dset_names[x_index]
-    y_name = dset_names[y_index]
-    z_name = dset_names[z_index]
-    s_name = dset_names[s_index]
+    x_bins, y_bins = xy_bins
+    x_min, x_max = x_range
+    y_min, y_max = y_range
 
-    x_data = np.array(f[x_name])[read_slice]
-    y_data = np.array(f[y_name])[read_slice]
-    z_data = np.array(f[z_name])[read_slice]
-    s_data = np.array(f[s_name])[read_slice]
+    x_bin_limits = np.linspace(x_min, x_max, x_bins + 1)
+    y_bin_limits = np.linspace(y_min, y_max, y_bins + 1)
 
-    filter_names, filter_datasets = utils.get_filters_hdf5(f, filter_indices, read_slice=read_slice)
+    dx = x_bin_limits[1] - x_bin_limits[0]
+    dy = y_bin_limits[1] - y_bin_limits[0]
 
-    f.close()
+    x_bin_centres = x_bin_limits[:-1] + 0.5 * dx
+    y_bin_centres = y_bin_limits[:-1] + 0.5 * dy
 
-    if use_filters:
-        x_data, y_data, z_data, s_data = utils.apply_filters([x_data, y_data, z_data, s_data], filter_datasets)
+    x_data = []
+    y_data = []
+    z_data = []
+    for x in x_bin_centres:
+        for y in y_bin_centres:
+            x_data.append(x)
+            y_data.append(y)
+            z_data.append( eval(function_str) )
+
+    x_data = np.array(x_data)
+    y_data = np.array(y_data)
+    z_data = np.array(z_data)
 
     assert len(x_data) == len(y_data)
     assert len(x_data) == len(z_data)
-    assert len(x_data) == len(s_data)
-    # data_length = len(x_data)
-
-    x_transf_expr = args.x_transf_expr
-    y_transf_expr = args.y_transf_expr
-    z_transf_expr = args.z_transf_expr
-    s_transf_expr = args.s_transf_expr
-    # @todo: add the x,y,z,s variables to a dictionary of allowed arguments to eval()
-    x = x_data
-    y = y_data
-    z = z_data
-    s = s_data
-    if x_transf_expr != "":
-        x_data = eval(x_transf_expr)
-    if y_transf_expr != "":
-        y_data = eval(y_transf_expr)
-    if z_transf_expr != "":
-        z_data = eval(z_transf_expr)
-    if s_transf_expr != "":
-        s_data = eval(s_transf_expr)
 
     if not x_range:
         x_range = [np.min(x_data), np.max(x_data)]
@@ -242,29 +186,16 @@ def run(args, mode):
     if not z_range:
         z_range = [np.min(z_data), np.max(z_data)]
 
-    # Get z max and minimum
     z_min, z_max = z_range
-
-    # Get max/min (x,y,z,s) point
-    maxmin_index = 0
-    if s_type == "max":
-        maxmin_index = np.argmax(s_data)
-    elif s_type == "min":
-        maxmin_index = np.argmin(s_data)
-
-    xyzs_maxmin = (x_data[maxmin_index], y_data[maxmin_index], z_data[maxmin_index], s_data[maxmin_index])
-
 
     # Set color limits
     color_z_lims = list( np.linspace(z_min, z_max, len(ccodes)+1) )
-    # color_z_norm_lims = list( np.linspace(0.0, 1.0, len(ccodes)+1) )
-    # print("DEBUG:", color_z_norm_lims)
 
     #
     # Get a dict with info per bin
     #
 
-    bins_info, x_bin_limits, y_bin_limits = utils.get_bin_tuples_maxmin(x_data, y_data, z_data, xy_bins, x_range, y_range, s_data, s_type)
+    bins_info, x_bin_limits, y_bin_limits = utils.get_bin_tuples_avg(x_data, y_data, z_data, xy_bins, x_range, y_range)
 
 
     #
@@ -286,12 +217,12 @@ def run(args, mode):
 
             if xiyi in bins_info.keys():
                 z_val = bins_info[xiyi][2]
-                z_norm = 0.0
-                if (z_max != z_min):
-                    z_norm = (z_val - z_min) / (z_max - z_min)
+                # z_norm = 0.0
+                # if (z_max != z_min):
+                #     z_norm = (z_val - z_min) / (z_max - z_min)
 
-                ccode = get_color_code(z_val, z_norm, color_z_lims, s_type, highlight_maxmin_point)
-                marker = get_marker(z_norm, s_type, highlight_maxmin_point)
+                ccode = get_color_code(z_val, color_z_lims)
+                marker = get_marker()
 
             # Add point to line
             yi_line += utils.prettify(marker, ccode, bg_ccode)
@@ -320,34 +251,7 @@ def run(args, mode):
                                                     ccodes, color_z_lims, 
                                                     fg_ccode, bg_ccode, empty_bin_ccode)
 
-    # max/min legend
-    legend_mod_func = lambda input_str, input_fg_ccode : utils.prettify(input_str, input_fg_ccode, bg_ccode, bold=True)
-
-    point_str = ""
-    if s_index != z_index:
-        point_str = "sort_" + s_type + " point: (x, y, z, sort) = "
-    else:
-        point_str = "z_" + s_type + " point: (x, y, z) = "
-
-    legend_maxmin_entries = []
-
-    marker_str = ""
-    if (highlight_maxmin_point) and (s_index == z_index): 
-        marker_str = "" + special_marker.strip()
-
-    if s_index != z_index:
-        point = ("(" + ff2 + ", " + ff2 + ", " + ff2 + ", " + ff2 + ")").format(xyzs_maxmin[0], xyzs_maxmin[1], xyzs_maxmin[2], xyzs_maxmin[3])
-    else:
-        point = ("(" + ff2 + ", " + ff2 + ", " + ff2 + ")").format(xyzs_maxmin[0], xyzs_maxmin[1], xyzs_maxmin[2])
-
-    point_str += point
-    legend_maxmin_entries.append( (marker_str, fg_ccode, point_str, fg_ccode) )
-    legend_maxmin, legend_maxmin_width = utils.generate_legend(legend_maxmin_entries, legend_mod_func, sep="  ", internal_sep=" ")
-
-    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode)
-    plot_lines, fig_width = utils.insert_line(legend_maxmin, legend_maxmin_width, plot_lines, fig_width, fg_ccode, bg_ccode)
         
-
     #
     # Add left padding
     #
@@ -360,10 +264,9 @@ def run(args, mode):
     # Set labels
     #
 
-    x_label = x_name
-    y_label = y_name
-    z_label = z_name
-    s_label = s_name
+    x_label = "x"
+    y_label = "y"
+    z_label = "f(x,y) = " + function_str
 
 
     #
@@ -374,13 +277,7 @@ def run(args, mode):
                                           x_label, x_range, 
                                           y_label, y_range, 
                                           z_label=z_label, z_range=z_range, 
-                                          s_label=s_label, s_type=s_type,
-                                          x_transf_expr=x_transf_expr, 
-                                          y_transf_expr=y_transf_expr,
-                                          z_transf_expr=z_transf_expr, 
-                                          s_transf_expr=s_transf_expr,
-                                          filter_names=filter_names,
-                                          mode_name=mode,
+                                          mode_name="graph",
                                           left_padding=left_padding + " ")
 
     for i,line in enumerate(info_lines):

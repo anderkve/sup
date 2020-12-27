@@ -26,7 +26,7 @@ examples:
 import sys
 import os
 import argparse
-from sup import listmode, colorsmode, plr2dmode, plr1dmode, maxmin2dmode, maxmin1dmode, avg1dmode, avg2dmode, hist2dmode, post2dmode, graph1dmode
+from sup import listmode, colorsmode, plr2dmode, plr1dmode, maxmin2dmode, maxmin1dmode, avg1dmode, avg2dmode, hist2dmode, post2dmode, graph1dmode, graph2dmode
 
 
 
@@ -57,8 +57,8 @@ modes:
   sup avg2d     plot the average z value across the (x,y) plane
   sup plr1d     plot the profile likelihood ratio across the x axis
   sup plr2d     plot the profile likelihood ratio across the (x,y) plane
-  sup graph1d   plot a function f(x)
-  sup graph2d   plot a function f(x,y)
+  sup graph1d   plot a function y = f(x) across the x axis
+  sup graph2d   plot a function z = f(x,y) across the (x,y) plane
   sup colors    display the colors available for colormaps (for development)
 
 examples:
@@ -71,6 +71,8 @@ examples:
   ./sup.py plr2d data.hdf5 2 1 4 --x-range 0 10 --y-range 0 20 --bins 20 40 --x-transf "np.abs(x)"
 
   ./sup.py graph1d "x * np.cos(2 * np.pi * x)" --x-range 0.0 2.0 --y-range -2 2 --bins 40 20
+
+  ./sup.py graph2d "np.sin(x**2 + y**2) / (x**2 + y**2)" --x-range -5 5 --y-range -5 5 --bins 50 50
         """,
   # sup post    plot the z posterior probability density
     )
@@ -305,13 +307,28 @@ examples:
     # Parser for "graph1d" mode
     parser_graph1dmode = subparsers.add_parser("graph1d")
     parser_graph1dmode.set_defaults(func=graph1dmode.run)
-    parser_graph1dmode.add_argument("function", type=str, action="store", help="definition of function f(x), using numpy as 'np' (e.g. \"np.sin(x) * 1 / x\")")
+    parser_graph1dmode.add_argument("function", type=str, action="store", help="definition of function f(x), using numpy as 'np' (e.g. \"x * np.sin(x)\")")
     parser_graph1dmode.add_argument("-xr", "--x-range", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
     parser_graph1dmode.add_argument("-yr", "--y-range", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
     parser_graph1dmode.add_argument("-b", "--bins", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="number of bins for each axis", metavar=("X_BINS", "Y_BINS"))
     parser_graph1dmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
     parser_graph1dmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
     parser_graph1dmode.add_argument("-d", "--decimals", type=int, action="store", dest="n_decimals", default=2, help="set the number of decimals for axis and colorbar tick labels", metavar="N_DECIMALS")
+
+    # Parser for "graph2d" mode
+    parser_graph2dmode = subparsers.add_parser("graph2d")
+    parser_graph2dmode.set_defaults(func=graph2dmode.run)
+    parser_graph2dmode.add_argument("function", type=str, action="store", help="definition of function f(x,y), using numpy as 'np' (e.g. \"y * np.sin(x)\")")
+    parser_graph2dmode.add_argument("-xr", "--x-range", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
+    parser_graph2dmode.add_argument("-yr", "--y-range", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
+    parser_graph2dmode.add_argument("-zr", "--z-range", nargs=2, type=float, action="store", dest="z_range", default=None, help="z-axis range", metavar=("Z_MIN", "Z_MAX"))
+    parser_graph2dmode.add_argument("-b", "--bins", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="number of bins for each axis", metavar=("X_BINS", "Y_BINS"))
+    parser_graph2dmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
+    parser_graph2dmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
+    parser_graph2dmode.add_argument("-nc", "--num-colors", type=int, action="store", dest="n_colors", default=10, help="number of colors in colorbar (max 10)", metavar="N_COLORS")
+    parser_graph2dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish", metavar="CM")
+    parser_graph2dmode.add_argument("-rc", "--reverse-colormap", action="store_true", dest="reverse_colormap", default=False, help="reverse colormap")
+    parser_graph2dmode.add_argument("-d", "--decimals", type=int, action="store", dest="n_decimals", default=2, help="set the number of decimals for axis and colorbar tick labels", metavar="N_DECIMALS")
 
     # Parser for "colors" mode
     parser_colorsmode = subparsers.add_parser("colors")
