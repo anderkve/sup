@@ -57,8 +57,8 @@ modes:
   sup avg2d     plot the average z value across the (x,y) plane
   sup plr1d     plot the profile likelihood ratio across the x axis
   sup plr2d     plot the profile likelihood ratio across the (x,y) plane
-  sup graph1d   plot a function y = f(x) across the x axis
-  sup graph2d   plot a function z = f(x,y) across the (x,y) plane
+  sup graph1d   plot the function y = f(x) across the x axis
+  sup graph2d   plot the function z = f(x,y) across the (x,y) plane
   sup colors    display the colors available for colormaps (for development)
 
 examples:
