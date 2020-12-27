@@ -254,36 +254,6 @@ def run(args):
     plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode, insert_pos=0)
 
 
-    # #
-    # # Add legend
-    # #
-
-    # # max/min legend
-    # legend_mod_func = lambda input_str, input_fg_ccode : utils.prettify(input_str, input_fg_ccode, bg_ccode, bold=True)
-
-    # point_str = ""
-    # if s_index != y_index:
-    #     point_str = "sort_" + s_type + " point: (x, y, sort) = "
-    # else:
-    #     point_str = "y_" + s_type + " point: (x, y) = "
-
-    # legend_maxmin_entries = []
-
-    # marker_str = ""
-
-    # if s_index != y_index:
-    #     point = ("(" + ff2 + ", " + ff2 + ", " + ff2 + ")").format(xys_maxmin[0], xys_maxmin[1], xys_maxmin[2])
-    # else:
-    #     point = ("(" + ff2 + ", " + ff2 + ")").format(xys_maxmin[0], xys_maxmin[1])
-
-    # point_str += point
-    # legend_maxmin_entries.append( (marker_str, fg_ccode, point_str, fg_ccode) )
-    # legend_maxmin, legend_maxmin_width = utils.generate_legend(legend_maxmin_entries, legend_mod_func, sep="  ", internal_sep=" ")
-
-    # plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode)
-    # plot_lines, fig_width = utils.insert_line(legend_maxmin, legend_maxmin_width, plot_lines, fig_width, fg_ccode, bg_ccode)
-
-
     #
     # Add left padding
     #
