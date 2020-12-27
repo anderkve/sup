@@ -60,10 +60,11 @@ def generate_legend(legend_entries, mod_func, sep="  ", internal_sep=" ", left_p
         marker, marker_ccode, txt, txt_ccode = entry_tuple
         if marker != "":
             legend += mod_func(marker, marker_ccode) + mod_func(internal_sep + txt, txt_ccode)
+            legend_width += len(marker) + len(internal_sep)
         else:
             legend += mod_func(txt, txt_ccode)
         legend += mod_func(sep, txt_ccode)
-        legend_width += len(marker) + len(internal_sep) + len(txt) + len(sep)
+        legend_width += len(txt) + len(sep)
 
     return legend, legend_width
 
