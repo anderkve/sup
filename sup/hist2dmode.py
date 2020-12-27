@@ -98,7 +98,7 @@ def run(args):
     w_index = args.w_index
     use_weights = bool(w_index is not None)
 
-    normalise_histogram = args.normalise_histogram
+    normalize_histogram = args.normalize_histogram
 
     filter_indices = args.filter_indices
     use_filters = bool(filter_indices is not None) 
@@ -206,8 +206,8 @@ def run(args):
     # Get a dict with info per bin
     #
 
-    bins_content_unweighted,_ ,_  = np.histogram2d(x_data, y_data, bins=xy_bins, range=[x_range, y_range], density=normalise_histogram) 
-    bins_content, x_bin_limits, y_bin_limits = np.histogram2d(x_data, y_data, bins=xy_bins, range=[x_range, y_range], weights=w_data, density=normalise_histogram) 
+    bins_content_unweighted,_ ,_  = np.histogram2d(x_data, y_data, bins=xy_bins, range=[x_range, y_range], density=normalize_histogram) 
+    bins_content, x_bin_limits, y_bin_limits = np.histogram2d(x_data, y_data, bins=xy_bins, range=[x_range, y_range], weights=w_data, density=normalize_histogram) 
 
     # Apply z-axis transformation
     z = bins_content
@@ -299,7 +299,36 @@ def run(args):
     plot_lines, fig_width = utils.generate_colorbar(plot_lines, fig_width, ff,
                                                     ccodes, color_z_lims, 
                                                     fg_ccode, bg_ccode, empty_bin_ccode)
-        
+
+    # max bin legend
+    legend_mod_func = lambda input_str, input_fg_ccode : utils.prettify(input_str, input_fg_ccode, bg_ccode, bold=True)
+
+    maxbin_content = -np.inf
+    maxbin_x_index = 0
+    maxbin_y_index = 0
+    for bin_key, bin_tuple in bins_info.items():
+        z_val = bin_tuple[2]
+        if z_val > maxbin_content:
+            maxbin_content = z_val
+            maxbin_x_index, maxbin_y_index = bin_key
+
+    maxbin_xlimits = [x_bin_limits[maxbin_x_index], x_bin_limits[maxbin_x_index+1]]
+    maxbin_ylimits = [y_bin_limits[maxbin_y_index], y_bin_limits[maxbin_y_index+1]]
+
+    maxbin_str = "max bin:  x: "
+    maxbin_str += ("(" + ff2 + ", " + ff2 + ")").format(maxbin_xlimits[0], maxbin_xlimits[1])
+    maxbin_str += "  y: "
+    maxbin_str += ("(" + ff2 + ", " + ff2 + ")").format(maxbin_ylimits[0], maxbin_ylimits[1])
+    maxbin_str += "  bin height: "
+    maxbin_str += (ff2).format(maxbin_content)
+
+    legend_maxbin_entries = []
+    legend_maxbin_entries.append( ("", fg_ccode, maxbin_str, fg_ccode) )
+    legend_maxbin, legend_maxbin_width = utils.generate_legend(legend_maxbin_entries, legend_mod_func, sep="  ", internal_sep=" ")
+
+    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode)
+    plot_lines, fig_width = utils.insert_line(legend_maxbin, legend_maxbin_width, plot_lines, fig_width, fg_ccode, bg_ccode)
+
 
     #
     # Add left padding
@@ -329,6 +358,7 @@ def run(args):
                                           x_transf_expr=x_transf_expr, 
                                           y_transf_expr=y_transf_expr,
                                           z_transf_expr=z_transf_expr,
+                                          z_normalized_hist=normalize_histogram,
                                           w_label=w_label,
                                           w_transf_expr=w_transf_expr,
                                           filter_names=filter_names,

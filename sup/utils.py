@@ -117,6 +117,7 @@ def generate_info_text(ff2, x_label, x_range,
                        y_label=None, y_range=None, 
                        z_label=None, z_range=None, 
                        x_transf_expr="", y_transf_expr="", z_transf_expr="", 
+                       y_normalized_hist=False, z_normalized_hist=False,
                        s_label=None, s_type=None, s_transf_expr="", 
                        w_label=None, w_transf_expr="",
                        capped_z=False, capped_label="z-axis", cap_val=1e99,
@@ -132,15 +133,21 @@ def generate_info_text(ff2, x_label, x_range,
         info_lines.append(left_padding + "  - transf.: {}".format(x_transf_expr))
     info_lines.append(left_padding + "  - range: [{}, {}]".format(ff2.format(x_range[0]), ff2.format(x_range[1])))
 
-    info_lines.append(left_padding + "y-axis: {}".format(y_label))
-    if y_transf_expr != "":
-        info_lines.append(left_padding + "  - transf.: {}".format(y_transf_expr))
-    info_lines.append(left_padding + "  - range: [{}, {}]".format(ff2.format(y_range[0]), ff2.format(y_range[1])))
+    if y_label is not None:
+        info_lines.append(left_padding + "y-axis: {}".format(y_label))
+        if y_transf_expr != "":
+            info_lines.append(left_padding + "  - transf.: {}".format(y_transf_expr))
+        if y_normalized_hist:
+            info_lines.append(left_padding + "  - normalized")
+        if y_range is not None:
+            info_lines.append(left_padding + "  - range: [{}, {}]".format(ff2.format(y_range[0]), ff2.format(y_range[1])))
 
     if z_label is not None:
         info_lines.append(left_padding + "z-axis: {}".format(z_label))
         if z_transf_expr != "":
             info_lines.append(left_padding + "  - transf.: {}".format(z_transf_expr))
+        if z_normalized_hist:
+            info_lines.append(left_padding + "  - normalized")
         if z_range is not None:
             info_lines.append(left_padding + "  - range: [{}, {}]".format(ff2.format(z_range[0]), ff2.format(z_range[1])))
 

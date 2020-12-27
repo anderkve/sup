@@ -128,7 +128,7 @@ def run(args):
     w_index = args.w_index
     use_weights = bool(w_index is not None)
 
-    normalise_histogram = args.normalise_histogram
+    normalize_histogram = args.normalize_histogram
 
     filter_indices = args.filter_indices
     use_filters = bool(filter_indices is not None) 
@@ -216,8 +216,8 @@ def run(args):
     # Get a dict with info per bin
     #
 
-    bins_content_unweighted,_  = np.histogram(x_data, bins=xy_bins[0], range=x_range, density=normalise_histogram) 
-    bins_content, x_bin_limits = np.histogram(x_data, bins=xy_bins[0], range=x_range, weights=w_data, density=normalise_histogram) 
+    bins_content_unweighted,_  = np.histogram(x_data, bins=xy_bins[0], range=x_range, density=normalize_histogram) 
+    bins_content, x_bin_limits = np.histogram(x_data, bins=xy_bins[0], range=x_range, weights=w_data, density=normalize_histogram) 
 
     # Apply y-axis transformation
     y = bins_content
@@ -277,34 +277,28 @@ def run(args):
     plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode, insert_pos=0)
 
 
-    # #
-    # # Add legend
-    # #
+    #
+    # Add legend
+    #
 
-    # # max/min legend
-    # legend_mod_func = lambda input_str, input_fg_ccode : utils.prettify(input_str, input_fg_ccode, bg_ccode, bold=True)
+    # max bin legend
+    legend_mod_func = lambda input_str, input_fg_ccode : utils.prettify(input_str, input_fg_ccode, bg_ccode, bold=True)
 
-    # point_str = ""
-    # if s_index != y_index:
-    #     point_str = "sort_" + s_type + " point: (x, y, sort) = "
-    # else:
-    #     point_str = "y_" + s_type + " point: (x, y) = "
+    maxbin_index = np.argmax(bins_content)
+    maxbin_content = bins_content[maxbin_index]
+    maxbin_limits = [x_bin_limits[maxbin_index], x_bin_limits[maxbin_index+1]]
+    
+    maxbin_str = "max bin:  x: "
+    maxbin_str += ("(" + ff2 + ", " + ff2 + ")").format(maxbin_limits[0], maxbin_limits[1])
+    maxbin_str += "  bin height: "
+    maxbin_str += (ff2).format(maxbin_content)
 
-    # legend_maxmin_entries = []
+    legend_maxbin_entries = []
+    legend_maxbin_entries.append( ("", fg_ccode, maxbin_str, fg_ccode) )
+    legend_maxbin, legend_maxbin_width = utils.generate_legend(legend_maxbin_entries, legend_mod_func, sep="  ", internal_sep=" ")
 
-    # marker_str = ""
-
-    # if s_index != y_index:
-    #     point = ("(" + ff2 + ", " + ff2 + ", " + ff2 + ")").format(xys_maxmin[0], xys_maxmin[1], xys_maxmin[2])
-    # else:
-    #     point = ("(" + ff2 + ", " + ff2 + ")").format(xys_maxmin[0], xys_maxmin[1])
-
-    # point_str += point
-    # legend_maxmin_entries.append( (marker_str, fg_ccode, point_str, fg_ccode) )
-    # legend_maxmin, legend_maxmin_width = utils.generate_legend(legend_maxmin_entries, legend_mod_func, sep="  ", internal_sep=" ")
-
-    # plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode)
-    # plot_lines, fig_width = utils.insert_line(legend_maxmin, legend_maxmin_width, plot_lines, fig_width, fg_ccode, bg_ccode)
+    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode)
+    plot_lines, fig_width = utils.insert_line(legend_maxbin, legend_maxbin_width, plot_lines, fig_width, fg_ccode, bg_ccode)
 
 
     #
@@ -333,6 +327,7 @@ def run(args):
                                           y_label=y_label, y_range=y_range, 
                                           x_transf_expr=x_transf_expr, 
                                           y_transf_expr=y_transf_expr,
+                                          y_normalized_hist=normalize_histogram,
                                           w_label=w_label,
                                           w_transf_expr=w_transf_expr,
                                           filter_names=filter_names,
