@@ -70,13 +70,13 @@ ccode_grayscale_bb = 231
 ccode_grayscale_wb = 232
 ccode_grayscale = ccode_grayscale_bb
 
-ccode_color_bb = 231
-ccode_color_wb = 232
+ccode_color_bb = 1   # 231
+ccode_color_wb = 9   # 232
 ccode = ccode_color_bb
 
 color_z_lims = [0.0, 0.003, 0.046, 0.317]
 
-def get_color_code(z_val, highlight_maxlike_point, use_capped_loglike=False):
+def get_color_code(z_val):
 
     if z_val in [1,2]:
         return ccode
@@ -88,7 +88,7 @@ def get_color_code(z_val, highlight_maxlike_point, use_capped_loglike=False):
         raise Exception("Unexpected z_val. This shouldn't happen...")
 
 
-def get_marker(z_val, highlight_maxlike_point, use_capped_loglike=False):
+def get_marker(z_val):
 
     if z_val == 2:
         return regular_marker_up
@@ -268,8 +268,8 @@ def run(args):
             if xiyi in bins_info.keys():
                 z_val = bins_info[xiyi][2]
 
-                cc = get_color_code(z_val, highlight_maxlike_point, use_capped_loglike=use_capped_loglike)
-                marker = get_marker(z_val, highlight_maxlike_point, use_capped_loglike=use_capped_loglike)
+                cc = get_color_code(z_val)
+                marker = get_marker(z_val)
 
             # Add point to line
             yi_line += utils.prettify(marker, cc, bg_ccode)
@@ -343,8 +343,8 @@ def run(args):
                                           capped_label="ln(L)",
                                           cap_val=args.cap_loglike_val,
                                           filter_names=filter_names,
-                                          mode_name="profile likelihood ratio, L(x)/L_max",
-                                          left_padding = left_padding + " ")
+                                          mode_name="profile likelihood ratio, L/L_max",
+                                          left_padding=left_padding + " ")
 
     for i,line in enumerate(info_lines):
         pretty_line = utils.prettify(line + "  ", fg_ccode, bg_ccode, bold=False)

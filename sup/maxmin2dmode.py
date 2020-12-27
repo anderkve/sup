@@ -241,16 +241,17 @@ def run(args, mode):
 
     # Get z max and minimum
     z_min = np.min(z_data)
-    z_min_index = np.argmin(z_data)
     z_max = np.max(z_data)
-    z_max_index = np.argmax(z_data)
     z_range = [z_min, z_max]
 
-    # Get positions of max/min points
-    xyz_max = (x_data[z_max_index], y_data[z_max_index], z_max)
-    xyz_min = (x_data[z_min_index], y_data[z_min_index], z_min)
+    # Get max/min (x,y,z,s) point
+    maxmin_index = 0
+    if s_type == "max":
+        maxmin_index = np.argmax(s_data)
+    elif s_type == "min":
+        maxmin_index = np.argmin(s_data)
 
-    # z_norm = (z_data - z_min) / (z_max - z_min)
+    xyzs_maxmin = (x_data[maxmin_index], y_data[maxmin_index], z_data[maxmin_index], s_data[maxmin_index])
 
 
     # Set color limits
@@ -319,22 +320,31 @@ def run(args, mode):
                                                     fg_ccode, bg_ccode, empty_bin_ccode)
 
     # max/min legend
-    if highlight_maxmin_point:
+    legend_mod_func = lambda input_str, input_fg_ccode : utils.prettify(input_str, input_fg_ccode, bg_ccode, bold=True)
 
-        legend_mod_func = lambda input_str, input_fg_ccode : utils.prettify(input_str, input_fg_ccode, bg_ccode, bold=True)
+    point_str = ""
+    if s_index != z_index:
+        point_str = "sort_" + s_type + " point: (x, y, z, sort) = "
+    else:
+        point_str = "z_" + s_type + " point: (x, y, z) = "
 
-        if s_index == z_index:
-            legend_maxmin_entries = []
-            if s_type == "max":
-                point = ("(" + ff2 + ", " + ff2 + ", " + ff2 + ")").format(xyz_max[0], xyz_max[1], xyz_max[2])
-                legend_maxmin_entries.append( (" " + special_marker.strip(), fg_ccode, "max(z) point: (x, y, z) = " + point, fg_ccode) )
-            else:
-                point = ("(" + ff2 + ", " + ff2 + ", " + ff2 + ")").format(xyz_min[0], xyz_min[1], xyz_min[2])
-                legend_maxmin_entries.append( (" " + special_marker.strip(), fg_ccode, "min(z) point: (x, y, z) = " + point, fg_ccode) )
-            legend_maxmin, legend_maxmin_width = utils.generate_legend(legend_maxmin_entries, legend_mod_func, sep=" ", internal_sep="  ")
+    legend_maxmin_entries = []
 
-            plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode)
-            plot_lines, fig_width = utils.insert_line(legend_maxmin, legend_maxmin_width, plot_lines, fig_width, fg_ccode, bg_ccode)
+    marker_str = ""
+    if (highlight_maxmin_point) and (s_index == z_index): 
+        marker_str = "" + special_marker.strip()
+
+    if s_index != z_index:
+        point = ("(" + ff2 + ", " + ff2 + ", " + ff2 + ", " + ff2 + ")").format(xyzs_maxmin[0], xyzs_maxmin[1], xyzs_maxmin[2], xyzs_maxmin[3])
+    else:
+        point = ("(" + ff2 + ", " + ff2 + ", " + ff2 + ")").format(xyzs_maxmin[0], xyzs_maxmin[1], xyzs_maxmin[2])
+
+    point_str += point
+    legend_maxmin_entries.append( (marker_str, fg_ccode, point_str, fg_ccode) )
+    legend_maxmin, legend_maxmin_width = utils.generate_legend(legend_maxmin_entries, legend_mod_func, sep="  ", internal_sep=" ")
+
+    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode)
+    plot_lines, fig_width = utils.insert_line(legend_maxmin, legend_maxmin_width, plot_lines, fig_width, fg_ccode, bg_ccode)
         
 
     #
@@ -364,13 +374,13 @@ def run(args, mode):
                                           y_label, y_range, 
                                           z_label=z_label, z_range=z_range, 
                                           s_label=s_label, s_type=s_type,
-                                          x_transf_expr = x_transf_expr, 
-                                          y_transf_expr = y_transf_expr,
-                                          z_transf_expr = z_transf_expr, 
-                                          s_transf_expr = s_transf_expr,
+                                          x_transf_expr=x_transf_expr, 
+                                          y_transf_expr=y_transf_expr,
+                                          z_transf_expr=z_transf_expr, 
+                                          s_transf_expr=s_transf_expr,
                                           filter_names=filter_names,
-                                          mode_name=mode+"(z(x,y))",
-                                          left_padding = left_padding + " ")
+                                          mode_name=mode,
+                                          left_padding=left_padding + " ")
 
     for i,line in enumerate(info_lines):
         pretty_line = utils.prettify(line + "  ", fg_ccode, bg_ccode, bold=False)

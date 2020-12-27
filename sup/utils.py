@@ -58,7 +58,10 @@ def generate_legend(legend_entries, mod_func, sep="  ", internal_sep=" ", left_p
 
     for entry_tuple in legend_entries:
         marker, marker_ccode, txt, txt_ccode = entry_tuple
-        legend += mod_func(marker, marker_ccode) + mod_func(internal_sep + txt, txt_ccode)
+        if marker != "":
+            legend += mod_func(marker, marker_ccode) + mod_func(internal_sep + txt, txt_ccode)
+        else:
+            legend += mod_func(txt, txt_ccode)
         legend += mod_func(sep, txt_ccode)
         legend_width += len(marker) + len(internal_sep) + len(txt) + len(sep)
 
@@ -262,6 +265,9 @@ def get_bin_tuples_maxmin_1d(x_data, y_data, xy_bins, x_range, y_range, s_data, 
 
         x_bin_number = new_xdata_xbin_numbers[i]
         y_bin_number = new_ydata_ybin_numbers[i]
+
+        if y_bin_number >= y_bins:
+            continue
 
         bin_key = (x_bin_number, y_bin_number)
         if split_marker:

@@ -26,7 +26,7 @@ examples:
 import sys
 import os
 import argparse
-from sup import listmode, colorsmode, plr2dmode, plr1dmode, maxmin2dmode, avg2dmode, hist2dmode, post2dmode
+from sup import listmode, colorsmode, plr2dmode, plr1dmode, maxmin2dmode, maxmin1dmode, avg2dmode, hist2dmode, post2dmode
 
 
 def main():
@@ -46,14 +46,16 @@ def main():
         epilog="""
 modes:
   sup list    list dataset names and indices
-  sup colors  display the colors available for colormaps
   sup plr1d   plot the profile likelihood ratio across the x axis
   sup plr2d   plot the profile likelihood ratio across the (x,y) plane
+  sup max1d   plot the maximum y value across the x axis
   sup max2d   plot the maximum z value across the (x,y) plane
+  sup min1d   plot the minimum y value across the x axis
   sup min2d   plot the minimum z value across the (x,y) plane
   sup avg2d   plot the average z value across the (x,y) plane
   sup hist2d  plot the (x,y) histogram
   sup post2d  plot the (x,y) posterior probability distribution
+  sup colors  display the colors available for colormaps (for development)
 
 examples:
   ./sup.py list data.hdf5
@@ -73,10 +75,6 @@ examples:
     parser_listmode = subparsers.add_parser("list")
     parser_listmode.set_defaults(func=listmode.run)
     parser_listmode.add_argument("input_file", type=str, action="store", help="path to the input data file")
-
-    # Parser for "colors" mode
-    parser_colorsmode = subparsers.add_parser("colors")
-    parser_colorsmode.set_defaults(func=colorsmode.run)
 
     # Parser for "plr1d" mode
     parser_plr1dmode = subparsers.add_parser("plr1d")
@@ -117,6 +115,44 @@ examples:
     parser_plr2dmode.add_argument("-ns", "--no-star", action="store_true", dest="no_star", default=False, help="switch off the star marker for the max likelihood point(s)")
     parser_plr2dmode.add_argument("-rs", "--read-slice", nargs=3, type=int, action="store", dest="read_slice", default=[0,-1,1], help="read only the given slice of each dataset", metavar=("START", "END", "STEP"))
     parser_plr2dmode.add_argument("-d", "--decimals", type=int, action="store", dest="n_decimals", default=2, help="set the number of decimals for axis and colorbar tick labels", metavar="N_DECIMALS")
+
+    # Parser for "max1d" mode
+    parser_max1dmode = subparsers.add_parser("max1d")
+    parser_max1dmode.set_defaults(func=maxmin1dmode.run_max)
+    parser_max1dmode.add_argument("input_file", type=str, action="store", help="path to the input data file")
+    parser_max1dmode.add_argument("x_index", type=int, action="store", help="index of the x-axis dataset")
+    parser_max1dmode.add_argument("y_index", type=int, action="store", help="index of the y-axis dataset")
+    parser_max1dmode.add_argument("-f", "--filter", nargs="+", type=int, action="store", dest="filter_indices", default=None, help="indices of boolean datasets used for filtering", metavar="F_INDEX")
+    parser_max1dmode.add_argument("-s", "--sort", type=int, action="store", dest="s_index", default=None, help="index of the sort dataset", metavar="S_INDEX")
+    parser_max1dmode.add_argument("-xr", "--x-range", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
+    parser_max1dmode.add_argument("-yr", "--y-range", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
+    parser_max1dmode.add_argument("-b", "--bins", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="number of bins for each axis", metavar=("X_BINS", "Y_BINS"))
+    parser_max1dmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
+    parser_max1dmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
+    parser_max1dmode.add_argument("-xt", "--x-transf", type=str, action="store", dest="x_transf_expr", default="", help="tranformation for the x-axis dataset, using numpy as 'np' (e.g. -xt \"np.log10(x)\")", metavar="EXPR")
+    parser_max1dmode.add_argument("-yt", "--y-transf", type=str, action="store", dest="y_transf_expr", default="", help="tranformation for the y-axis dataset, using numpy as 'np' (e.g. -yt \"np.log10(y)\")", metavar="EXPR")
+    parser_max1dmode.add_argument("-st", "--s-transf", type=str, action="store", dest="s_transf_expr", default="", help="tranformation for the sort dataset, using numpy as 'np' (e.g. -st \"np.log10(s)\")", metavar="EXPR")
+    parser_max1dmode.add_argument("-rs", "--read-slice", nargs=3, type=int, action="store", dest="read_slice", default=[0,-1,1], help="read only the given slice of each dataset", metavar=("START", "END", "STEP"))
+    parser_max1dmode.add_argument("-d", "--decimals", type=int, action="store", dest="n_decimals", default=2, help="set the number of decimals for axis and colorbar tick labels", metavar="N_DECIMALS")
+
+    # Parser for "min1d" mode
+    parser_min1dmode = subparsers.add_parser("min1d")
+    parser_min1dmode.set_defaults(func=maxmin1dmode.run_min)
+    parser_min1dmode.add_argument("input_file", type=str, action="store", help="path to the input data file")
+    parser_min1dmode.add_argument("x_index", type=int, action="store", help="index of the x-axis dataset")
+    parser_min1dmode.add_argument("y_index", type=int, action="store", help="index of the y-axis dataset")
+    parser_min1dmode.add_argument("-f", "--filter", nargs="+", type=int, action="store", dest="filter_indices", default=None, help="indices of boolean datasets used for filtering", metavar="F_INDEX")
+    parser_min1dmode.add_argument("-s", "--sort", type=int, action="store", dest="s_index", default=None, help="index of the sort dataset", metavar="S_INDEX")
+    parser_min1dmode.add_argument("-xr", "--x-range", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
+    parser_min1dmode.add_argument("-yr", "--y-range", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
+    parser_min1dmode.add_argument("-b", "--bins", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="number of bins for each axis", metavar=("X_BINS", "Y_BINS"))
+    parser_min1dmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
+    parser_min1dmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
+    parser_min1dmode.add_argument("-xt", "--x-transf", type=str, action="store", dest="x_transf_expr", default="", help="tranformation for the x-axis dataset, using numpy as 'np' (e.g. -xt \"np.log10(x)\")", metavar="EXPR")
+    parser_min1dmode.add_argument("-yt", "--y-transf", type=str, action="store", dest="y_transf_expr", default="", help="tranformation for the y-axis dataset, using numpy as 'np' (e.g. -yt \"np.log10(y)\")", metavar="EXPR")
+    parser_min1dmode.add_argument("-st", "--s-transf", type=str, action="store", dest="s_transf_expr", default="", help="tranformation for the sort dataset, using numpy as 'np' (e.g. -st \"np.log10(s)\")", metavar="EXPR")
+    parser_min1dmode.add_argument("-rs", "--read-slice", nargs=3, type=int, action="store", dest="read_slice", default=[0,-1,1], help="read only the given slice of each dataset", metavar=("START", "END", "STEP"))
+    parser_min1dmode.add_argument("-d", "--decimals", type=int, action="store", dest="n_decimals", default=2, help="set the number of decimals for axis and colorbar tick labels", metavar="N_DECIMALS")
 
     # Parser for "max2d" mode
     parser_max2dmode = subparsers.add_parser("max2d")
@@ -243,6 +279,9 @@ examples:
     parser_post2dmode.add_argument("-rs", "--read-slice", nargs=3, type=int, action="store", dest="read_slice", default=[0,-1,1], help="read only the given slice of each dataset", metavar=("START", "END", "STEP"))
     parser_post2dmode.add_argument("-d", "--decimals", type=int, action="store", dest="n_decimals", default=2, help="set the number of decimals for axis and colorbar tick labels", metavar="N_DECIMALS")
 
+    # Parser for "colors" mode
+    parser_colorsmode = subparsers.add_parser("colors")
+    parser_colorsmode.set_defaults(func=colorsmode.run)
 
     # Parse the arguments
     args = parser.parse_args()

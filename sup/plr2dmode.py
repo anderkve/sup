@@ -278,8 +278,8 @@ def run(args):
 
     # legend_entries.append( ("", fg_ccode, "", fg_ccode) )
     if (not use_capped_loglike) and highlight_maxlike_point:
-        legend_entries.append( (" " + special_marker.strip(), max_bin_ccode, "best-fit", fg_ccode) )
-    legend_entries.append( (" " * use_capped_loglike + regular_marker.strip(), ccodes[-1], "1σ", fg_ccode) )
+        legend_entries.append( (special_marker.strip(), max_bin_ccode, "best-fit", fg_ccode) )
+    legend_entries.append( (regular_marker.strip(), ccodes[-1], "1σ", fg_ccode) )
     legend_entries.append( (regular_marker.strip(), ccodes[-2], "2σ", fg_ccode) )
     legend_entries.append( (regular_marker.strip(), ccodes[-3], "3σ", fg_ccode) )
     
@@ -315,14 +315,14 @@ def run(args):
                                           y_label, y_range, 
                                           # z_label=z_label, z_range=z_range, 
                                           s_label=s_label, s_type=s_type,
-                                          x_transf_expr = x_transf_expr, 
-                                          y_transf_expr = y_transf_expr,
+                                          x_transf_expr=x_transf_expr, 
+                                          y_transf_expr=y_transf_expr,
                                           capped_z=use_capped_loglike,
                                           capped_label="ln(L)",
                                           cap_val=args.cap_loglike_val,
                                           filter_names=filter_names,
-                                          mode_name="profile likelihood ratio, L(x,y)/L_max",
-                                          left_padding = left_padding + " ")
+                                          mode_name="profile likelihood ratio, L/L_max",
+                                          left_padding=left_padding + " ")
 
     for i,line in enumerate(info_lines):
         pretty_line = utils.prettify(line + "  ", fg_ccode, bg_ccode, bold=False)

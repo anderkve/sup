@@ -339,14 +339,14 @@ def run(args):
 
     info_lines = utils.generate_info_text(ff2,
                                           x_label, x_range, 
-                                          y_label, y_range, 
-                                          x_transf_expr = x_transf_expr, 
-                                          y_transf_expr = y_transf_expr,
-                                          w_label = w_label,
-                                          w_transf_expr = w_transf_expr,
+                                          y_label=y_label, y_range=y_range, 
+                                          x_transf_expr=x_transf_expr, 
+                                          y_transf_expr=y_transf_expr,
+                                          w_label=w_label,
+                                          w_transf_expr=w_transf_expr,
                                           filter_names=filter_names,
-                                          mode_name="posterior(x,y)",
-                                          left_padding = left_padding + " ")
+                                          mode_name="posterior",
+                                          left_padding=left_padding + " ")
 
     for i,line in enumerate(info_lines):
         pretty_line = utils.prettify(line + "  ", fg_ccode, bg_ccode, bold=False)
