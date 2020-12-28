@@ -274,8 +274,11 @@ def run(args):
     # Add info text
     #
 
+    dx = x_bin_limits[1] - x_bin_limits[0]
+
     info_lines = utils.generate_info_text(ff2,
                                           x_label, x_range, 
+                                          x_bin_width=dx,
                                           y_label=y_label, y_range=y_range, 
                                           x_transf_expr=x_transf_expr, 
                                           y_transf_expr=y_transf_expr,

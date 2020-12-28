@@ -130,6 +130,19 @@ def run(args):
 
     normalize_histogram = True
 
+    credible_regions = args.credible_regions
+    if not credible_regions:
+        credible_regions = [68., 95.]
+    # if credible_regions[-1] < 100.:
+    # credible_regions.append(100.0)
+
+    credible_regions = np.array(credible_regions)
+    if np.any(credible_regions>100.0):
+        raise Exception("Can't have a credible region with more than 100% probability.")
+    elif np.any(credible_regions<=0.0):
+        raise Exception("Can't have a credible region with <= 0% probability.")
+
+
     filter_indices = args.filter_indices
     use_filters = bool(filter_indices is not None) 
 
@@ -220,6 +233,7 @@ def run(args):
     bins_content, x_bin_limits = np.histogram(x_data, bins=xy_bins[0], range=x_range, weights=w_data, density=normalize_histogram) 
 
     # Apply y-axis transformation
+    bins_content_not_transformed = bins_content
     y = bins_content
     if y_transf_expr != "":
         bins_content = eval(y_transf_expr)
@@ -281,13 +295,25 @@ def run(args):
     # Add horizontal CR region bars
     #
 
+
+    included_bins = utils.get_cr_included_bins_1d(credible_regions, bins_content_not_transformed, dx)
+    cr_ranges_indices, cr_ranges_pos = utils.get_ranges_from_included_bins(included_bins, x_bin_limits)
+
+    # print(included_bins)
+    # print(cr_ranges_indices)
+    # print(cr_ranges_pos)
+
     plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode)
 
-    cr_ranges_dict = {}
-    cr_ranges_dict["68"] = [(-300.0, -150.0), (100.0, 350.0), (360, 380.0)]
-    cr_ranges_dict["95"] = [(-400.0, -100.0), (80.0, 400.0)]
+    # cr_ranges_dict = {}
+    # cr_ranges_dict["68"] = [(-300.0, -150.0), (100.0, 350.0), (360, 380.0)]
+    # cr_ranges_dict["95"] = [(-400.0, -100.0), (80.0, 400.0)]
 
-    for cr_key, cr_ranges in cr_ranges_dict.items():
+    for cr_index,cr_val in enumerate(credible_regions):
+        cr_str = str(cr_val)
+        cr_ranges = cr_ranges_pos[cr_index]
+
+    # for cr_key, cr_ranges in cr_ranges_dict.items():
 
         cr_bar = "   "
         prev_end_index = 0
@@ -304,32 +330,41 @@ def run(args):
             x_tick_indicies = new_indicies
             n_x_ticks = len(x_tick_indicies)
 
+            # print("new_indicies:", new_indicies)
+            if new_indicies[0] == 0:
+                cr_bar = " "
+
             cr_bar += "" + "  " * (new_indicies[0] - prev_end_index - 1)
-            for i in range(n_x_ticks):
-                if i == 0:
-                    cr_bar += "├─"
-                    # cr_bar += "┣━"
-                elif i == (n_x_ticks-1):
-                    cr_bar += "┤ "
-                    # cr_bar += "┫ "
+            for ti in range(n_x_ticks):
+                if ti == 0:
+                    # cr_bar += "├─"
+                    cr_bar += "┣━"
+                elif ti == (n_x_ticks-1):
+                    # cr_bar += "┤ "
+                    cr_bar += "┫ "
                     break
                 else:
-                    cr_bar += "┼─"
-                    # cr_bar += "━━"
-                bin_diff = x_tick_indicies[i+1] - x_tick_indicies[i]
-                cr_bar += "─" * (bin_diff * 2 - 2)
-                # cr_bar += "━" * (bin_diff * 2 - 2)
+                    # cr_bar += "┼─"
+                    cr_bar += "━━"
+                bin_diff = x_tick_indicies[ti+1] - x_tick_indicies[ti]
+                # cr_bar += "─" * (bin_diff * 2 - 2)
+                cr_bar += "━" * (bin_diff * 2 - 2)
 
             prev_end_index = cr_indices[1]
 
-        cr_bar += " " + cr_key + "% CR"
+        cr_bar += " " + cr_str + "% CR"
 
         cr_bar_width = len(cr_bar)
 
-        if cr_key == "68":
-            cr_bar = utils.prettify(cr_bar, 4, bg_ccode)
-        elif cr_key == "95":
-            cr_bar = utils.prettify(cr_bar, 12, bg_ccode)
+        cols = [4,12]
+        cc = cols[cr_index % 2]
+        cr_bar = utils.prettify(cr_bar, cc, bg_ccode)
+
+        # if cr_key == "68":
+        #     cr_bar = utils.prettify(cr_bar, 4, bg_ccode)
+        # elif cr_key == "95":
+        #     cr_bar = utils.prettify(cr_bar, 12, bg_ccode)
+
         plot_lines, fig_width = utils.insert_line(cr_bar, cr_bar_width, plot_lines, fig_width, fg_ccode, bg_ccode)
 
 
@@ -380,6 +415,7 @@ def run(args):
 
     info_lines = utils.generate_info_text(ff2,
                                           x_label, x_range, 
+                                          x_bin_width=dx,
                                           y_label=y_label, y_range=y_range, 
                                           x_transf_expr=x_transf_expr, 
                                           y_transf_expr=y_transf_expr,
@@ -387,7 +423,7 @@ def run(args):
                                           w_label=w_label,
                                           w_transf_expr=w_transf_expr,
                                           filter_names=filter_names,
-                                          mode_name="histogram",
+                                          mode_name="posterior",
                                           left_padding=left_padding + " ")
 
     for i,line in enumerate(info_lines):

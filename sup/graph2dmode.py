@@ -275,7 +275,7 @@ def run(args):
 
     info_lines = utils.generate_info_text(ff2, 
                                           x_label, x_range, 
-                                          y_label, y_range, 
+                                          y_label=y_label, y_range=y_range, 
                                           z_label=z_label, z_range=z_range, 
                                           mode_name="graph",
                                           left_padding=left_padding + " ")

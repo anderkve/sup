@@ -113,8 +113,8 @@ def generate_colorbar(plot_lines, fig_width, ff,
     return plot_lines, fig_width
 
 
-def generate_info_text(ff2, x_label, x_range, 
-                       y_label=None, y_range=None, 
+def generate_info_text(ff2, x_label, x_range, x_bin_width=None,
+                       y_label=None, y_range=None, y_bin_width=None,
                        z_label=None, z_range=None, 
                        x_transf_expr="", y_transf_expr="", z_transf_expr="", 
                        y_normalized_hist=False, z_normalized_hist=False,
@@ -131,6 +131,9 @@ def generate_info_text(ff2, x_label, x_range,
     info_lines.append(left_padding + "x-axis: {}".format(x_label))
     if x_transf_expr != "":
         info_lines.append(left_padding + "  - transf.: {}".format(x_transf_expr))
+    if x_bin_width is not None:
+        # info_lines.append(left_padding + "  - bin ∆x: {}".format(ff2.format(x_bin_width)))
+        info_lines.append(left_padding + "  - bin width: {}".format(ff2.format(x_bin_width)))
     info_lines.append(left_padding + "  - range: [{}, {}]".format(ff2.format(x_range[0]), ff2.format(x_range[1])))
 
     if y_label is not None:
@@ -139,6 +142,9 @@ def generate_info_text(ff2, x_label, x_range,
             info_lines.append(left_padding + "  - transf.: {}".format(y_transf_expr))
         if y_normalized_hist:
             info_lines.append(left_padding + "  - normalized")
+        if y_bin_width is not None:
+            # info_lines.append(left_padding + "  - bin ∆y: {}".format(ff2.format(y_bin_width)))
+            info_lines.append(left_padding + "  - bin width: {}".format(ff2.format(y_bin_width)))
         if y_range is not None:
             info_lines.append(left_padding + "  - range: [{}, {}]".format(ff2.format(y_range[0]), ff2.format(y_range[1])))
 
@@ -688,5 +694,99 @@ def apply_filters(datasets, filters):
         filtered_datasets.append(dset[joint_filter])
 
     return filtered_datasets
+
+
+def get_cr_included_bins_1d(credible_regions, bins_content, dx):
+
+    included_bins = []
+
+    # ordering for sorting from high to low bin content
+    ordering = np.argsort( bins_content )[::-1]
+
+    # for cr in credible_regions[:-1]:
+    for cr in credible_regions:
+
+        # Shortcut for 100% region
+        if cr >= 100.0:
+            included_bins.append(ordering)
+            continue
+
+        cr_sum = 0.0
+        inc_bins = []
+
+        n_indicies = len(ordering)
+        for i,index in enumerate(ordering):
+            bc = bins_content[index]
+            cr_sum += bc * dx * 100
+
+            inc_bins.append(index)
+
+            if (cr_sum > cr):
+                break
+
+            if i < n_indicies - 1:
+                next_index = ordering[i+1]
+                next_bc = bins_content[next_index]
+                next_cr_sum = cr_sum + (next_bc * dx * 100)
+                if np.abs(cr_sum - cr) < np.abs(next_cr_sum -cr):
+                    break
+            
+        included_bins.append(inc_bins)
+
+    return included_bins
+
+def get_ranges_from_included_bins(included_bins, bin_limits):
+
+    result_bin_indices = []
+    result_positions = []
+    for inc_bins_list in included_bins:
+
+        # print("START new CR: inc_bins_list: ", inc_bins_list)
+        ranges_bin_indices = []
+        ranges_positions = []
+
+        inc_bins_list.sort()
+
+        inside = False
+        begin_bi = 0
+        end_bi = 0
+        n_bins = len(inc_bins_list)
+
+        for i,bi in enumerate(inc_bins_list):
+            # print("i: ", i, "   bi: ", bi, "  inside: ", inside)
+            if inside:
+                # print(" - inc_bins_list[i+1] = ", inc_bins_list[i+1])
+                if i == n_bins-1:
+                    end_bi = bi+1
+                    ranges_bin_indices.append( (begin_bi, end_bi) )
+                    ranges_positions.append( (bin_limits[begin_bi], bin_limits[end_bi]) )
+                    inside = False
+                    continue
+
+                else:
+                    if inc_bins_list[i+1] == bi+1:
+                        # print(" - found next!")
+                        continue
+                    else:
+                        # print(" - did not find next -- closing range")
+                        end_bi = bi + 1
+                        ranges_bin_indices.append( (begin_bi, end_bi) )
+                        ranges_positions.append( (bin_limits[begin_bi], bin_limits[end_bi]) )
+                        inside = False
+                        # continue
+            # not inside
+            else:
+                begin_bi = bi
+                inside = True
+                if ((i < n_bins-1) and (inc_bins_list[i+1] != bi+1)) or (i == n_bins-1):
+                    end_bi = bi+1
+                    ranges_bin_indices.append( (begin_bi, end_bi) )
+                    ranges_positions.append( (bin_limits[begin_bi], bin_limits[end_bi]) )
+                    inside = False
+
+        result_bin_indices.append(ranges_bin_indices)
+        result_positions.append(ranges_positions)
+
+    return result_bin_indices, result_positions
 
 
