@@ -735,6 +735,7 @@ def get_cr_included_bins_1d(credible_regions, bins_content, dx):
 
     return included_bins
 
+
 def get_ranges_from_included_bins(included_bins, bin_limits):
 
     result_bin_indices = []
@@ -790,3 +791,60 @@ def get_ranges_from_included_bins(included_bins, bin_limits):
     return result_bin_indices, result_positions
 
 
+def get_bar_str(ranges_pos, bin_limits):
+
+    bar_str = "   "
+    prev_end_index = 0
+
+    for bar_range in ranges_pos:
+
+        indices = [0,0]
+        indices[0] = np.where(bin_limits==bar_range[0])[0][0]
+        indices[1] = np.where(bin_limits==bar_range[1])[0][0]
+
+        x_tick_indicies = []
+        n_ticks = 2
+        new_indicies = [ int(i) for i in np.floor( np.linspace(indices[0], indices[1], n_ticks) ) ]
+        x_tick_indicies = new_indicies
+        n_x_ticks = len(x_tick_indicies)
+
+        if new_indicies[0] == 0:
+            bar_str = " "
+
+        bar_str += "" + "  " * (new_indicies[0] - prev_end_index - 1)
+        for ti in range(n_x_ticks):
+            if ti == 0:
+                bar_str += "├─"
+                # bar_str += "┣━"
+            elif ti == (n_x_ticks-1):
+                bar_str += "┤ "
+                # bar_str += "┫ "
+                break
+            bin_diff = x_tick_indicies[ti+1] - x_tick_indicies[ti]
+            bar_str += "─" * (bin_diff * 2 - 2)
+            # bar_str += "━" * (bin_diff * 2 - 2)
+
+        prev_end_index = indices[1]
+
+    return bar_str
+
+
+def generate_credible_region_bars(credible_regions, bins_content, bin_limits, ff2):
+
+    cr_bar_lines = []
+
+    dx = bin_limits[1] - bin_limits[0]
+
+    included_bins = get_cr_included_bins_1d(credible_regions, bins_content, dx)
+
+    cr_ranges_indices, cr_ranges_pos = get_ranges_from_included_bins(included_bins, bin_limits)
+
+    for cr_index,cr_val in enumerate(credible_regions):
+        
+        bar_str = get_bar_str(cr_ranges_pos[cr_index], bin_limits)
+
+        bar_str += str(cr_val) + "% CR"
+
+        cr_bar_lines.append(bar_str)
+
+    return cr_bar_lines

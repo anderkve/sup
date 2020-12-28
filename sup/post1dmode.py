@@ -74,6 +74,11 @@ ccode_color_bb = 3 # 2  # 231
 ccode_color_wb = 11 # 10 # 232
 ccode = ccode_color_bb
 
+bar_ccodes_grayscale = [243, 240]
+bar_ccodes_color = [4,12]
+bar_ccodes = bar_ccodes_color
+
+
 def get_color_code(z_val):
 
     if z_val in [1,2]:
@@ -116,6 +121,7 @@ def run(args):
     global empty_bin_ccode_grayscale
     global fill_bin_ccode
     global fill_bin_ccode_grayscale
+    global bar_ccodes
     global empty_bin_marker
     global special_marker
     global ff
@@ -176,6 +182,7 @@ def run(args):
             empty_bin_ccode = empty_bin_ccode_grayscale_bb
             fill_bin_ccode = fill_bin_ccode_grayscale_bb
         empty_bin_marker = empty_bin_marker_grayscale
+        bar_ccodes = bar_ccodes_grayscale
 
     n_decimals = args.n_decimals
     ff = "{: ." + str(n_decimals) + "e}"
@@ -295,71 +302,13 @@ def run(args):
     # Add horizontal CR region bars
     #
 
-
-    included_bins = utils.get_cr_included_bins_1d(credible_regions, bins_content_not_transformed, dx)
-    cr_ranges_indices, cr_ranges_pos = utils.get_ranges_from_included_bins(included_bins, x_bin_limits)
-
-    # print(included_bins)
-    # print(cr_ranges_indices)
-    # print(cr_ranges_pos)
-
     plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode)
 
-    # cr_ranges_dict = {}
-    # cr_ranges_dict["68"] = [(-300.0, -150.0), (100.0, 350.0), (360, 380.0)]
-    # cr_ranges_dict["95"] = [(-400.0, -100.0), (80.0, 400.0)]
+    cr_bar_lines = utils.generate_credible_region_bars(credible_regions, bins_content_not_transformed, x_bin_limits, ff2)
 
-    for cr_index,cr_val in enumerate(credible_regions):
-        cr_str = str(cr_val)
-        cr_ranges = cr_ranges_pos[cr_index]
-
-    # for cr_key, cr_ranges in cr_ranges_dict.items():
-
-        cr_bar = "   "
-        prev_end_index = 0
-
-        for cr_range in cr_ranges:
-
-            cr_indices = [0,0]
-            cr_indices[0] = np.where(x_bin_limits==cr_range[0])[0][0]
-            cr_indices[1] = np.where(x_bin_limits==cr_range[1])[0][0]
-
-            x_tick_indicies = []
-            n_ticks = 2
-            new_indicies = [ int(i) for i in np.floor( np.linspace(cr_indices[0], cr_indices[1], n_ticks) ) ]
-            x_tick_indicies = new_indicies
-            n_x_ticks = len(x_tick_indicies)
-
-            # print("new_indicies:", new_indicies)
-            if new_indicies[0] == 0:
-                cr_bar = " "
-
-            cr_bar += "" + "  " * (new_indicies[0] - prev_end_index - 1)
-            for ti in range(n_x_ticks):
-                if ti == 0:
-                    # cr_bar += "├─"
-                    cr_bar += "┣━"
-                elif ti == (n_x_ticks-1):
-                    # cr_bar += "┤ "
-                    cr_bar += "┫ "
-                    break
-                else:
-                    # cr_bar += "┼─"
-                    cr_bar += "━━"
-                bin_diff = x_tick_indicies[ti+1] - x_tick_indicies[ti]
-                # cr_bar += "─" * (bin_diff * 2 - 2)
-                cr_bar += "━" * (bin_diff * 2 - 2)
-
-            prev_end_index = cr_indices[1]
-
-        cr_bar += " " + cr_str + "% CR"
-
-        cr_bar_width = len(cr_bar)
-
-        cols = [4,12]
-        cc = cols[cr_index % 2]
-        cr_bar = utils.prettify(cr_bar, cc, bg_ccode)
-
+    for i,line in enumerate(cr_bar_lines):
+        cr_bar_width = len(line)
+        cr_bar = utils.prettify(line, bar_ccodes[i % 2], bg_ccode)
         plot_lines, fig_width = utils.insert_line(cr_bar, cr_bar_width, plot_lines, fig_width, fg_ccode, bg_ccode)
 
 
