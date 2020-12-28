@@ -586,28 +586,28 @@ def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None, mod_func
     # Add axis lines
     #
 
-    top_line = mod_func(" " + "  " * xy_bins[0] + " _")
+    top_line = mod_func(" " + "  " * xy_bins[0] + "_")
     lines = [top_line] + lines
     for i in range(len(lines)):
         if i == 0:
             continue
         if i in y_tick_indicies:
-            lines[i] = lines[i] + mod_func(" │\u0332")
+            lines[i] = lines[i] + mod_func("│\u0332")
         else:
-            lines[i] += mod_func(" │")
+            lines[i] += mod_func("│")
 
     # x axis:
     x_axis = " "
     for i in range(n_x_ticks):
         if i == 0:
-            x_axis += "├─"
+            x_axis += "┼─"
         elif i == (n_x_ticks-1):
-            x_axis += "┤"
+            x_axis += "┼"
             break
         else:
-            x_axis += "┼"
+            x_axis += "┼─"
         bin_diff = x_tick_indicies[i+1] - x_tick_indicies[i]
-        x_axis += "─" * (bin_diff * 2 - 1)
+        x_axis += "─" * (bin_diff * 2 - 2)
     x_axis = mod_func(x_axis)
     lines.append(x_axis)
 
@@ -622,23 +622,23 @@ def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None, mod_func
         for i, tick_index in enumerate(y_tick_indicies):
             # top line
             if tick_index == y_tick_indicies[-1]:
-                lines[tick_index] = mod_func_2(" " + " _" * xy_bins[0]) + mod_func(" _")
+                lines[tick_index] = mod_func_2(" " + " _" * xy_bins[0]) + mod_func("_")
             # other lines
             else:
                 lines[tick_index] = lines[tick_index].replace("  ", mod_func_2(" _") )
 
             # Add y tick
-            lines[tick_index] += mod_func("" + y_tick_labels[i] + "  ")
+            lines[tick_index] += mod_func("" + y_tick_labels[i] + "   ")
     else:
         for i, tick_index in enumerate(y_tick_indicies):
-            lines[tick_index] += mod_func("" + y_tick_labels[i] + "  ")
+            lines[tick_index] += mod_func("" + y_tick_labels[i] + "   ")
 
 
     for i,line in enumerate(lines):
         if i in y_tick_indicies:
             pass
         else:
-            lines[i] += mod_func("" + " "*tick_width + "  ")
+            lines[i] += mod_func("" + " "*tick_width + "   ")
 
     # x ticks
     x_tick_labels = [ "{}".format(floatf.format(x_bin_limits[i])) for i in x_tick_indicies ]
@@ -646,14 +646,14 @@ def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None, mod_func
     for i in range(n_x_ticks):
         tick_label = x_tick_labels[i]
         x_ticks += tick_label
-        if i == 0:
-            x_ticks += " "    
+        # if i == 0:
+        #     x_ticks += " "    
         if i == (n_x_ticks-1):
             break
         bin_diff = x_tick_indicies[i+1] - x_tick_indicies[i]
         x_ticks += " " * ((bin_diff * 2) - len(tick_label))
 
-    x_ticks = mod_func(x_ticks + "    ")
+    x_ticks = mod_func(x_ticks + "     ")
     lines.append(x_ticks)
 
     return lines
