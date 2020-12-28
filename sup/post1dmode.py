@@ -360,11 +360,6 @@ def run(args):
         cc = cols[cr_index % 2]
         cr_bar = utils.prettify(cr_bar, cc, bg_ccode)
 
-        # if cr_key == "68":
-        #     cr_bar = utils.prettify(cr_bar, 4, bg_ccode)
-        # elif cr_key == "95":
-        #     cr_bar = utils.prettify(cr_bar, 12, bg_ccode)
-
         plot_lines, fig_width = utils.insert_line(cr_bar, cr_bar_width, plot_lines, fig_width, fg_ccode, bg_ccode)
 
 
