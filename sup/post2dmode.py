@@ -94,7 +94,7 @@ def run(args):
 
     credible_regions = args.credible_regions
     if not credible_regions:
-        credible_regions = [68., 95.]
+        credible_regions = [68.3, 95.45]
     credible_regions.append(100.0)
 
     filter_indices = args.filter_indices

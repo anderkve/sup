@@ -74,6 +74,11 @@ ccode_color_bb = 1   # 231
 ccode_color_wb = 9   # 232
 ccode = ccode_color_bb
 
+bar_ccodes_grayscale = [243, 240]
+bar_ccodes_color = [3,11] # [4,12]
+bar_ccodes = bar_ccodes_color
+
+
 def get_color_code(z_val):
 
     if z_val in [1,2]:
@@ -116,6 +121,7 @@ def run(args):
     global empty_bin_ccode_grayscale
     global fill_bin_ccode
     global fill_bin_ccode_grayscale
+    global bar_ccodes
     global empty_bin_marker
     global special_marker
     global ff
@@ -127,6 +133,16 @@ def run(args):
     loglike_index = args.loglike_index
     s_index = args.loglike_index
     s_type = "max"
+
+    confidence_levels = args.confidence_levels
+    if not confidence_levels:
+        confidence_levels = [68.3, 95.45]
+
+    confidence_levels = np.array(confidence_levels)
+    if np.any(confidence_levels>100.0):
+        raise Exception("Can't use a confidence level of more than 100%.")
+    elif np.any(confidence_levels<=0.0):
+        raise Exception("Can't use a confidence level of <= 0%.")
 
     filter_indices = args.filter_indices
     use_filters = bool(filter_indices is not None) 
@@ -244,7 +260,7 @@ def run(args):
     # Get a dict with info per bin
     #
 
-    bins_info, x_bin_limits, y_bin_limits = utils.get_bin_tuples_maxmin_1d(x_data, y_data, xy_bins, x_range, y_range, s_data, s_type, fill_below=False, split_marker=True)
+    bins_info, x_bin_limits, y_bin_limits, x_func_data, y_func_data = utils.get_bin_tuples_maxmin_1d(x_data, y_data, xy_bins, x_range, y_range, s_data, s_type, fill_below=False, split_marker=True, return_function_data=True)
 
     #
     # Generate string to be printed
@@ -287,6 +303,20 @@ def run(args):
 
     # Add blank top line
     plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode, insert_pos=0)
+
+
+    #
+    # Add horizontal confidence interval bars
+    #
+
+    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode)
+
+    cl_bar_lines = utils.generate_confidence_level_bars(confidence_levels, y_func_data, x_bin_limits, ff2)
+
+    for i,line in enumerate(cl_bar_lines):
+        cl_bar_width = len(line)
+        cl_bar = utils.prettify(line, bar_ccodes[i % 2], bg_ccode)
+        plot_lines, fig_width = utils.insert_line(cl_bar, cl_bar_width, plot_lines, fig_width, fg_ccode, bg_ccode)
 
 
     # #

@@ -314,6 +314,7 @@ examples:
     # parser_plr1dmode.add_argument("y_index", type=int, action="store", help="index of the y-axis dataset")
     parser_plr1dmode.add_argument("loglike_index", type=int, action="store", help="index of the ln(L) dataset")
     parser_plr1dmode.add_argument("-f", "--filter", nargs="+", type=int, action="store", dest="filter_indices", default=None, help="indices of boolean datasets used for filtering", metavar="F_INDEX")
+    parser_plr1dmode.add_argument("-cl", "--confidence-levels", nargs="+", type=float, action="store", dest="confidence_levels", default=None, help="list of probabilities (in percent) to define the confidence levels", metavar="CL_PROB")
     parser_plr1dmode.add_argument("-xr", "--x-range", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
     parser_plr1dmode.add_argument("-yr", "--y-range", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
     parser_plr1dmode.add_argument("-b", "--bins", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="number of bins for each axis", metavar=("X_BINS", "Y_BINS"))

@@ -138,7 +138,7 @@ def run(args):
 
     credible_regions = args.credible_regions
     if not credible_regions:
-        credible_regions = [68., 95.]
+        credible_regions = [68.3, 95.45]
     # if credible_regions[-1] < 100.:
     # credible_regions.append(100.0)
 
@@ -300,7 +300,7 @@ def run(args):
 
 
     #
-    # Add horizontal CR region bars
+    # Add horizontal credible region bars
     #
 
     plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode)

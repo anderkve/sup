@@ -193,7 +193,7 @@ def get_dataset_names(hdf5_file_object):
 
 
 def get_bin_tuples_maxmin_1d(x_data, y_data, xy_bins, x_range, y_range, s_data, s_type, 
-                             fill_below=True, fill_z_val=-1, split_marker=False):
+                             fill_below=True, fill_z_val=-1, split_marker=False, return_function_data=False):
 
     assert s_type in ["min", "max"]
     assert len(x_data) == len(y_data)
@@ -299,7 +299,10 @@ def get_bin_tuples_maxmin_1d(x_data, y_data, xy_bins, x_range, y_range, s_data, 
                 bin_key = (x_bin_number, ybn)
                 result_dict[bin_key] = (x_bin_centres[x_bin_number], y_bin_centres[ybn], -1)
 
-    return result_dict, x_bin_limits, y_bin_limits
+    if return_function_data:
+        return result_dict, x_bin_limits, y_bin_limits, new_xdata, new_ydata
+    else:
+        return result_dict, x_bin_limits, y_bin_limits
 
 
 def get_bin_tuples_maxmin(x_data, y_data, z_data, xy_bins, x_range, y_range, s_data, s_type):
@@ -696,6 +699,45 @@ def apply_filters(datasets, filters):
     return filtered_datasets
 
 
+def get_cl_included_bins_1d(confidence_levels, y_func_data, dx):
+
+    included_bins = []
+
+    # Check assumption that the max element is 1.0
+    assert np.max(y_func_data) == 1.0
+
+    indices = range(len(y_func_data))
+
+    for cl in confidence_levels:
+
+        # Shortcut for 100% region
+        if cl >= 100.0:
+            included_bins.append(indices)
+            continue
+
+        # _Anders
+        # 
+        # TODO: calculate the correct L/L_max threshold for the given CL
+        # 
+
+        llhratio_thres = 0.6
+
+        inc_bins = []
+
+        for index in indices:
+
+            y_val = y_func_data[index]
+
+            print("DEBUG: ", index, y_val, llhratio_thres)
+            if y_val >= llhratio_thres:
+                print("DEBUG: --> adding index")
+                inc_bins.append(index)
+            
+        included_bins.append(inc_bins)
+
+    return included_bins
+
+
 def get_cr_included_bins_1d(credible_regions, bins_content, dx):
 
     included_bins = []
@@ -703,7 +745,6 @@ def get_cr_included_bins_1d(credible_regions, bins_content, dx):
     # ordering for sorting from high to low bin content
     ordering = np.argsort( bins_content )[::-1]
 
-    # for cr in credible_regions[:-1]:
     for cr in credible_regions:
 
         # Shortcut for 100% region
@@ -848,6 +889,30 @@ def generate_credible_region_bars(credible_regions, bins_content, bin_limits, ff
         cr_bar_lines.append(bar_str)
 
     return cr_bar_lines
+
+
+# _Anders
+def generate_confidence_level_bars(confidence_levels, y_func_data, bin_limits, ff2):
+
+    cl_bar_lines = []
+
+    dx = bin_limits[1] - bin_limits[0]
+
+    included_bins = get_cl_included_bins_1d(confidence_levels, y_func_data, dx)
+    print(included_bins)
+    # included_bins = [[10,11,12,13,14]]
+
+    cl_ranges_indices, cl_ranges_pos = get_ranges_from_included_bins(included_bins, bin_limits)
+
+    for cl_index,cl_val in enumerate(confidence_levels):
+        
+        bar_str = get_bar_str(cl_ranges_pos[cl_index], bin_limits)
+
+        bar_str += "{:.12g}% CI".format(cl_val)
+
+        cl_bar_lines.append(bar_str)
+
+    return cl_bar_lines
 
 
 def check_weights(w_data, w_name=""):
