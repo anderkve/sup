@@ -843,7 +843,7 @@ def generate_credible_region_bars(credible_regions, bins_content, bin_limits, ff
         
         bar_str = get_bar_str(cr_ranges_pos[cr_index], bin_limits)
 
-        bar_str += str(cr_val) + "% CR"
+        bar_str += "{:.12g}% CR".format(cr_val)
 
         cr_bar_lines.append(bar_str)
 

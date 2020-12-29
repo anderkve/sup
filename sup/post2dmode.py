@@ -95,8 +95,7 @@ def run(args):
     credible_regions = args.credible_regions
     if not credible_regions:
         credible_regions = [68., 95.]
-    if credible_regions[-1] < 100.:
-        credible_regions.append(100.0)
+    credible_regions.append(100.0)
 
     filter_indices = args.filter_indices
     use_filters = bool(filter_indices is not None) 
