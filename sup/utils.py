@@ -848,3 +848,21 @@ def generate_credible_region_bars(credible_regions, bins_content, bin_limits, ff
         cr_bar_lines.append(bar_str)
 
     return cr_bar_lines
+
+
+def check_weights(w_data, w_name=""):
+    
+    extra_info = ""
+    if w_name != "":
+        extra_info = "The current dataset for weights: {}".format(w_name) 
+
+    if np.any(w_data < 0.0):
+        raise Exception("Negative weights are not allowed. Check the weights data set.\n" + extra_info)
+
+    elif np.all(w_data <= 0.0):
+        raise Exception("Found no weights greater than zero. Check the weights data set.\n" + extra_info)
+
+    return 
+
+
+

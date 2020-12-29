@@ -185,6 +185,7 @@ def run(args):
     if use_weights:
         w_name = dset_names[w_index]
         w_data = np.array(f[w_name])[read_slice]
+        utils.check_weights(w_data, w_name)
 
     filter_names, filter_datasets = utils.get_filters_hdf5(f, filter_indices, read_slice=read_slice)
 
