@@ -260,7 +260,7 @@ def run(args):
     # Get a dict with info per bin
     #
 
-    bins_info, x_bin_limits, y_bin_limits, x_func_data, y_func_data = utils.get_bin_tuples_maxmin_1d(x_data, y_data, xy_bins, x_range, y_range, s_data, s_type, fill_below=False, split_marker=True, return_function_data=True)
+    bins_info, x_bin_limits, y_bin_limits, x_func_data, y_func_data = utils.get_bin_tuples_maxmin_1d(x_data, y_data, xy_bins, x_range, y_range, s_data, s_type, fill_below=False, split_marker=True, return_function_data=True, fill_y_val=np.nan)
 
     #
     # Generate string to be printed

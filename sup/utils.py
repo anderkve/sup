@@ -193,7 +193,8 @@ def get_dataset_names(hdf5_file_object):
 
 
 def get_bin_tuples_maxmin_1d(x_data, y_data, xy_bins, x_range, y_range, s_data, s_type, 
-                             fill_below=True, fill_z_val=-1, split_marker=False, return_function_data=False):
+                             fill_below=True, fill_z_val=-1, split_marker=False, 
+                             return_function_data=False, fill_y_val=np.nan):
 
     assert s_type in ["min", "max"]
     assert len(x_data) == len(y_data)
@@ -260,10 +261,11 @@ def get_bin_tuples_maxmin_1d(x_data, y_data, xy_bins, x_range, y_range, s_data, 
 
         x_bins_dict[bin_key]["y_vals"] = x_bins_dict[bin_key]["y_vals"][ordering]
 
+        new_xdata.append(x_bin_centres[bin_key])
         if len(x_bins_dict[bin_key]["y_vals"]) > 0:
-
-            new_xdata.append(x_bin_centres[bin_key])
             new_ydata.append(x_bins_dict[bin_key]["y_vals"][0])
+        else:
+            new_ydata.append(fill_y_val)
 
     new_xdata = np.array(new_xdata)
     new_ydata = np.array(new_ydata)
@@ -703,8 +705,8 @@ def get_cl_included_bins_1d(confidence_levels, y_func_data, dx):
 
     included_bins = []
 
-    # Check assumption that the max element is 1.0
-    assert np.max(y_func_data) == 1.0
+    # Check assumption that the max (non-NaN) element is 1.0
+    assert np.max(y_func_data[np.invert(np.isnan(y_func_data))]) == 1.0
 
     indices = range(len(y_func_data))
 
@@ -720,7 +722,8 @@ def get_cl_included_bins_1d(confidence_levels, y_func_data, dx):
         # TODO: calculate the correct L/L_max threshold for the given CL
         # 
 
-        llhratio_thres = 0.6
+        print("DEBUG: cl:", cl)
+        llhratio_thres = 0.1
 
         inc_bins = []
 
@@ -728,9 +731,10 @@ def get_cl_included_bins_1d(confidence_levels, y_func_data, dx):
 
             y_val = y_func_data[index]
 
-            print("DEBUG: ", index, y_val, llhratio_thres)
+            if np.isnan(y_val):
+                continue
+
             if y_val >= llhratio_thres:
-                print("DEBUG: --> adding index")
                 inc_bins.append(index)
             
         included_bins.append(inc_bins)
@@ -834,9 +838,10 @@ def get_ranges_from_included_bins(included_bins, bin_limits):
 
 def get_bar_str(ranges_pos, bin_limits):
 
+    n_bins = len(bin_limits) - 1 
     bar_str = "   "
     prev_end_index = 0
-
+    
     for bar_range in ranges_pos:
 
         indices = [0,0]
@@ -849,21 +854,31 @@ def get_bar_str(ranges_pos, bin_limits):
         x_tick_indicies = new_indicies
         n_x_ticks = len(x_tick_indicies)
 
+        open_start = False
         if new_indicies[0] == 0:
             bar_str = " "
+            open_start = True
+
+        open_end = False
+        if new_indicies[-1] == n_bins:
+            open_end = True
 
         bar_str += "" + "  " * (new_indicies[0] - prev_end_index - 1)
+
         for ti in range(n_x_ticks):
             if ti == 0:
-                bar_str += "├─"
-                # bar_str += "┣━"
+                if open_start:
+                    bar_str += "╶─"
+                else:
+                    bar_str += "├─"
             elif ti == (n_x_ticks-1):
-                bar_str += "┤ "
-                # bar_str += "┫ "
+                if open_end:
+                    bar_str += "╴ "
+                else:
+                    bar_str += "┤ "
                 break
             bin_diff = x_tick_indicies[ti+1] - x_tick_indicies[ti]
             bar_str += "─" * (bin_diff * 2 - 2)
-            # bar_str += "━" * (bin_diff * 2 - 2)
 
         prev_end_index = indices[1]
 
@@ -899,8 +914,6 @@ def generate_confidence_level_bars(confidence_levels, y_func_data, bin_limits, f
     dx = bin_limits[1] - bin_limits[0]
 
     included_bins = get_cl_included_bins_1d(confidence_levels, y_func_data, dx)
-    print(included_bins)
-    # included_bins = [[10,11,12,13,14]]
 
     cl_ranges_indices, cl_ranges_pos = get_ranges_from_included_bins(included_bins, bin_limits)
 
