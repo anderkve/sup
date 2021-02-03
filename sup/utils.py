@@ -1,5 +1,6 @@
 import numpy as np
 from collections import OrderedDict
+from scipy.stats import chi2
 import h5py
 
 
@@ -708,7 +709,7 @@ def get_cl_included_bins_1d(confidence_levels, y_func_data, dx):
     # Check assumption that the max (non-NaN) element is 1.0
     assert np.max(y_func_data[np.invert(np.isnan(y_func_data))]) == 1.0
 
-    indices = range(len(y_func_data))
+    indices = list(range(len(y_func_data)))
 
     for cl in confidence_levels:
 
@@ -717,13 +718,10 @@ def get_cl_included_bins_1d(confidence_levels, y_func_data, dx):
             included_bins.append(indices)
             continue
 
-        # _Anders
-        # 
-        # TODO: calculate the correct L/L_max threshold for the given CL
-        # 
-
-        print("DEBUG: cl:", cl)
-        llhratio_thres = 0.1
+        # Calculate the correct L/L_max threshold for the given CL
+        pp = cl * 0.01
+        chi2_val = chi2.ppf(pp, df=1)
+        llhratio_thres = np.exp(-0.5 * chi2_val)
 
         inc_bins = []
 
@@ -906,7 +904,6 @@ def generate_credible_region_bars(credible_regions, bins_content, bin_limits, ff
     return cr_bar_lines
 
 
-# _Anders
 def generate_confidence_level_bars(confidence_levels, y_func_data, bin_limits, ff2):
 
     cl_bar_lines = []
