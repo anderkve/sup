@@ -386,6 +386,74 @@ examples:
         parser.print_usage()
         sys.exit(1)
 
+
+    # Consistency checks for arguments
+    error_prefix = os.path.basename(__file__) + ": error: "
+    args_dict = vars(args)
+
+    if "x_range" in args_dict.keys():
+      if args.x_range is not None:
+        if args.x_range[0] >= args.x_range[1]:
+          print(error_prefix + "X_MIN must be smaller than X_MAX")
+          return
+
+    if "y_range" in args_dict.keys():
+      if args.y_range is not None:
+        if args.y_range[0] >= args.y_range[1]:
+          print(error_prefix + "Y_MIN must be smaller than Y_MAX")
+          return
+
+    if "z_range" in args_dict.keys():
+      if args.z_range is not None:
+        if args.z_range[0] >= args.z_range[1]:
+          print(error_prefix + "Z_MIN must be smaller than Z_MAX")
+          return
+
+    if "xy_bins" in args_dict.keys():
+      if args.xy_bins is not None:
+        if (args.xy_bins[0] < 6) or (args.xy_bins[1] < 6):
+          print(error_prefix + "X_BINS and Y_BINS must be at least 6")
+          return
+
+    if "n_colors" in args_dict.keys():
+      if args.n_colors is not None:
+        if args.n_colors <= 0:
+          print(error_prefix + "N_COLORS must be an integer greater than 0")
+          return
+
+    if "cmap_index" in args_dict.keys():
+      if args.cmap_index is not None:
+        if args.cmap_index not in [0,1]:
+          print(error_prefix + "the colormap option (CM) must equal 0 or 1")
+          return
+
+    if "read_slice" in args_dict.keys():
+      if args.read_slice is not None:
+        if args.read_slice[2] <= 0:
+          print(error_prefix + "STEP must be an integer greater than 0")
+          return
+
+    if "n_decimals" in args_dict.keys():
+      if args.n_decimals is not None:
+        if (args.n_decimals < 1) or (args.n_decimals > 8):
+          print(error_prefix + "N_DECIMALS must be an integer between 1 and 8")
+          return
+
+    if "credible_regions" in args_dict.keys():
+      if args.credible_regions is not None:
+        for cr_val in args.credible_regions:
+          if (cr_val < 0.) or (cr_val > 100.):
+            print(error_prefix + "CR_PROB (credible region probability) must be between 0 and 100")
+            return 
+
+    if "confidence_levels" in args_dict.keys():
+      if args.confidence_levels is not None:
+        for cl_val in args.confidence_levels:
+          if (cl_val < 0.) or (cl_val > 100.):
+            print(error_prefix + "CL_PROB (confidence level probability) must be between 0 and 100")
+            return 
+
+
     # Run the function for the chosen mode
     args.func(args)
 

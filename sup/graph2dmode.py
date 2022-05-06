@@ -57,18 +57,25 @@ ccodes = cmaps[0]
 
 def get_color_code(z_val, color_z_lims):
 
-    i = 0
-    for j, lim in enumerate(color_z_lims):
-        if z_val > lim:
-            i = j
-        else:
-            break
-    return ccodes[i]
+    if z_val >= color_z_lims[-1]:
+        return ccodes[-1]
+    elif z_val <= color_z_lims[0]:
+        return ccodes[0]        
+    else:
+        i = 0
+        for j, lim in enumerate(color_z_lims):
+            if z_val > lim:
+                i = j
+            else:
+                break
+        return ccodes[i]
+    raise Exception("Unexpected z_val. This shouldn't happen...")
 
 
 def get_marker():
 
     return regular_marker
+
 
 
 #
