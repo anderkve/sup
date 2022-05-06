@@ -3,6 +3,7 @@ import numpy as np
 import h5py
 import sup.defaults as defaults
 import sup.utils as utils
+from sup.colors import cmaps, cmaps_grayscale
 
 
 #
@@ -33,16 +34,8 @@ empty_bin_ccode_color_bb = 237
 empty_bin_ccode_color_wb = 252
 empty_bin_ccode = empty_bin_ccode_color_bb
 
-cmaps_grayscale = [
-    [233, 236, 239, 242, 244, 247, 250, 253, 255, 231],  # for black background
-    [232, 235, 238, 240, 243, 246, 248, 251, 253, 255][::-1],  # for white background
-]
 ccodes_grayscale = cmaps_grayscale[0]
 
-cmaps = [
-    [53,56,62,26,31,36,42,47,154,226],      # viridis
-    [18,20,27,45,122,155,226,214,202,196],  # jet
-]
 ccodes = cmaps[0]
 
 

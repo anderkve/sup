@@ -100,7 +100,7 @@ examples:
     parser_hist1dmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
     parser_hist1dmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
     # parser_hist1dmode.add_argument("-nc", "--num-colors", type=int, action="store", dest="n_colors", default=10, help="number of colors in colorbar (max 10)", metavar="N_COLORS")
-    # parser_hist1dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish", metavar="CM")
+    # parser_hist1dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish, 2 = inferno-ish", metavar="CM")
     # parser_hist1dmode.add_argument("-rc", "--reverse-colormap", action="store_true", dest="reverse_colormap", default=False, help="reverse colormap")
     parser_hist1dmode.add_argument("-xt", "--x-transf", type=str, action="store", dest="x_transf_expr", default="", help="tranformation for the x-axis dataset, using numpy as 'np' (e.g. -xt \"np.log10(x)\")", metavar="EXPR")
     parser_hist1dmode.add_argument("-yt", "--y-transf", type=str, action="store", dest="y_transf_expr", default="", help="tranformation for the y-axis dataset, using numpy as 'np' (e.g. -yt \"np.log10(y)\")", metavar="EXPR")
@@ -124,7 +124,7 @@ examples:
     parser_hist2dmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
     parser_hist2dmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
     parser_hist2dmode.add_argument("-nc", "--num-colors", type=int, action="store", dest="n_colors", default=10, help="number of colors in colorbar (max 10)", metavar="N_COLORS")
-    parser_hist2dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish", metavar="CM")
+    parser_hist2dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish, 2 = inferno-ish", metavar="CM")
     parser_hist2dmode.add_argument("-rc", "--reverse-colormap", action="store_true", dest="reverse_colormap", default=False, help="reverse colormap")
     parser_hist2dmode.add_argument("-xt", "--x-transf", type=str, action="store", dest="x_transf_expr", default="", help="tranformation for the x-axis dataset, using numpy as 'np' (e.g. -xt \"np.log10(x)\")", metavar="EXPR")
     parser_hist2dmode.add_argument("-yt", "--y-transf", type=str, action="store", dest="y_transf_expr", default="", help="tranformation for the y-axis dataset, using numpy as 'np' (e.g. -yt \"np.log10(y)\")", metavar="EXPR")
@@ -187,7 +187,7 @@ examples:
     parser_max2dmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
     parser_max2dmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
     parser_max2dmode.add_argument("-nc", "--num-colors", type=int, action="store", dest="n_colors", default=10, help="number of colors in colorbar (max 10)", metavar="N_COLORS")
-    parser_max2dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish", metavar="CM")
+    parser_max2dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish, 2 = inferno-ish", metavar="CM")
     parser_max2dmode.add_argument("-rc", "--reverse-colormap", action="store_true", dest="reverse_colormap", default=False, help="reverse colormap")
     parser_max2dmode.add_argument("-xt", "--x-transf", type=str, action="store", dest="x_transf_expr", default="", help="tranformation for the x-axis dataset, using numpy as 'np' (e.g. -xt \"np.log10(x)\")", metavar="EXPR")
     parser_max2dmode.add_argument("-yt", "--y-transf", type=str, action="store", dest="y_transf_expr", default="", help="tranformation for the y-axis dataset, using numpy as 'np' (e.g. -yt \"np.log10(y)\")", metavar="EXPR")
@@ -212,7 +212,7 @@ examples:
     parser_min2dmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
     parser_min2dmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
     parser_min2dmode.add_argument("-nc", "--num-colors", type=int, action="store", dest="n_colors", default=10, help="number of colors in colorbar (max 10)", metavar="N_COLORS")
-    parser_min2dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish", metavar="CM")
+    parser_min2dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish, 2 = inferno-ish", metavar="CM")
     parser_min2dmode.add_argument("-rc", "--reverse-colormap", action="store_true", dest="reverse_colormap", default=False, help="reverse colormap")
     parser_min2dmode.add_argument("-xt", "--x-transf", type=str, action="store", dest="x_transf_expr", default="", help="tranformation for the x-axis dataset, using numpy as 'np' (e.g. -xt \"np.log10(x)\")", metavar="EXPR")
     parser_min2dmode.add_argument("-yt", "--y-transf", type=str, action="store", dest="y_transf_expr", default="", help="tranformation for the y-axis dataset, using numpy as 'np' (e.g. -yt \"np.log10(y)\")", metavar="EXPR")
@@ -254,7 +254,7 @@ examples:
     parser_avg2dmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
     parser_avg2dmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
     parser_avg2dmode.add_argument("-nc", "--num-colors", type=int, action="store", dest="n_colors", default=10, help="number of colors in colorbar (max 10)", metavar="N_COLORS")
-    parser_avg2dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish", metavar="CM")
+    parser_avg2dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish, 2 = inferno-ish", metavar="CM")
     parser_avg2dmode.add_argument("-rc", "--reverse-colormap", action="store_true", dest="reverse_colormap", default=False, help="reverse colormap")
     parser_avg2dmode.add_argument("-xt", "--x-transf", type=str, action="store", dest="x_transf_expr", default="", help="tranformation for the x-axis dataset, using numpy as 'np' (e.g. -xt \"np.log10(x)\")", metavar="EXPR")
     parser_avg2dmode.add_argument("-yt", "--y-transf", type=str, action="store", dest="y_transf_expr", default="", help="tranformation for the y-axis dataset, using numpy as 'np' (e.g. -yt \"np.log10(y)\")", metavar="EXPR")
@@ -277,7 +277,7 @@ examples:
     parser_post1dmode.add_argument("-b", "--bins", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="number of bins for each axis", metavar=("X_BINS", "Y_BINS"))
     parser_post1dmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
     parser_post1dmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
-    parser_post1dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish", metavar="CM")
+    parser_post1dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish, 2 = inferno-ish", metavar="CM")
     parser_post1dmode.add_argument("-rc", "--reverse-colormap", action="store_true", dest="reverse_colormap", default=False, help="reverse colormap")
     parser_post1dmode.add_argument("-xt", "--x-transf", type=str, action="store", dest="x_transf_expr", default="", help="tranformation for the x-axis dataset, using numpy as 'np' (e.g. -xt \"np.log10(x)\")", metavar="EXPR")
     parser_post1dmode.add_argument("-yt", "--y-transf", type=str, action="store", dest="y_transf_expr", default="", help="tranformation for the y-axis dataset, using numpy as 'np' (e.g. -yt \"np.log10(y)\")", metavar="EXPR")
@@ -299,7 +299,7 @@ examples:
     parser_post2dmode.add_argument("-b", "--bins", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="number of bins for each axis", metavar=("X_BINS", "Y_BINS"))
     parser_post2dmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
     parser_post2dmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
-    parser_post2dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish", metavar="CM")
+    parser_post2dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish, 2 = inferno-ish", metavar="CM")
     parser_post2dmode.add_argument("-rc", "--reverse-colormap", action="store_true", dest="reverse_colormap", default=False, help="reverse colormap")
     parser_post2dmode.add_argument("-xt", "--x-transf", type=str, action="store", dest="x_transf_expr", default="", help="tranformation for the x-axis dataset, using numpy as 'np' (e.g. -xt \"np.log10(x)\")", metavar="EXPR")
     parser_post2dmode.add_argument("-yt", "--y-transf", type=str, action="store", dest="y_transf_expr", default="", help="tranformation for the y-axis dataset, using numpy as 'np' (e.g. -yt \"np.log10(y)\")", metavar="EXPR")
@@ -370,7 +370,7 @@ examples:
     parser_graph2dmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
     parser_graph2dmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
     parser_graph2dmode.add_argument("-nc", "--num-colors", type=int, action="store", dest="n_colors", default=10, help="number of colors in colorbar (max 10)", metavar="N_COLORS")
-    parser_graph2dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish", metavar="CM")
+    parser_graph2dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish, 2 = inferno-ish", metavar="CM")
     parser_graph2dmode.add_argument("-rc", "--reverse-colormap", action="store_true", dest="reverse_colormap", default=False, help="reverse colormap")
     parser_graph2dmode.add_argument("-d", "--decimals", type=int, action="store", dest="n_decimals", default=2, help="set the number of decimals for axis and colorbar tick labels", metavar="N_DECIMALS")
 
@@ -417,14 +417,14 @@ examples:
 
     if "n_colors" in args_dict.keys():
       if args.n_colors is not None:
-        if args.n_colors <= 0:
-          print(error_prefix + "N_COLORS must be an integer greater than 0")
+        if (args.n_colors < 1) or (args.n_colors > 10):
+          print(error_prefix + "N_COLORS must be an integer between 1 and 10")
           return
 
     if "cmap_index" in args_dict.keys():
       if args.cmap_index is not None:
-        if args.cmap_index not in [0,1]:
-          print(error_prefix + "the colormap option (CM) must equal 0 or 1")
+        if args.cmap_index not in [0,1,2]:
+          print(error_prefix + "the colormap option (CM) must equal 0, 1 or 2")
           return
 
     if "read_slice" in args_dict.keys():
