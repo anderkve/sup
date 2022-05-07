@@ -1,4 +1,3 @@
-import sys
 import numpy as np
 import h5py
 import sup.defaults as defaults
@@ -299,4 +298,4 @@ def run(args):
     for line in plot_lines:
         print(line)
 
-    sys.exit()    
+    return
