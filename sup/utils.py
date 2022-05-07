@@ -2,6 +2,8 @@ import numpy as np
 from collections import OrderedDict
 from scipy.stats import chi2
 import h5py
+from io import StringIO 
+
 
 
 def prettify(input_string, fg_ccode, bg_ccode, bold=True, reset=True):
@@ -183,7 +185,7 @@ def generate_info_text(ff2, x_label, x_range, x_bin_width=None,
     return info_lines
 
 
-def get_dataset_names(hdf5_file_object):
+def get_dataset_names_hdf5(hdf5_file_object):
     result = []
     def get_datasets(name, obj):
         if type(obj) is h5py._hl.dataset.Dataset:
@@ -191,6 +193,40 @@ def get_dataset_names(hdf5_file_object):
 
     hdf5_file_object.visititems(get_datasets)
     return result
+
+
+def get_dataset_names_txt(txt_file_name):
+    result = []
+
+    # To avoid reading the entire file just to list the dataset names
+    # we'll use a StringIO file-like object constructed from the first
+    # interesting line in the file.
+
+    comments = '#'
+
+    # Let's find the first non-empty comment line, which we require 
+    # should contain the column names.
+    firstline = ''
+    with open(txt_file_name) as f:
+        templine = ''
+        for line in f:
+            templine = line.lstrip().rstrip()
+            if not ((templine == '') or (templine == comments)):
+                break
+        firstline = templine
+
+    use_names = True
+    # If firstline is not a header with column names, we have to create
+    # a list of names based on the number of columns we detect from firstline.
+    if not firstline.startswith(comments):
+        n_cols = len(firstline.replace(',', ' ').split())
+        use_names = ['dataset' + str(i) for i in range(n_cols)]
+
+    stringIO_file = StringIO(firstline)
+    dsets = np.genfromtxt(stringIO_file, names=use_names, comments=comments)
+    result = dsets.dtype.names
+    return result
+
 
 
 def get_bin_tuples_maxmin_1d(x_data, y_data, xy_bins, x_range, y_range, s_data, s_type, 
@@ -673,7 +709,7 @@ def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None, mod_func
 
 def get_filters_hdf5(data_file, filter_indices, read_slice=slice(0,-1,1)):
 
-    dset_names = get_dataset_names(data_file)
+    dset_names = get_dataset_names_hdf5(data_file)
 
     filter_names = []
     filter_datasets = []

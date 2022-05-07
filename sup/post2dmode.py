@@ -143,7 +143,7 @@ def run(args):
 
     f = h5py.File(input_file, "r")
 
-    dset_names = utils.get_dataset_names(f)
+    dset_names = utils.get_dataset_names_hdf5(f)
     x_name = dset_names[x_index]
     y_name = dset_names[y_index]
 
