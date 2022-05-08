@@ -336,8 +336,16 @@ def get_filters_txt(input_file, filter_indices, read_slice, delimiter=' '):
     filter_dsets = []
     filter_names = []
 
-    # _Anders
-    print("Function get_filters_txt is not implemented yet!")
+    all_dset_names = get_dataset_names_txt(input_file)
+
+    filter_names = [ all_dset_names[filter_index] for filter_index in filter_indices ]
+    
+    if delimiter.strip() == "":
+        delimiter = None
+
+    filter_dsets = list( np.genfromtxt(input_file, usecols=filter_indices, names=filter_names, unpack=True, comments="#", delimiter=delimiter) )
+    if len(filter_indices) == 1:
+        filter_dsets = [filter_dsets]
 
     return filter_dsets, filter_names
 
@@ -353,6 +361,9 @@ def apply_filters(datasets, filters):
     for dset in datasets:
         assert len(dset) == len(joint_filter)
         filtered_datasets.append(dset[joint_filter])
+
+    if len(filtered_datasets[0]) == 0:
+        raise RuntimeError("No data points left after applying filters.")
 
     return filtered_datasets
 
@@ -457,7 +468,6 @@ def get_bin_tuples_maxmin_1d(x_data, y_data, xy_bins, x_range, y_range, s_data, 
             if new_ydata[i] > y_bin_centres[y_bin_number]:
                 use_z_val = 2
             result_dict[bin_key] = (x_bin_centres[x_bin_number], y_bin_centres[y_bin_number], use_z_val)
-            # print("DEBUG:", new_ydata[i], " vs ", [y_bin_limits[y_bin_number], y_bin_limits[y_bin_number+1]], " --> z_val = ", use_z_val)
         else:
             result_dict[bin_key] = (x_bin_centres[x_bin_number], y_bin_centres[y_bin_number], 1)
 
@@ -517,8 +527,6 @@ def get_bin_tuples_maxmin(x_data, y_data, z_data, xy_bins, x_range, y_range, s_d
         # if di % 1000 == 0:
         #     print("Point", di)
 
-        # x_val = x_data[di]
-        # y_val = y_data[di]
         z_val = z_data[di]
         s_val = s_data[di]
 
@@ -1066,10 +1074,10 @@ def check_weights(w_data, w_name=""):
         extra_info = "The current dataset for weights: {}".format(w_name) 
 
     if np.any(w_data < 0.0):
-        raise Exception("Negative weights are not allowed. Check the weights data set.\n" + extra_info)
+        raise RuntimeError("Negative weights are not allowed. Check the weights data set.\n" + extra_info)
 
     elif np.all(w_data <= 0.0):
-        raise Exception("Found no weights greater than zero. Check the weights data set.\n" + extra_info)
+        raise RuntimeError("Found no weights greater than zero. Check the weights data set.\n" + extra_info)
 
     return 
 

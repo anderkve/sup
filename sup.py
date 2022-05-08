@@ -465,10 +465,15 @@ examples:
             print(error_prefix + "CL_PROB (confidence level probability) must be between 0 and 100")
             return 
 
-
-    # Run the function for the chosen mode
-    args.func(args)
-
+    try:
+      # Run the function for the chosen mode
+      args.func(args)
+    except RuntimeError as e:
+      print(error_prefix + "{0}".format(e))
+    except BaseException as e:
+      print(error_prefix + "Unexpected error:")
+      print()
+      raise e
 
 if __name__ == "__main__":
     main()

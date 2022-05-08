@@ -14,4 +14,4 @@ def run(args):
             colors += "\n"
     print(colors)
 
-    sys.exit()    
+    return

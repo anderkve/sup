@@ -279,4 +279,4 @@ def run(args):
     for line in plot_lines:
         print(line)
 
-    sys.exit()    
+    return
