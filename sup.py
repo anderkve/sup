@@ -66,9 +66,13 @@ modes:
 examples:
   ./sup.py list data.hdf5
 
-  ./sup.py plr2d data.hdf5 0 1 4 --x-range 0 10 --y-range 0 10 --bins 20 20
+  ./sup.py list data.txt --delimiter ","
 
-  ./sup.py plr2d data.hdf5 2 1 4 --x-range 0 10 --y-range 0 10 --bins 20 20 -g
+  ./sup.py hist1d data.txt 0 --x-range -10 10 --bins 100 20 --y-transf "np.log10(y)" --delimiter ","
+
+  ./sup.py hist2d data.txt 0 1 --x-range -10 10 --y-range -10 10 --bins 30 30 --delimiter ","
+
+  ./sup.py plr2d data.hdf5 0 1 4 --x-range 0 10 --y-range 0 10 --bins 20 20
 
   ./sup.py plr2d data.hdf5 2 1 4 --x-range 0 10 --y-range 0 20 --bins 20 40 --x-transf "np.abs(x)"
 
