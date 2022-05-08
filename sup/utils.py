@@ -1071,13 +1071,13 @@ def check_weights(w_data, w_name=""):
     
     extra_info = ""
     if w_name != "":
-        extra_info = "The current dataset for weights: {}".format(w_name) 
+        extra_info = "The current dataset for weights is {}.".format(w_name) 
 
     if np.any(w_data < 0.0):
-        raise RuntimeError("Negative weights are not allowed. Check the weights data set.\n" + extra_info)
+        raise RuntimeError("Negative weights are not allowed. Check the weights data set. " + extra_info)
 
     elif np.all(w_data <= 0.0):
-        raise RuntimeError("Found no weights greater than zero. Check the weights data set.\n" + extra_info)
+        raise RuntimeError("Found no weights greater than zero. Check the weights data set. " + extra_info)
 
     return 
 

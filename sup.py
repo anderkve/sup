@@ -16,17 +16,17 @@ modes:
 examples:
   ./sup.py list data.hdf5
 
-  ./sup.py plr data.hdf5 0 1 4 --x-range 0 10 --y-range 0 10 --bins 20 20
+  ./sup.py plr data.hdf5 0 1 4 --x-range 0 10 --y-range 0 10 --size 20 20
 
-  ./sup.py plr data.hdf5 2 1 4 --x-range 0 10 --y-range 0 10 --bins 20 20 -g
+  ./sup.py plr data.hdf5 2 1 4 --x-range 0 10 --y-range 0 10 --size 20 20 -g
 
-  ./sup.py plr data.hdf5 2 1 4 --x-range 0 10 --y-range 0 20 --bins 20 40 --x-transf "np.abs(x)"
+  ./sup.py plr data.hdf5 2 1 4 --x-range 0 10 --y-range 0 20 --size 20 40 --x-transf "np.abs(x)"
 """
 
 import sys
 import os
 import argparse
-from sup import listmode, colorsmode, plr2dmode, plr1dmode, maxmin2dmode, maxmin1dmode, avg1dmode, avg2dmode, hist1dmode, hist2dmode, post1dmode, post2dmode, graph1dmode, graph2dmode
+from sup import colors, listmode, colorsmode, plr2dmode, plr1dmode, maxmin2dmode, maxmin1dmode, avg1dmode, avg2dmode, hist1dmode, hist2dmode, post1dmode, post2dmode, graph1dmode, graph2dmode
 
 
 
@@ -68,17 +68,19 @@ examples:
 
   ./sup.py list data.txt --delimiter ","
 
-  ./sup.py hist1d data.txt 0 --x-range -10 10 --bins 100 20 --y-transf "np.log10(y)" --delimiter ","
+  ./sup.py hist1d data.txt 0 --x-range -10 10 --size 100 20 --y-transf "np.log10(y)" --delimiter ","
 
-  ./sup.py hist2d data.txt 0 1 --x-range -10 10 --y-range -10 10 --bins 30 30 --delimiter ","
+  ./sup.py hist2d data.txt 0 1 --x-range -10 10 --y-range -10 10 --size 30 30 --delimiter "," --colormap 1
 
-  ./sup.py plr2d data.hdf5 0 1 4 --x-range 0 10 --y-range 0 10 --bins 20 20
+  ./sup.py post2d posterior.dat 2 3 --x-range -10 10 --y-range -10 10 --size 30 30 --delimiter " "
 
-  ./sup.py plr2d data.hdf5 2 1 4 --x-range 0 10 --y-range 0 20 --bins 20 40 --x-transf "np.abs(x)"
+  ./sup.py plr2d data.hdf5 0 1 4 --x-range 0 10 --y-range 0 10 --size 20 20
 
-  ./sup.py graph1d "x * np.cos(2 * np.pi * x)" --x-range 0.0 2.0 --y-range -2 2 --bins 40 20
+  ./sup.py plr2d data.hdf5 2 1 4 --x-range 0 10 --y-range 0 20 --size 20 40 --x-transf "np.abs(x)"
 
-  ./sup.py graph2d "np.sin(x**2 + y**2) / (x**2 + y**2)" --x-range -5 5 --y-range -5 5 --bins 50 50
+  ./sup.py graph1d "x * np.cos(2 * np.pi * x)" --x-range 0.0 2.0 --y-range -2 2 --size 40 20 --white-bg
+
+  ./sup.py graph2d "np.sin(x**2 + y**2) / (x**2 + y**2)" --x-range -5 5 --y-range -5 5 --size 50 50
         """,
   # sup post    plot the z posterior probability density
     )
@@ -100,11 +102,11 @@ examples:
     parser_hist1dmode.add_argument("-n", "--normalize", action="store_true", dest="normalize_histogram", default=False, help="normalize histogram to integrate to unity")
     parser_hist1dmode.add_argument("-xr", "--x-range", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
     parser_hist1dmode.add_argument("-yr", "--y-range", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
-    parser_hist1dmode.add_argument("-b", "--bins", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="number of bins for each axis", metavar=("X_BINS", "Y_BINS"))
+    parser_hist1dmode.add_argument("-sz", "--size", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="plot size in terms of number of grid cells (bins) for each axis", metavar=("X_SIZE", "Y_SIZE"))
     parser_hist1dmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
     parser_hist1dmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
     # parser_hist1dmode.add_argument("-nc", "--num-colors", type=int, action="store", dest="n_colors", default=10, help="number of colors in colorbar (max 10)", metavar="N_COLORS")
-    # parser_hist1dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish, 2 = inferno-ish", metavar="CM")
+    # parser_hist1dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish, 2 = inferno-ish, 3 = blue-red-ish", metavar="CM")
     # parser_hist1dmode.add_argument("-rc", "--reverse-colormap", action="store_true", dest="reverse_colormap", default=False, help="reverse colormap")
     parser_hist1dmode.add_argument("-xt", "--x-transf", type=str, action="store", dest="x_transf_expr", default="", help="tranformation for the x-axis dataset, using numpy as 'np' (e.g. -xt \"np.log10(x)\")", metavar="EXPR")
     parser_hist1dmode.add_argument("-yt", "--y-transf", type=str, action="store", dest="y_transf_expr", default="", help="tranformation for the y-axis dataset, using numpy as 'np' (e.g. -yt \"np.log10(y)\")", metavar="EXPR")
@@ -125,11 +127,11 @@ examples:
     parser_hist2dmode.add_argument("-xr", "--x-range", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
     parser_hist2dmode.add_argument("-yr", "--y-range", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
     parser_hist2dmode.add_argument("-zr", "--z-range", nargs=2, type=float, action="store", dest="z_range", default=None, help="z-axis range", metavar=("Z_MIN", "Z_MAX"))
-    parser_hist2dmode.add_argument("-b", "--bins", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="number of bins for each axis", metavar=("X_BINS", "Y_BINS"))
+    parser_hist2dmode.add_argument("-sz", "--size", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="plot size in terms of number of grid cells (bins) for each axis", metavar=("X_SIZE", "Y_SIZE"))
     parser_hist2dmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
     parser_hist2dmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
     parser_hist2dmode.add_argument("-nc", "--num-colors", type=int, action="store", dest="n_colors", default=10, help="number of colors in colorbar (max 10)", metavar="N_COLORS")
-    parser_hist2dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish, 2 = inferno-ish", metavar="CM")
+    parser_hist2dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish, 2 = inferno-ish, 3 = blue-red-ish", metavar="CM")
     parser_hist2dmode.add_argument("-rc", "--reverse-colormap", action="store_true", dest="reverse_colormap", default=False, help="reverse colormap")
     parser_hist2dmode.add_argument("-xt", "--x-transf", type=str, action="store", dest="x_transf_expr", default="", help="tranformation for the x-axis dataset, using numpy as 'np' (e.g. -xt \"np.log10(x)\")", metavar="EXPR")
     parser_hist2dmode.add_argument("-yt", "--y-transf", type=str, action="store", dest="y_transf_expr", default="", help="tranformation for the y-axis dataset, using numpy as 'np' (e.g. -yt \"np.log10(y)\")", metavar="EXPR")
@@ -149,7 +151,7 @@ examples:
     parser_max1dmode.add_argument("-s", "--sort", type=int, action="store", dest="s_index", default=None, help="index of the sort dataset", metavar="S_INDEX")
     parser_max1dmode.add_argument("-xr", "--x-range", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
     parser_max1dmode.add_argument("-yr", "--y-range", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
-    parser_max1dmode.add_argument("-b", "--bins", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="number of bins for each axis", metavar=("X_BINS", "Y_BINS"))
+    parser_max1dmode.add_argument("-sz", "--size", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="plot size in terms of number of grid cells (bins) for each axis", metavar=("X_SIZE", "Y_SIZE"))
     parser_max1dmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
     parser_max1dmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
     parser_max1dmode.add_argument("-xt", "--x-transf", type=str, action="store", dest="x_transf_expr", default="", help="tranformation for the x-axis dataset, using numpy as 'np' (e.g. -xt \"np.log10(x)\")", metavar="EXPR")
@@ -169,7 +171,7 @@ examples:
     parser_min1dmode.add_argument("-s", "--sort", type=int, action="store", dest="s_index", default=None, help="index of the sort dataset", metavar="S_INDEX")
     parser_min1dmode.add_argument("-xr", "--x-range", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
     parser_min1dmode.add_argument("-yr", "--y-range", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
-    parser_min1dmode.add_argument("-b", "--bins", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="number of bins for each axis", metavar=("X_BINS", "Y_BINS"))
+    parser_min1dmode.add_argument("-sz", "--size", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="plot size in terms of number of grid cells (bins) for each axis", metavar=("X_SIZE", "Y_SIZE"))
     parser_min1dmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
     parser_min1dmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
     parser_min1dmode.add_argument("-xt", "--x-transf", type=str, action="store", dest="x_transf_expr", default="", help="tranformation for the x-axis dataset, using numpy as 'np' (e.g. -xt \"np.log10(x)\")", metavar="EXPR")
@@ -191,11 +193,11 @@ examples:
     parser_max2dmode.add_argument("-xr", "--x-range", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
     parser_max2dmode.add_argument("-yr", "--y-range", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
     parser_max2dmode.add_argument("-zr", "--z-range", nargs=2, type=float, action="store", dest="z_range", default=None, help="z-axis range", metavar=("Z_MIN", "Z_MAX"))
-    parser_max2dmode.add_argument("-b", "--bins", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="number of bins for each axis", metavar=("X_BINS", "Y_BINS"))
+    parser_max2dmode.add_argument("-sz", "--size", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="plot size in terms of number of grid cells (bins) for each axis", metavar=("X_SIZE", "Y_SIZE"))
     parser_max2dmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
     parser_max2dmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
     parser_max2dmode.add_argument("-nc", "--num-colors", type=int, action="store", dest="n_colors", default=10, help="number of colors in colorbar (max 10)", metavar="N_COLORS")
-    parser_max2dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish, 2 = inferno-ish", metavar="CM")
+    parser_max2dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish, 2 = inferno-ish, 3 = blue-red-ish", metavar="CM")
     parser_max2dmode.add_argument("-rc", "--reverse-colormap", action="store_true", dest="reverse_colormap", default=False, help="reverse colormap")
     parser_max2dmode.add_argument("-xt", "--x-transf", type=str, action="store", dest="x_transf_expr", default="", help="tranformation for the x-axis dataset, using numpy as 'np' (e.g. -xt \"np.log10(x)\")", metavar="EXPR")
     parser_max2dmode.add_argument("-yt", "--y-transf", type=str, action="store", dest="y_transf_expr", default="", help="tranformation for the y-axis dataset, using numpy as 'np' (e.g. -yt \"np.log10(y)\")", metavar="EXPR")
@@ -217,11 +219,11 @@ examples:
     parser_min2dmode.add_argument("-s", "--sort", type=int, action="store", dest="s_index", default=None, help="index of the sort dataset", metavar="S_INDEX")
     parser_min2dmode.add_argument("-xr", "--x-range", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
     parser_min2dmode.add_argument("-yr", "--y-range", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
-    parser_min2dmode.add_argument("-b", "--bins", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="number of bins for each axis", metavar=("X_BINS", "Y_BINS"))
+    parser_min2dmode.add_argument("-sz", "--size", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="plot size in terms of number of grid cells (bins) for each axis", metavar=("X_SIZE", "Y_SIZE"))
     parser_min2dmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
     parser_min2dmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
     parser_min2dmode.add_argument("-nc", "--num-colors", type=int, action="store", dest="n_colors", default=10, help="number of colors in colorbar (max 10)", metavar="N_COLORS")
-    parser_min2dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish, 2 = inferno-ish", metavar="CM")
+    parser_min2dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish, 2 = inferno-ish, 3 = blue-red-ish", metavar="CM")
     parser_min2dmode.add_argument("-rc", "--reverse-colormap", action="store_true", dest="reverse_colormap", default=False, help="reverse colormap")
     parser_min2dmode.add_argument("-xt", "--x-transf", type=str, action="store", dest="x_transf_expr", default="", help="tranformation for the x-axis dataset, using numpy as 'np' (e.g. -xt \"np.log10(x)\")", metavar="EXPR")
     parser_min2dmode.add_argument("-yt", "--y-transf", type=str, action="store", dest="y_transf_expr", default="", help="tranformation for the y-axis dataset, using numpy as 'np' (e.g. -yt \"np.log10(y)\")", metavar="EXPR")
@@ -241,7 +243,7 @@ examples:
     parser_avg1dmode.add_argument("-f", "--filter", nargs="+", type=int, action="store", dest="filter_indices", default=None, help="indices of boolean datasets used for filtering", metavar="F_INDEX")
     parser_avg1dmode.add_argument("-xr", "--x-range", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
     parser_avg1dmode.add_argument("-yr", "--y-range", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
-    parser_avg1dmode.add_argument("-b", "--bins", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="number of bins for each axis", metavar=("X_BINS", "Y_BINS"))
+    parser_avg1dmode.add_argument("-sz", "--size", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="plot size in terms of number of grid cells (bins) for each axis", metavar=("X_SIZE", "Y_SIZE"))
     parser_avg1dmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
     parser_avg1dmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
     parser_avg1dmode.add_argument("-xt", "--x-transf", type=str, action="store", dest="x_transf_expr", default="", help="tranformation for the x-axis dataset, using numpy as 'np' (e.g. -xt \"np.log10(x)\")", metavar="EXPR")
@@ -261,11 +263,11 @@ examples:
     # parser_avg2dmode.add_argument("-s", "--sort", type=int, action="store", dest="s_index", default=None, help="index of the sort dataset", metavar="S_INDEX")
     parser_avg2dmode.add_argument("-xr", "--x-range", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
     parser_avg2dmode.add_argument("-yr", "--y-range", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
-    parser_avg2dmode.add_argument("-b", "--bins", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="number of bins for each axis", metavar=("X_BINS", "Y_BINS"))
+    parser_avg2dmode.add_argument("-sz", "--size", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="plot size in terms of number of grid cells (bins) for each axis", metavar=("X_SIZE", "Y_SIZE"))
     parser_avg2dmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
     parser_avg2dmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
     parser_avg2dmode.add_argument("-nc", "--num-colors", type=int, action="store", dest="n_colors", default=10, help="number of colors in colorbar (max 10)", metavar="N_COLORS")
-    parser_avg2dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish, 2 = inferno-ish", metavar="CM")
+    parser_avg2dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish, 2 = inferno-ish, 3 = blue-red-ish", metavar="CM")
     parser_avg2dmode.add_argument("-rc", "--reverse-colormap", action="store_true", dest="reverse_colormap", default=False, help="reverse colormap")
     parser_avg2dmode.add_argument("-xt", "--x-transf", type=str, action="store", dest="x_transf_expr", default="", help="tranformation for the x-axis dataset, using numpy as 'np' (e.g. -xt \"np.log10(x)\")", metavar="EXPR")
     parser_avg2dmode.add_argument("-yt", "--y-transf", type=str, action="store", dest="y_transf_expr", default="", help="tranformation for the y-axis dataset, using numpy as 'np' (e.g. -yt \"np.log10(y)\")", metavar="EXPR")
@@ -286,10 +288,10 @@ examples:
     parser_post1dmode.add_argument("-cr", "--credible-regions", nargs="+", type=float, action="store", dest="credible_regions", default=None, help="list of probabilities (in percent) to define the credible regions", metavar="CR_PROB")
     parser_post1dmode.add_argument("-xr", "--x-range", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
     parser_post1dmode.add_argument("-yr", "--y-range", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
-    parser_post1dmode.add_argument("-b", "--bins", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="number of bins for each axis", metavar=("X_BINS", "Y_BINS"))
+    parser_post1dmode.add_argument("-sz", "--size", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="plot size in terms of number of grid cells (bins) for each axis", metavar=("X_SIZE", "Y_SIZE"))
     parser_post1dmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
     parser_post1dmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
-    parser_post1dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish, 2 = inferno-ish", metavar="CM")
+    parser_post1dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish, 2 = inferno-ish, 3 = blue-red-ish", metavar="CM")
     parser_post1dmode.add_argument("-rc", "--reverse-colormap", action="store_true", dest="reverse_colormap", default=False, help="reverse colormap")
     parser_post1dmode.add_argument("-xt", "--x-transf", type=str, action="store", dest="x_transf_expr", default="", help="tranformation for the x-axis dataset, using numpy as 'np' (e.g. -xt \"np.log10(x)\")", metavar="EXPR")
     parser_post1dmode.add_argument("-yt", "--y-transf", type=str, action="store", dest="y_transf_expr", default="", help="tranformation for the y-axis dataset, using numpy as 'np' (e.g. -yt \"np.log10(y)\")", metavar="EXPR")
@@ -309,10 +311,10 @@ examples:
     parser_post2dmode.add_argument("-cr", "--credible-regions", nargs="+", type=float, action="store", dest="credible_regions", default=None, help="list of probabilities (in percent) to define the credible regions", metavar="CR_PROB")
     parser_post2dmode.add_argument("-xr", "--x-range", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
     parser_post2dmode.add_argument("-yr", "--y-range", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
-    parser_post2dmode.add_argument("-b", "--bins", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="number of bins for each axis", metavar=("X_BINS", "Y_BINS"))
+    parser_post2dmode.add_argument("-sz", "--size", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="plot size in terms of number of grid cells (bins) for each axis", metavar=("X_SIZE", "Y_SIZE"))
     parser_post2dmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
     parser_post2dmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
-    parser_post2dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish, 2 = inferno-ish", metavar="CM")
+    parser_post2dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish, 2 = inferno-ish, 3 = blue-red-ish", metavar="CM")
     parser_post2dmode.add_argument("-rc", "--reverse-colormap", action="store_true", dest="reverse_colormap", default=False, help="reverse colormap")
     parser_post2dmode.add_argument("-xt", "--x-transf", type=str, action="store", dest="x_transf_expr", default="", help="tranformation for the x-axis dataset, using numpy as 'np' (e.g. -xt \"np.log10(x)\")", metavar="EXPR")
     parser_post2dmode.add_argument("-yt", "--y-transf", type=str, action="store", dest="y_transf_expr", default="", help="tranformation for the y-axis dataset, using numpy as 'np' (e.g. -yt \"np.log10(y)\")", metavar="EXPR")
@@ -332,7 +334,7 @@ examples:
     parser_plr1dmode.add_argument("-cl", "--confidence-levels", nargs="+", type=float, action="store", dest="confidence_levels", default=None, help="list of probabilities (in percent) to define the confidence levels", metavar="CL_PROB")
     parser_plr1dmode.add_argument("-xr", "--x-range", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
     parser_plr1dmode.add_argument("-yr", "--y-range", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
-    parser_plr1dmode.add_argument("-b", "--bins", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="number of bins for each axis", metavar=("X_BINS", "Y_BINS"))
+    parser_plr1dmode.add_argument("-sz", "--size", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="plot size in terms of number of grid cells (bins) for each axis", metavar=("X_SIZE", "Y_SIZE"))
     parser_plr1dmode.add_argument("-c", "--cap-loglike", type=float, action="store", dest="cap_loglike_val", default=None, help="cap the ln(L) at the given value", metavar="CAP_VAL")
     parser_plr1dmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
     parser_plr1dmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
@@ -353,7 +355,7 @@ examples:
     parser_plr2dmode.add_argument("-f", "--filter", nargs="+", type=int, action="store", dest="filter_indices", default=None, help="indices of boolean datasets used for filtering", metavar="F_INDEX")
     parser_plr2dmode.add_argument("-xr", "--x-range", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
     parser_plr2dmode.add_argument("-yr", "--y-range", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
-    parser_plr2dmode.add_argument("-b", "--bins", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="number of bins for each axis", metavar=("X_BINS", "Y_BINS"))
+    parser_plr2dmode.add_argument("-sz", "--size", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="plot size in terms of number of grid cells (bins) for each axis", metavar=("X_SIZE", "Y_SIZE"))
     parser_plr2dmode.add_argument("-c", "--cap-loglike", type=float, action="store", dest="cap_loglike_val", default=None, help="cap the ln(L) at the given value", metavar="CAP_VAL")
     parser_plr2dmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
     parser_plr2dmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
@@ -370,7 +372,7 @@ examples:
     parser_graph1dmode.add_argument("function", type=str, action="store", help="definition of function f(x), using numpy as 'np' (e.g. \"x * np.sin(x)\")")
     parser_graph1dmode.add_argument("-xr", "--x-range", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
     parser_graph1dmode.add_argument("-yr", "--y-range", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
-    parser_graph1dmode.add_argument("-b", "--bins", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="number of bins for each axis", metavar=("X_BINS", "Y_BINS"))
+    parser_graph1dmode.add_argument("-sz", "--size", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="plot size in terms of number of grid cells (bins) for each axis", metavar=("X_SIZE", "Y_SIZE"))
     parser_graph1dmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
     parser_graph1dmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
     parser_graph1dmode.add_argument("-d", "--decimals", type=int, action="store", dest="n_decimals", default=2, help="set the number of decimals for axis and colorbar tick labels", metavar="N_DECIMALS")
@@ -382,11 +384,11 @@ examples:
     parser_graph2dmode.add_argument("-xr", "--x-range", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
     parser_graph2dmode.add_argument("-yr", "--y-range", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
     parser_graph2dmode.add_argument("-zr", "--z-range", nargs=2, type=float, action="store", dest="z_range", default=None, help="z-axis range", metavar=("Z_MIN", "Z_MAX"))
-    parser_graph2dmode.add_argument("-b", "--bins", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="number of bins for each axis", metavar=("X_BINS", "Y_BINS"))
+    parser_graph2dmode.add_argument("-sz", "--size", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="plot size in terms of number of grid cells (bins) for each axis", metavar=("X_SIZE", "Y_SIZE"))
     parser_graph2dmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
     parser_graph2dmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
     parser_graph2dmode.add_argument("-nc", "--num-colors", type=int, action="store", dest="n_colors", default=10, help="number of colors in colorbar (max 10)", metavar="N_COLORS")
-    parser_graph2dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish, 2 = inferno-ish", metavar="CM")
+    parser_graph2dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish, 2 = inferno-ish, 3 = blue-red-ish", metavar="CM")
     parser_graph2dmode.add_argument("-rc", "--reverse-colormap", action="store_true", dest="reverse_colormap", default=False, help="reverse colormap")
     parser_graph2dmode.add_argument("-d", "--decimals", type=int, action="store", dest="n_decimals", default=2, help="set the number of decimals for axis and colorbar tick labels", metavar="N_DECIMALS")
 
@@ -439,8 +441,9 @@ examples:
 
     if "cmap_index" in args_dict.keys():
       if args.cmap_index is not None:
-        if args.cmap_index not in [0,1,2]:
-          print(error_prefix + "the colormap option (CM) must equal 0, 1 or 2")
+        n_colormaps = len(colors.cmaps)
+        if args.cmap_index not in range(n_colormaps):
+          print(error_prefix + "the colormap option (CM) must be a integer between 0 and " + str(n_colormaps))
           return
 
     if "read_slice" in args_dict.keys():

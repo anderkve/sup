@@ -176,7 +176,6 @@ def run(args):
     x_transf_expr = args.x_transf_expr
     y_transf_expr = args.y_transf_expr
     w_transf_expr = args.w_transf_expr
-    # z_transf_expr = args.z_transf_expr
     # @todo: add the x,y,w variables to a dictionary of allowed arguments to eval()
     x = x_data
     y = y_data
