@@ -1,5 +1,4 @@
 import os
-import sys
 import numpy as np
 from collections import OrderedDict
 from scipy.stats import chi2

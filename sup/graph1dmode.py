@@ -1,4 +1,3 @@
-import sys
 import numpy as np
 import sup.defaults as defaults
 import sup.utils as utils

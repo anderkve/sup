@@ -2,33 +2,12 @@
 
 """
 sup -- the Simlpe Unicode Plotter 
-
-modes:
-  sup list    list dataset names and indices
-  sup colors  display the colors available for colormaps
-  sup plr     plot the profile likelihood ratio
-  sup max     plot the maximum z value
-  sup min     plot the minimum z value
-  sup avg     plot the average z value
-  sup hist    plot a histogram 
-  sup post    plot the z posterior probability density
-
-examples:
-  ./sup.py list data.hdf5
-
-  ./sup.py plr data.hdf5 0 1 4 --x-range 0 10 --y-range 0 10 --size 20 20
-
-  ./sup.py plr data.hdf5 2 1 4 --x-range 0 10 --y-range 0 10 --size 20 20 -g
-
-  ./sup.py plr data.hdf5 2 1 4 --x-range 0 10 --y-range 0 20 --size 20 40 --x-transf "np.abs(x)"
 """
 
 import sys
 import os
 import argparse
-from sup import colors, listmode, colorsmode, plr2dmode, plr1dmode, maxmin2dmode, maxmin1dmode, avg1dmode, avg2dmode, hist1dmode, hist2dmode, post1dmode, post2dmode, graph1dmode, graph2dmode
-
-
+from sup import colors, listmode, colorsmode, colormapsmode, plr2dmode, plr1dmode, maxmin2dmode, maxmin1dmode, avg1dmode, avg2dmode, hist1dmode, hist2dmode, post1dmode, post2dmode, graph1dmode, graph2dmode
 
 def main():
     
@@ -46,22 +25,23 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 modes:
-  sup list      list dataset names and indices
-  sup hist1d    plot the x histogram
-  sup hist2d    plot the (x,y) histogram
-  sup max1d     plot the maximum y value across the x axis
-  sup max2d     plot the maximum z value across the (x,y) plane
-  sup min1d     plot the minimum y value across the x axis
-  sup min2d     plot the minimum z value across the (x,y) plane
-  sup avg1d     plot the average y value across the x axis
-  sup avg2d     plot the average z value across the (x,y) plane
-  sup post1d    plot the x posterior probability distribution
-  sup post2d    plot the (x,y) posterior probability distribution
-  sup plr1d     plot the profile likelihood ratio across the x axis
-  sup plr2d     plot the profile likelihood ratio across the (x,y) plane
-  sup graph1d   plot the function y = f(x) across the x axis
-  sup graph2d   plot the function z = f(x,y) across the (x,y) plane
-  sup colors    display the colors available for colormaps (for development)
+  sup list        list dataset names and indices
+  sup hist1d      plot the x histogram
+  sup hist2d      plot the (x,y) histogram
+  sup max1d       plot the maximum y value across the x axis
+  sup max2d       plot the maximum z value across the (x,y) plane
+  sup min1d       plot the minimum y value across the x axis
+  sup min2d       plot the minimum z value across the (x,y) plane
+  sup avg1d       plot the average y value across the x axis
+  sup avg2d       plot the average z value across the (x,y) plane
+  sup post1d      plot the x posterior probability distribution
+  sup post2d      plot the (x,y) posterior probability distribution
+  sup plr1d       plot the profile likelihood ratio across the x axis
+  sup plr2d       plot the profile likelihood ratio across the (x,y) plane
+  sup graph1d     plot the function y = f(x) across the x axis
+  sup graph2d     plot the function z = f(x,y) across the (x,y) plane
+  sup colormaps   display the available colormaps
+  sup colors      display the colors available for creating colormaps (for development)
 
 examples:
   ./sup.py list data.hdf5
@@ -395,6 +375,11 @@ examples:
     # Parser for "colors" mode
     parser_colorsmode = subparsers.add_parser("colors")
     parser_colorsmode.set_defaults(func=colorsmode.run)
+
+    # Parser for "colormaps" mode
+    parser_colormapsmode = subparsers.add_parser("colormaps")
+    parser_colormapsmode.set_defaults(func=colormapsmode.run)
+
 
     # Parse the arguments
     args = parser.parse_args()
