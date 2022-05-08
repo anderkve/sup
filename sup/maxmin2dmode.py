@@ -1,5 +1,4 @@
 import numpy as np
-import h5py
 import sup.defaults as defaults
 import sup.utils as utils
 from sup.colors import cmaps, cmaps_grayscale
@@ -184,30 +183,18 @@ def run(args, mode):
     # Read datasets from file
     #
 
-    f = h5py.File(input_file, "r")
+    dsets, dset_names = utils.read_input_file(input_file, [x_index, y_index, z_index, s_index], read_slice, delimiter=args.delimiter)
+    x_data, y_data, z_data, s_data = dsets
+    x_name, y_name, z_name, s_name = dset_names
 
-    dset_names = utils.get_dataset_names_hdf5(f)
-    x_name = dset_names[x_index]
-    y_name = dset_names[y_index]
-    z_name = dset_names[z_index]
-    s_name = dset_names[s_index]
-
-    x_data = np.array(f[x_name])[read_slice]
-    y_data = np.array(f[y_name])[read_slice]
-    z_data = np.array(f[z_name])[read_slice]
-    s_data = np.array(f[s_name])[read_slice]
-
-    filter_names, filter_datasets = utils.get_filters_hdf5(f, filter_indices, read_slice=read_slice)
-
-    f.close()
-
-    if use_filters:
-        x_data, y_data, z_data, s_data = utils.apply_filters([x_data, y_data, z_data, s_data], filter_datasets)
+    filter_datasets, filter_names = utils.get_filters(input_file, filter_indices, read_slice=read_slice, delimiter=args.delimiter)
 
     assert len(x_data) == len(y_data)
     assert len(x_data) == len(z_data)
     assert len(x_data) == len(s_data)
-    # data_length = len(x_data)
+
+    if use_filters:
+        x_data, y_data, z_data, s_data = utils.apply_filters([x_data, y_data, z_data, s_data], filter_datasets)
 
     x_transf_expr = args.x_transf_expr
     y_transf_expr = args.y_transf_expr

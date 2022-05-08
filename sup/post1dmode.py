@@ -1,5 +1,4 @@
 import numpy as np
-import h5py
 import sup.defaults as defaults
 import sup.utils as utils
 
@@ -192,26 +191,25 @@ def run(args):
     # Read datasets from file
     #
 
-    f = h5py.File(input_file, "r")
-
-    dset_names = utils.get_dataset_names_hdf5(f)
-    x_name = dset_names[x_index]
-
-    x_data = np.array(f[x_name])[read_slice]
-
+    x_name = None
+    x_data = None
     w_name = None
-    w_data = np.ones(len(x_data))
+    w_data = None
+
     if use_weights:
-        w_name = dset_names[w_index]
-        w_data = np.array(f[w_name])[read_slice]
+        dsets, dset_names = utils.read_input_file(input_file, [x_index, w_index], read_slice, delimiter=args.delimiter)
+        x_data, w_data = dsets
+        x_name, w_name = dset_names
         utils.check_weights(w_data, w_name)
-
-    filter_names, filter_datasets = utils.get_filters_hdf5(f, filter_indices, read_slice=read_slice)
-
-    f.close()
+    else:
+        dsets, dset_names = utils.read_input_file(input_file, [x_index], read_slice, delimiter=args.delimiter)
+        x_data,  = dsets
+        x_name,  = dset_names
+        w_data = np.ones(len(x_data))
 
     assert len(x_data) == len(w_data)
-    # data_length = len(x_data)
+
+    filter_datasets, filter_names = utils.get_filters(input_file, filter_indices, read_slice=read_slice, delimiter=args.delimiter)
 
     if use_filters:
         x_data, w_data = utils.apply_filters([x_data, w_data], filter_datasets)

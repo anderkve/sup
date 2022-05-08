@@ -1,7 +1,8 @@
+import os
+import sys
 import numpy as np
 from collections import OrderedDict
 from scipy.stats import chi2
-import h5py
 from io import StringIO 
 
 
@@ -186,6 +187,7 @@ def generate_info_text(ff2, x_label, x_range, x_bin_width=None,
 
 
 def get_dataset_names_hdf5(hdf5_file_object):
+    import h5py
     result = []
     def get_datasets(name, obj):
         if type(obj) is h5py._hl.dataset.Dataset:
@@ -225,7 +227,134 @@ def get_dataset_names_txt(txt_file_name):
     stringIO_file = StringIO(firstline)
     dsets = np.genfromtxt(stringIO_file, names=use_names, comments=comments)
     result = dsets.dtype.names
+
     return result
+
+
+def read_input_file(input_file, dset_indices, read_slice, delimiter=' '):
+    dsets = []
+    dset_names = []
+
+    filename_without_extension, file_extension = os.path.splitext(input_file)
+    
+    # If a known HDF5 file extension, read as HDF5 file
+    if file_extension in ['.hdf5', '.h5', '.he5']:
+        print("Reading " + input_file + " as an HDF5 file")
+        print()
+        dsets, dset_names = read_input_file_hdf5(input_file, dset_indices, read_slice)
+
+    # All other files are treated as text files
+    else:
+        print("Reading " + input_file + " as a text file with delimiter '" + delimiter + "'")
+        print()
+        dsets, dset_names = read_input_file_txt(input_file, dset_indices, read_slice, delimiter)
+
+    return dsets, dset_names    
+
+
+
+def read_input_file_hdf5(input_file, dset_indices, read_slice):
+    import h5py
+    dsets = []
+    dset_names = []
+
+    f = h5py.File(input_file, "r")
+
+    all_dset_names = get_dataset_names_hdf5(f)
+
+    dset_names = [ all_dset_names[dset_index] for dset_index in dset_indices ]
+
+    dsets = [ np.array(f[dset_name])[read_slice] for dset_name in dset_names ]
+
+    f.close()
+
+    return dsets, dset_names    
+
+
+
+def read_input_file_txt(input_file, dset_indices, read_slice, delimiter):
+    dsets = []
+    dset_names = []
+
+    all_dset_names = get_dataset_names_txt(input_file)
+
+    dset_names = [ all_dset_names[dset_index] for dset_index in dset_indices ]
+    
+    if delimiter.strip() == "":
+        delimiter = None
+
+    dsets = list( np.genfromtxt(input_file, usecols=dset_indices, names=dset_names, unpack=True, comments="#", delimiter=delimiter) )
+    if len(dset_indices) == 1:
+        dsets = [dsets]
+
+    return dsets, dset_names    
+
+
+
+def get_filters(input_file, filter_indices, read_slice, delimiter=' '):
+    filter_dsets = []
+    filter_names = []
+
+    # @todo: Check this before function is called?
+    if filter_indices is None:
+        return filter_dsets, filter_names
+
+    filename_without_extension, file_extension = os.path.splitext(input_file)
+    
+    # If a known HDF5 file extension, read as HDF5 file
+    if file_extension in ['.hdf5', '.h5', '.he5']:
+        filter_dsets, filter_names = get_filters_hdf5(input_file, filter_indices, read_slice)
+
+    # All other files are treated as text files
+    else:
+        filter_dsets, filter_names = get_filters_txt(input_file, filter_indices, read_slice, delimiter)
+
+    return filter_dsets, filter_names
+
+
+def get_filters_hdf5(input_file, filter_indices, read_slice=slice(0,-1,1)):
+    import h5py
+    filter_dsets = []
+    filter_names = []
+
+    f = h5py.File(input_file, "r")
+
+    dset_names = get_dataset_names_hdf5(f)
+
+    if filter_indices is not None:
+        for filter_index in filter_indices:
+            filter_name = dset_names[filter_index]
+            filter_names.append(filter_name)
+            filter_dsets.append(np.array(f[filter_name])[read_slice])
+
+    f.close()
+
+    return filter_dsets, filter_names
+
+
+def get_filters_txt(input_file, filter_indices, read_slice, delimiter=' '):
+    filter_dsets = []
+    filter_names = []
+
+    # _Anders
+    print("Function get_filters_txt is not implemented yet!")
+
+    return filter_dsets, filter_names
+
+
+def apply_filters(datasets, filters):
+
+    for filter_dset in filters:
+        assert len(filters[0]) == len(filter_dset)
+
+    joint_filter = np.array([np.all(l) for l in zip(*filters)], dtype=np.bool)
+
+    filtered_datasets = []
+    for dset in datasets:
+        assert len(dset) == len(joint_filter)
+        filtered_datasets.append(dset[joint_filter])
+
+    return filtered_datasets
 
 
 
@@ -705,37 +834,6 @@ def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None, mod_func
     lines.append(x_ticks)
 
     return lines
-
-
-def get_filters_hdf5(data_file, filter_indices, read_slice=slice(0,-1,1)):
-
-    dset_names = get_dataset_names_hdf5(data_file)
-
-    filter_names = []
-    filter_datasets = []
-
-    if filter_indices is not None:
-        for filter_index in filter_indices:
-            filter_name = dset_names[filter_index]
-            filter_names.append(filter_name)
-            filter_datasets.append(np.array(data_file[filter_name])[read_slice])
-
-    return filter_names, filter_datasets
-
-
-def apply_filters(datasets, filters):
-
-    for filter_dset in filters:
-        assert len(filters[0]) == len(filter_dset)
-
-    joint_filter = np.array([np.all(l) for l in zip(*filters)], dtype=np.bool)
-
-    filtered_datasets = []
-    for dset in datasets:
-        assert len(dset) == len(joint_filter)
-        filtered_datasets.append(dset[joint_filter])
-
-    return filtered_datasets
 
 
 def get_cl_included_bins_1d(confidence_levels, y_func_data, dx):

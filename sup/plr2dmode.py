@@ -1,5 +1,4 @@
 import numpy as np
-import h5py
 import sup.defaults as defaults
 import sup.utils as utils
 
@@ -153,27 +152,15 @@ def run(args):
     # Read datasets from file
     #
 
-    f = h5py.File(input_file, "r")
-
-    dset_names = utils.get_dataset_names_hdf5(f)
-    x_name = dset_names[x_index]
-    y_name = dset_names[y_index]
-    loglike_name = dset_names[loglike_index]
-    s_name = dset_names[s_index]
-
-    x_data = np.array(f[x_name])[read_slice]
-    y_data = np.array(f[y_name])[read_slice]
-    loglike_data = np.array(f[loglike_name])[read_slice]
-    s_data = np.array(f[s_name])[read_slice]
-
-    filter_names, filter_datasets = utils.get_filters_hdf5(f, filter_indices, read_slice=read_slice)
-
-    f.close()
+    dsets, dset_names = utils.read_input_file(input_file, [x_index, y_index, loglike_index, s_index], read_slice, delimiter=args.delimiter)
+    x_data, y_data, loglike_data, s_data = dsets
+    x_name, y_name, loglike_name, s_name = dset_names
 
     assert len(x_data) == len(y_data)
     assert len(x_data) == len(loglike_data)
     assert len(x_data) == len(s_data)
-    # data_length = len(x_data)
+
+    filter_datasets, filter_names = utils.get_filters(input_file, filter_indices, read_slice=read_slice, delimiter=args.delimiter)
 
     if use_filters:
         x_data, y_data, loglike_data, s_data = utils.apply_filters([x_data, y_data, loglike_data, s_data], filter_datasets)
