@@ -1,35 +1,21 @@
 # -*- coding: utf-8 -*-
-input_file = None
-x_index = None
-y_index = None
-z_index = None
-s_index = None
 
-s_type = None
+"""Default settings.
 
-x_name = None
-y_name = None
-z_name = None
-s_name = None
+A sup module for collecting default settings that are used by several run modes. 
 
-read_length = -1
-read_step = 1
+Attributes:
+    xy_bins (pair of ints): The default number of bins to be used along the 
+    x-axis and y-axis.
 
-x_use_abs_val = False
-y_use_abs_val = False
-z_use_abs_val = False
-s_use_abs_val = False
+    ff (format string): The default format string for floating-point numbers,
+        with a reserved space for the sign.
 
-xy_bins = [40, 40]
+    ff2 (format string): The default format string for floating-point numbers,
+        without a reserverd space for the sign.
+"""
 
-x_min = None
-x_max = None
-y_min = None
-y_max = None
-z_min = None
-z_max = None
+xy_bins = (40, 40)
 
 ff = "{: .2e}"
 ff2 = "{:.2e}"
-# ffx = "{: .1e}"
-# ffy = "{: .1e}"
