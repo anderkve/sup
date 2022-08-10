@@ -12,7 +12,7 @@ Example:
     to see a list of examples.
 
 Todo:
-    * Add a "watch" option which generates the same plot every N-th second.
+    * Add a "--watch N" option which generates the same plot every N-th second.
 
 """
 
@@ -21,16 +21,17 @@ import os
 import argparse
 from sup import colors, listmode, colorsmode, colormapsmode, plr2dmode, plr1dmode, maxmin2dmode, maxmin1dmode, avg1dmode, avg2dmode, hist1dmode, hist2dmode, post1dmode, post2dmode, graph1dmode, graph2dmode
 
-def main():
-    """Testing testing
 
-    This is a docstring.
+def main():
+    """The main function.
+
+    This function parses the command line arguments using argparse and runs 
+    the sup in the requested mode.
+
+    Raises:
+        RuntimeError: If the chosen sup mode fails raises an Exception.
 
     """
-
-    #
-    # Parse and check command line arguments
-    #
 
     # Get the script name
     prog_name = os.path.basename(sys.argv[0])
@@ -78,11 +79,10 @@ examples:
   ./sup.py graph1d "x * np.cos(2 * np.pi * x)" --x-range 0.0 2.0 --y-range -2 2 --size 40 20 --white-bg
 
   ./sup.py graph2d "np.sin(x**2 + y**2) / (x**2 + y**2)" --x-range -5 5 --y-range -5 5 --size 50 50
-        """,
-  # sup post    plot the z posterior probability density
+
+"""
     )
     subparsers = parser.add_subparsers(dest="mode")
-
 
     # Parser for "list" mode
     parser_listmode = subparsers.add_parser("list")
@@ -102,9 +102,6 @@ examples:
     parser_hist1dmode.add_argument("-sz", "--size", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="plot size in terms of number of grid cells (bins) for each axis", metavar=("X_SIZE", "Y_SIZE"))
     parser_hist1dmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
     parser_hist1dmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
-    # parser_hist1dmode.add_argument("-nc", "--num-colors", type=int, action="store", dest="n_colors", default=10, help="number of colors in colorbar (max 10)", metavar="N_COLORS")
-    # parser_hist1dmode.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=0, help="select colormap: 0 = viridis-ish, 1 = jet-ish, 2 = inferno-ish, 3 = blue-red-ish", metavar="CM")
-    # parser_hist1dmode.add_argument("-rc", "--reverse-colormap", action="store_true", dest="reverse_colormap", default=False, help="reverse colormap")
     parser_hist1dmode.add_argument("-xt", "--x-transf", type=str, action="store", dest="x_transf_expr", default="", help="tranformation for the x-axis dataset, using numpy as 'np' (e.g. -xt \"np.log10(x)\")", metavar="EXPR")
     parser_hist1dmode.add_argument("-yt", "--y-transf", type=str, action="store", dest="y_transf_expr", default="", help="tranformation for the y-axis dataset, using numpy as 'np' (e.g. -yt \"np.log10(y)\")", metavar="EXPR")
     parser_hist1dmode.add_argument("-wt", "--w-transf", type=str, action="store", dest="w_transf_expr", default="", help="tranformation for the weights dataset, using numpy as 'np' (e.g. -zt \"np.ones(w.shape\")", metavar="EXPR")
@@ -257,7 +254,6 @@ examples:
     parser_avg2dmode.add_argument("y_index", type=int, action="store", help="index of the y-axis dataset")
     parser_avg2dmode.add_argument("z_index", type=int, action="store", help="index of the z-axis dataset")
     parser_avg2dmode.add_argument("-f", "--filter", nargs="+", type=int, action="store", dest="filter_indices", default=None, help="indices of boolean datasets used for filtering", metavar="F_INDEX")
-    # parser_avg2dmode.add_argument("-s", "--sort", type=int, action="store", dest="s_index", default=None, help="index of the sort dataset", metavar="S_INDEX")
     parser_avg2dmode.add_argument("-xr", "--x-range", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
     parser_avg2dmode.add_argument("-yr", "--y-range", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
     parser_avg2dmode.add_argument("-sz", "--size", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="plot size in terms of number of grid cells (bins) for each axis", metavar=("X_SIZE", "Y_SIZE"))
@@ -269,8 +265,6 @@ examples:
     parser_avg2dmode.add_argument("-xt", "--x-transf", type=str, action="store", dest="x_transf_expr", default="", help="tranformation for the x-axis dataset, using numpy as 'np' (e.g. -xt \"np.log10(x)\")", metavar="EXPR")
     parser_avg2dmode.add_argument("-yt", "--y-transf", type=str, action="store", dest="y_transf_expr", default="", help="tranformation for the y-axis dataset, using numpy as 'np' (e.g. -yt \"np.log10(y)\")", metavar="EXPR")
     parser_avg2dmode.add_argument("-zt", "--z-transf", type=str, action="store", dest="z_transf_expr", default="", help="tranformation for the z-axis dataset, using numpy as 'np' (e.g. -zt \"np.log10(z)\")", metavar="EXPR")
-    # parser_avg2dmode.add_argument("-st", "--s-transf", type=str, action="store", dest="s_transf_expr", default="", help="tranformation for the sort dataset, using numpy as 'np' (e.g. -st \"np.log10(s)\")", metavar="EXPR")
-    # parser_avg2dmode.add_argument("-ns", "--no-star", action="store_true", dest="no_star", default=False, help="switch off the star marker for the max/min point(s)")
     parser_avg2dmode.add_argument("-rs", "--read-slice", nargs=3, type=int, action="store", dest="read_slice", default=[0,-1,1], help="read only the given slice of each dataset", metavar=("START", "END", "STEP"))
     parser_avg2dmode.add_argument("-d", "--decimals", type=int, action="store", dest="n_decimals", default=2, help="set the number of decimals for axis and colorbar tick labels", metavar="N_DECIMALS")
     parser_avg2dmode.add_argument("-dl", "--delimiter", type=str, action="store", dest="delimiter", default=" ", help="set the delimiter used in the input data file (only for text files)", metavar="DELIMITER")
@@ -325,7 +319,6 @@ examples:
     parser_plr1dmode.set_defaults(func=plr1dmode.run)
     parser_plr1dmode.add_argument("input_file", type=str, action="store", help="path to the input data file")
     parser_plr1dmode.add_argument("x_index", type=int, action="store", help="index of the x-axis dataset")
-    # parser_plr1dmode.add_argument("y_index", type=int, action="store", help="index of the y-axis dataset")
     parser_plr1dmode.add_argument("loglike_index", type=int, action="store", help="index of the ln(L) dataset")
     parser_plr1dmode.add_argument("-f", "--filter", nargs="+", type=int, action="store", dest="filter_indices", default=None, help="indices of boolean datasets used for filtering", metavar="F_INDEX")
     parser_plr1dmode.add_argument("-cl", "--confidence-levels", nargs="+", type=float, action="store", dest="confidence_levels", default=None, help="list of probabilities (in percent) to define the confidence levels", metavar="CL_PROB")
@@ -336,8 +329,6 @@ examples:
     parser_plr1dmode.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
     parser_plr1dmode.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
     parser_plr1dmode.add_argument("-xt", "--x-transf", type=str, action="store", dest="x_transf_expr", default="", help="tranformation for the x-axis dataset, using numpy as 'np' (e.g. -xt \"np.log10(x)\")", metavar="EXPR")
-    # parser_plr1dmode.add_argument("-yt", "--y-transf", type=str, action="store", dest="y_transf_expr", default="", help="tranformation for the y-axis dataset, using numpy as 'np' (e.g. -yt \"np.log10(y)\")", metavar="EXPR")
-    # parser_plr1dmode.add_argument("-ns", "--no-star", action="store_true", dest="no_star", default=False, help="switch off the star marker for the max likelihood point(s)")
     parser_plr1dmode.add_argument("-rs", "--read-slice", nargs=3, type=int, action="store", dest="read_slice", default=[0,-1,1], help="read only the given slice of each dataset", metavar=("START", "END", "STEP"))
     parser_plr1dmode.add_argument("-d", "--decimals", type=int, action="store", dest="n_decimals", default=2, help="set the number of decimals for axis and colorbar tick labels", metavar="N_DECIMALS")
     parser_plr1dmode.add_argument("-dl", "--delimiter", type=str, action="store", dest="delimiter", default=" ", help="set the delimiter used in the input data file (only for text files)", metavar="DELIMITER")
@@ -397,17 +388,13 @@ examples:
     parser_colormapsmode = subparsers.add_parser("colormaps")
     parser_colormapsmode.set_defaults(func=colormapsmode.run)
 
-
-    # Parse the arguments
+    # Parse arguments and perform some consistency checks
     args = parser.parse_args()
 
-    # If no arguments, print usage string and exit
     if len(sys.argv) < 2:
         parser.print_usage()
         sys.exit(1)
 
-
-    # Consistency checks for arguments
     error_prefix = os.path.basename(__file__) + ": error: "
     args_dict = vars(args)
 
@@ -472,10 +459,10 @@ examples:
             for cl_val in args.confidence_levels:
                 if (cl_val < 0.) or (cl_val > 100.):
                     print(error_prefix + "CL_PROB (confidence level probability) must be between 0 and 100")
-                        return 
+                    return 
 
+    # Try running sup in the chosen mode
     try:
-        # Run the function for the chosen mode
         args.func(args)
     except RuntimeError as e:
         print(error_prefix + "{0}".format(e))
