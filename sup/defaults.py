@@ -6,7 +6,7 @@ A sup module for collecting default settings that are used by several run modes.
 
 Attributes:
     xy_bins (pair of ints): The default number of bins to be used along the 
-    x-axis and y-axis.
+        x-axis and y-axis.
 
     ff (format string): The default format string for floating-point numbers,
         with a reserved space for the sign.

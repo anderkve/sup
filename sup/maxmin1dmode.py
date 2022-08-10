@@ -12,8 +12,8 @@ ff = defaults.ff
 ff2 = defaults.ff2
 left_padding = 2*" "
 
-bg_ccode_bb, fg_ccode_bb = 16, 231  # 232, 231
-bg_ccode_wb, fg_ccode_wb = 231, 16  # 231, 232
+bg_ccode_bb, fg_ccode_bb = 16, 231
+bg_ccode_wb, fg_ccode_wb = 231, 16
 bg_ccode = bg_ccode_bb
 fg_ccode = fg_ccode_bb
 
@@ -23,17 +23,9 @@ regular_marker_down = " ▄"
 special_marker = " 🟊"
 
 fill_marker = "  "
-# fill_marker = " ■"
-# fill_marker = " █"
 
 empty_bin_marker_grayscale = "  "
-# empty_bin_marker_grayscale = " ▁"
-# empty_bin_marker_grayscale = " □"
-# empty_bin_marker_grayscale = " ■"
 empty_bin_marker_color = "  "
-# empty_bin_marker_color = " ▁"
-# empty_bin_marker_color = " □"
-# empty_bin_marker_color = " ■"
 empty_bin_marker = empty_bin_marker_color
 
 empty_bin_ccode_grayscale_bb = 235
