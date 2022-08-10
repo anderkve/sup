@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 input_file = None
 x_index = None
 y_index = None

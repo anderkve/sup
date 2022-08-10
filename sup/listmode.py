@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 from sup.utils import get_dataset_names_hdf5, get_dataset_names_txt
 

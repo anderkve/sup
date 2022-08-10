@@ -1,7 +1,19 @@
-#! /usr/bin/env python3
+# -*- coding: utf-8 -*-
 
-"""
-sup -- the Simlpe Unicode Plotter 
+"""sup -- the Simlpe Unicode Plotter. 
+
+A program for generating quick data visualisation directly in the terminal.
+
+Example:
+  Run the command 
+  
+    $ python3 sup.py --help
+  
+  to see a list of examples.
+
+Todo:
+  * Add a "watch" option which generates the same plot every N-th second.
+
 """
 
 import sys

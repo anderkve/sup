@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from sup.utils import prettify
 from sup.colors import cmaps
 

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 cmaps_grayscale = [
     [233, 236, 239, 242, 244, 247, 250, 253, 255, 231],        # for black background
     [232, 235, 238, 240, 243, 246, 248, 251, 253, 255][::-1],  # for white background
