@@ -20,7 +20,7 @@ bg_ccode = bg_ccode_bb
 fg_ccode = fg_ccode_bb
 
 regular_marker = " ■"
-special_marker = " 🟊"  # " ★" " 🟊" " ✱"
+special_marker = " 🟊"
 
 empty_bin_marker_grayscale = " □"
 empty_bin_marker_color = " □"

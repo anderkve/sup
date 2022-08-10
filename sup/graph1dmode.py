@@ -18,14 +18,9 @@ bg_ccode = bg_ccode_bb
 fg_ccode = fg_ccode_bb
 
 regular_marker_up = " ▀"
-# regular_marker_up = " █"
 regular_marker_down = " ▄"
 
-# regular_marker = " ●"
-# regular_marker = " ▁"
-# regular_marker = " ▔"
-
-special_marker = " 🟊"  # " ★" " 🟊" " ✱"
+special_marker = " 🟊"
 
 fill_marker = "  "
 # fill_marker = " ■"
