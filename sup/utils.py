@@ -245,7 +245,7 @@ def check_file_type(input_file):
 
     """
 
-    # Default assumtion is that the input file is a text file.
+    # Default assumption is that the input file is a text file.
     file_type = "text"
 
     filename_without_extension, file_extension = os.path.splitext(input_file)    

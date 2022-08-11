@@ -94,7 +94,8 @@ examples:
     # Parser for "list" mode
     parser_listmode = subparsers.add_parser("list")
     parser_listmode.set_defaults(func=listmode.run)
-    parser_listmode.add_argument("input_file", type=str, action="store", help="path to the input data file")
+    parser_listmode.add_argument("input_file", type=str, action="store", 
+                                 help="path to the input data file")
 
     # Parser for "hist1d" mode
     parser_hist1dmode = subparsers.add_parser("hist1d")
@@ -426,46 +427,57 @@ examples:
         if "xy_bins" in args_dict.keys():
             if args.xy_bins is not None:
                 if (args.xy_bins[0] < 6) or (args.xy_bins[1] < 6):
-                    raise SupRuntimeError("X_BINS and Y_BINS must be at least 6")
+                    raise SupRuntimeError("X_BINS and Y_BINS must be greater "
+                                          "than 6")
 
         if "n_colors" in args_dict.keys():
             if args.n_colors is not None:
                 if (args.n_colors < 1) or (args.n_colors > 10):
-                    raise SupRuntimeError("N_COLORS must be an integer between 1 and 10")
+                    raise SupRuntimeError("N_COLORS must be an integer between "
+                                          "1 and 10")
 
         if "cmap_index" in args_dict.keys():
             if args.cmap_index is not None:
                 n_colormaps = len(colors.cmaps)
                 if args.cmap_index not in range(n_colormaps):
-                    raise SupRuntimeError("the colormap option (CM) must be a integer between 0 and " + str(n_colormaps))
+                    raise SupRuntimeError("the colormap option (CM) must be an "
+                                          "integer between 0 and "
+                                          + format(n_colormaps))
 
         if "read_slice" in args_dict.keys():
             if args.read_slice is not None:
                 if args.read_slice[2] <= 0:
-                    raise SupRuntimeError("STEP must be an integer greater than 0")
+                    raise SupRuntimeError("STEP must be an integer greater "
+                                          "than 0")
 
         if "n_decimals" in args_dict.keys():
             if args.n_decimals is not None:
                 if (args.n_decimals < 1) or (args.n_decimals > 8):
-                    raise SupRuntimeError("N_DECIMALS must be an integer between 1 and 8")
+                    raise SupRuntimeError("N_DECIMALS must be an integer "
+                                          "between 1 and 8")
 
         if "credible_regions" in args_dict.keys():
             if args.credible_regions is not None:
                 for cr_val in args.credible_regions:
                     if (cr_val < 0.) or (cr_val > 100.):
-                        raise SupRuntimeError("CR_PROB (credible region probability) must be between 0 and 100")
+
+                        raise SupRuntimeError("CR_PROB (credible region "
+                                              "probability) must be between 0 "
+                                              "and 100")
 
         if "confidence_levels" in args_dict.keys():
             if args.confidence_levels is not None:
                 for cl_val in args.confidence_levels:
                     if (cl_val < 0.) or (cl_val > 100.):
-                        raise SupRuntimeError("CL_PROB (confidence level probability) must be between 0 and 100")
+                        raise SupRuntimeError("CL_PROB (confidence level "
+                                              "probability) must be between 0 "
+                                              "and 100")
 
     except SupRuntimeError as e:
         print(error_prefix + "{0}".format(e))
         return 1
 
-    # Try running sup in the chosen mode
+    # Now try running sup in the chosen mode.
     try:
         args.func(args)
     except SupRuntimeError as e:
