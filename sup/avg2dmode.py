@@ -185,15 +185,14 @@ def run(args):
     # z_norm = (z_data - z_min) / (z_max - z_min)
 
     # Set color limits
-    color_z_lims = list( np.linspace(z_min, z_max, len(ccodes)+1) )
+    color_z_lims = list(np.linspace(z_min, z_max, len(ccodes)+1))
 
     #
     # Get a dict with info per bin
     #
 
     bins_info, x_bin_limits, y_bin_limits = utils.get_bin_tuples_avg(
-        x_data, y_data, z_data, xy_bins, x_range, y_range
-    )
+        x_data, y_data, z_data, xy_bins, x_range, y_range)
 
 
     #

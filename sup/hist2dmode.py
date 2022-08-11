@@ -132,7 +132,9 @@ def run(args):
         n_colors = 1
     elif n_colors > 10:
         n_colors = 10
-    ccodes = [ ccodes[int(i)] for i in np.round( np.linspace(0, len(ccodes)-1, n_colors) ) ]
+    ccodes = [
+        ccodes[int(i)] for i in np.round(np.linspace(0, len(ccodes)-1, n_colors))
+    ]
 
     if args.reverse_colormap:
         ccodes = ccodes[::-1]
@@ -232,7 +234,7 @@ def run(args):
     z_min, z_max = z_range 
 
     # Set color limits
-    color_z_lims = list( np.linspace(z_min, z_max, len(ccodes)+1) )
+    color_z_lims = list(np.linspace(z_min, z_max, len(ccodes)+1))
 
 
     #
@@ -315,7 +317,7 @@ def run(args):
     maxbin_str += (ff2).format(maxbin_content)
 
     legend_maxbin_entries = []
-    legend_maxbin_entries.append( ("", fg_ccode, maxbin_str, fg_ccode) )
+    legend_maxbin_entries.append(("", fg_ccode, maxbin_str, fg_ccode))
     legend_maxbin, legend_maxbin_width = utils.generate_legend(legend_maxbin_entries, legend_mod_func, sep="  ", internal_sep=" ")
 
     plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode)

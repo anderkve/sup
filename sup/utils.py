@@ -285,9 +285,9 @@ def read_input_file_hdf5(input_file, dset_indices, read_slice):
 
     all_dset_names = get_dataset_names_hdf5(f)
 
-    dset_names = [ all_dset_names[dset_index] for dset_index in dset_indices ]
+    dset_names = [all_dset_names[dset_index] for dset_index in dset_indices]
 
-    dsets = [ np.array(f[dset_name])[read_slice] for dset_name in dset_names ]
+    dsets = [np.array(f[dset_name])[read_slice] for dset_name in dset_names]
 
     f.close()
 
@@ -301,7 +301,7 @@ def read_input_file_txt(input_file, dset_indices, read_slice, delimiter):
 
     all_dset_names = get_dataset_names_txt(input_file)
 
-    dset_names = [ all_dset_names[dset_index] for dset_index in dset_indices ]
+    dset_names = [all_dset_names[dset_index] for dset_index in dset_indices]
     
     if delimiter.strip() == "":
         delimiter = None
@@ -358,7 +358,7 @@ def get_filters_txt(input_file, filter_indices, read_slice, delimiter=' '):
 
     all_dset_names = get_dataset_names_txt(input_file)
 
-    filter_names = [ all_dset_names[filter_index] for filter_index in filter_indices ]
+    filter_names = [all_dset_names[filter_index] for filter_index in filter_indices]
     
     if delimiter.strip() == "":
         delimiter = None
@@ -768,7 +768,7 @@ def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None, mod_func
     tick_spacing = 0
     tick_width = len( "{}".format(floatf.format(0.0)))
     for n_ticks in range(2,100):
-        new_indicies = [ int(i) for i in np.floor( np.linspace(0, xy_bins[0], n_ticks) ) ]
+        new_indicies = [int(i) for i in np.floor( np.linspace(0, xy_bins[0], n_ticks))]
         tick_spacing = (new_indicies[1] - new_indicies[0]) * 2
         if tick_spacing < tick_width + 1:
             break
@@ -781,7 +781,7 @@ def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None, mod_func
     yx_bins_ratio = float(xy_bins[1]) / xy_bins[0]
     n_y_ticks = min(max_y_ticks, int(np.ceil(n_x_ticks * yx_bins_ratio))) 
     n_y_ticks = max(n_y_ticks, min_y_ticks) 
-    y_tick_indicies = [ int(i) for i in np.floor( np.linspace(0, xy_bins[1], n_y_ticks) ) ]
+    y_tick_indicies = [int(i) for i in np.floor( np.linspace(0, xy_bins[1], n_y_ticks))]
 
     # Reverse the list of indices, since we're printing the plot from top down
     y_tick_indicies = y_tick_indicies[::-1]
@@ -821,7 +821,7 @@ def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None, mod_func
     #
 
     # y ticks
-    y_tick_labels = [ "{}".format(floatf.format(y_bin_limits[::-1][i])) for i in y_tick_indicies ]
+    y_tick_labels = ["{}".format(floatf.format(y_bin_limits[::-1][i])) for i in y_tick_indicies]
 
     if add_y_grid_lines:
         for i, tick_index in enumerate(y_tick_indicies):
@@ -846,7 +846,7 @@ def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None, mod_func
             lines[i] += mod_func("" + " "*tick_width + "   ")
 
     # x ticks
-    x_tick_labels = [ "{}".format(floatf.format(x_bin_limits[i])) for i in x_tick_indicies ]
+    x_tick_labels = ["{}".format(floatf.format(x_bin_limits[i])) for i in x_tick_indicies]
     x_ticks = ""
     for i in range(n_x_ticks):
         tick_label = x_tick_labels[i]
@@ -1010,7 +1010,7 @@ def get_bar_str(ranges_pos, bin_limits):
 
         x_tick_indicies = []
         n_ticks = 2
-        new_indicies = [ int(i) for i in np.floor( np.linspace(indices[0], indices[1], n_ticks) ) ]
+        new_indicies = [int(i) for i in np.floor( np.linspace(indices[0], indices[1], n_ticks))]
         x_tick_indicies = new_indicies
         n_x_ticks = len(x_tick_indicies)
 

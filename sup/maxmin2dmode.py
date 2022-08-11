@@ -168,7 +168,9 @@ def run(args, mode):
         n_colors = 1
     elif n_colors > 10:
         n_colors = 10
-    ccodes = [ ccodes[int(i)] for i in np.round( np.linspace(0, len(ccodes)-1, n_colors) ) ]
+    ccodes = [
+        ccodes[int(i)] for i in np.round(np.linspace(0,len(ccodes)-1,n_colors))
+    ]
 
     if args.reverse_colormap:
         ccodes = ccodes[::-1]
@@ -184,18 +186,25 @@ def run(args, mode):
     # Read datasets from file
     #
 
-    dsets, dset_names = utils.read_input_file(input_file, [x_index, y_index, z_index, s_index], read_slice, delimiter=args.delimiter)
+    dsets, dset_names = utils.read_input_file(input_file, 
+                                              [x_index,y_index,z_index,s_index],
+                                              read_slice, 
+                                              delimiter=args.delimiter)
     x_data, y_data, z_data, s_data = dsets
     x_name, y_name, z_name, s_name = dset_names
 
-    filter_datasets, filter_names = utils.get_filters(input_file, filter_indices, read_slice=read_slice, delimiter=args.delimiter)
+    filter_datasets, filter_names = utils.get_filters(input_file, 
+                                                      filter_indices, 
+                                                      read_slice=read_slice,
+                                                      delimiter=args.delimiter)
 
     assert len(x_data) == len(y_data)
     assert len(x_data) == len(z_data)
     assert len(x_data) == len(s_data)
 
     if use_filters:
-        x_data, y_data, z_data, s_data = utils.apply_filters([x_data, y_data, z_data, s_data], filter_datasets)
+        x_data, y_data, z_data, s_data = utils.apply_filters(
+                [x_data, y_data, z_data, s_data], filter_datasets)
 
     x_transf_expr = args.x_transf_expr
     y_transf_expr = args.y_transf_expr
@@ -236,8 +245,8 @@ def run(args, mode):
 
 
     # Set color limits
-    color_z_lims = list( np.linspace(z_min, z_max, len(ccodes)+1) )
-    # color_z_norm_lims = list( np.linspace(0.0, 1.0, len(ccodes)+1) )
+    color_z_lims = list(np.linspace(z_min, z_max, len(ccodes)+1))
+    # color_z_norm_lims = list(np.linspace(0.0, 1.0, len(ccodes)+1))
     # print("DEBUG:", color_z_norm_lims)
 
     #
@@ -321,7 +330,7 @@ def run(args, mode):
         point = ("(" + ff2 + ", " + ff2 + ", " + ff2 + ")").format(xyzs_maxmin[0], xyzs_maxmin[1], xyzs_maxmin[2])
 
     point_str += point
-    legend_maxmin_entries.append( (marker_str, fg_ccode, point_str, fg_ccode) )
+    legend_maxmin_entries.append((marker_str, fg_ccode, point_str, fg_ccode))
     legend_maxmin, legend_maxmin_width = utils.generate_legend(legend_maxmin_entries, legend_mod_func, sep="  ", internal_sep=" ")
 
     plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode)

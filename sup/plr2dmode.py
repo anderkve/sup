@@ -263,12 +263,12 @@ def run(args):
     legend_mod_func = lambda input_str, input_fg_ccode : utils.prettify(input_str, input_fg_ccode, bg_ccode, bold=True)
     legend_entries = []
 
-    # legend_entries.append( ("", fg_ccode, "", fg_ccode) )
+    # legend_entries.append(("", fg_ccode, "", fg_ccode))
     if (not use_capped_loglike) and highlight_maxlike_point:
-        legend_entries.append( (special_marker.strip(), max_bin_ccode, "best-fit", fg_ccode) )
-    legend_entries.append( (regular_marker.strip(), ccodes[-1], "1σ", fg_ccode) )
-    legend_entries.append( (regular_marker.strip(), ccodes[-2], "2σ", fg_ccode) )
-    legend_entries.append( (regular_marker.strip(), ccodes[-3], "3σ", fg_ccode) )
+        legend_entries.append((special_marker.strip(), max_bin_ccode, "best-fit", fg_ccode))
+    legend_entries.append((regular_marker.strip(), ccodes[-1], "1σ", fg_ccode))
+    legend_entries.append((regular_marker.strip(), ccodes[-2], "2σ", fg_ccode))
+    legend_entries.append((regular_marker.strip(), ccodes[-3], "3σ", fg_ccode))
     
     legend, legend_width = utils.generate_legend(legend_entries, legend_mod_func, sep="  ")
 

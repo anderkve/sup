@@ -129,7 +129,7 @@ def run(args):
         empty_bin_marker = empty_bin_marker_grayscale
 
     n_colors = len(credible_regions)
-    ccodes = [ ccodes[int(i)] for i in np.round( np.linspace(0, len(ccodes)-1, n_colors) ) ]
+    ccodes = [ccodes[int(i)] for i in np.round(np.linspace(0, len(ccodes)-1, n_colors))]
 
     # In posterior mode we use a reversed colormap by default, to assign 
     # the "warmest" colour to the first credible region (z_val = region index = 0)
@@ -215,7 +215,7 @@ def run(args):
     bin_keys_list = []
     for i in range(len(x_bin_centres)):
         for j in range(len(y_bin_centres)):
-            bin_keys_list.append( (i,j) )
+            bin_keys_list.append((i,j))
 
     bins_info = OrderedDict()
     cred_region_index = 0
@@ -244,7 +244,7 @@ def run(args):
     z_max = len(credible_regions)
 
     # Set color limits
-    color_z_lims = list( np.linspace(z_min, z_max, len(ccodes)+1) )
+    color_z_lims = list(np.linspace(z_min, z_max, len(ccodes)+1))
 
 
     #
@@ -303,10 +303,10 @@ def run(args):
     legend_mod_func = lambda input_str, input_fg_ccode : utils.prettify(input_str, input_fg_ccode, bg_ccode, bold=True)
     legend_entries = []
 
-    # legend_entries.append( ("", fg_ccode, "", fg_ccode) )
+    # legend_entries.append(("", fg_ccode, "", fg_ccode))
     for i,cred_reg in enumerate(credible_regions[:-1]):
         cred_reg_str = "{:.12g}% CR".format(cred_reg)
-        legend_entries.append( (regular_marker.strip(), ccodes[i], cred_reg_str, fg_ccode) )
+        legend_entries.append((regular_marker.strip(), ccodes[i], cred_reg_str, fg_ccode))
     
     legend, legend_width = utils.generate_legend(legend_entries, legend_mod_func, sep="  ")
 

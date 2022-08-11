@@ -282,7 +282,7 @@ def run(args, mode):
         point = ("(" + ff2 + ", " + ff2 + ")").format(xys_maxmin[0], xys_maxmin[1])
 
     point_str += point
-    legend_maxmin_entries.append( (marker_str, fg_ccode, point_str, fg_ccode) )
+    legend_maxmin_entries.append((marker_str, fg_ccode, point_str, fg_ccode))
     legend_maxmin, legend_maxmin_width = utils.generate_legend(legend_maxmin_entries, legend_mod_func, sep="  ", internal_sep=" ")
 
     plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode)

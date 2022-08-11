@@ -130,7 +130,7 @@ def run(args):
         n_colors = 1
     elif n_colors > 10:
         n_colors = 10
-    ccodes = [ ccodes[int(i)] for i in np.round( np.linspace(0, len(ccodes)-1, n_colors) ) ]
+    ccodes = [ccodes[int(i)] for i in np.round(np.linspace(0, len(ccodes)-1, n_colors))]
 
     if args.reverse_colormap:
         ccodes = ccodes[::-1]
@@ -170,7 +170,7 @@ def run(args):
         for y in y_bin_centres:
             x_data.append(x)
             y_data.append(y)
-            z_data.append( eval(function_str) )
+            z_data.append(eval(function_str))
 
     x_data = np.array(x_data)
     y_data = np.array(y_data)
@@ -189,7 +189,7 @@ def run(args):
     z_min, z_max = z_range
 
     # Set color limits
-    color_z_lims = list( np.linspace(z_min, z_max, len(ccodes)+1) )
+    color_z_lims = list(np.linspace(z_min, z_max, len(ccodes)+1))
 
     #
     # Get a dict with info per bin
