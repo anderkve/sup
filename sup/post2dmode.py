@@ -91,9 +91,11 @@ def run(args):
 
     credible_regions = np.array(credible_regions)
     if np.any(credible_regions>100.0):
-        raise SupRuntimeError("Can't have a credible region with more than 100% probability.")
+        raise SupRuntimeError("Can't have a credible region with more than "
+                              "100% probability.")
     elif np.any(credible_regions<=0.0):
-        raise SupRuntimeError("Can't have a credible region with <= 0% probability.")
+        raise SupRuntimeError("Can't have a credible region with <= 0% "
+                              "probability.")
     
 
     filter_indices = args.filter_indices
@@ -129,10 +131,12 @@ def run(args):
         empty_bin_marker = empty_bin_marker_grayscale
 
     n_colors = len(credible_regions)
-    ccodes = [ccodes[int(i)] for i in np.round(np.linspace(0, len(ccodes)-1, n_colors))]
+    ccodes = [
+        ccodes[int(i)] for i in np.round(np.linspace(0,len(ccodes)-1,n_colors))
+    ]
 
-    # In posterior mode we use a reversed colormap by default, to assign 
-    # the "warmest" colour to the first credible region (z_val = region index = 0)
+    # In posterior mode we use a reversed colormap by default, to assign the
+    # "warmest" colour to the first credible region (z_val = region index = 0).
     ccodes = ccodes[::-1]
 
     # The user can still reverse it, though.
@@ -156,12 +160,18 @@ def run(args):
     w_data = None
 
     if use_weights:
-        dsets, dset_names = utils.read_input_file(input_file, [x_index, y_index, w_index], read_slice, delimiter=args.delimiter)
+        dsets, dset_names = utils.read_input_file(input_file,
+                                                  [x_index, y_index, w_index],
+                                                  read_slice,
+                                                  delimiter=args.delimiter)
         x_data, y_data, w_data = dsets
         x_name, y_name, w_name = dset_names
         utils.check_weights(w_data, w_name)
     else:
-        dsets, dset_names = utils.read_input_file(input_file, [x_index, y_index], read_slice, delimiter=args.delimiter)
+        dsets, dset_names = utils.read_input_file(input_file,
+                                                  [x_index, y_index],
+                                                  read_slice,
+                                                  delimiter=args.delimiter)
         x_data, y_data = dsets
         x_name, y_name = dset_names
         w_data = np.ones(len(x_data))
@@ -169,15 +179,20 @@ def run(args):
     assert len(x_data) == len(y_data)
     assert len(x_data) == len(w_data)
 
-    filter_datasets, filter_names = utils.get_filters(input_file, filter_indices, read_slice=read_slice, delimiter=args.delimiter)
+    filter_datasets, filter_names = utils.get_filters(input_file,
+                                                      filter_indices,
+                                                      read_slice=read_slice,
+                                                      delimiter=args.delimiter)
 
     if use_filters:
-        x_data, y_data, w_data = utils.apply_filters([x_data, y_data, w_data], filter_datasets)
+        x_data, y_data, w_data = utils.apply_filters([x_data, y_data, w_data],
+                                                     filter_datasets)
 
     x_transf_expr = args.x_transf_expr
     y_transf_expr = args.y_transf_expr
     w_transf_expr = args.w_transf_expr
-    # @todo: add the x,y,w variables to a dictionary of allowed arguments to eval()
+    # @todo: add the x,y,w variables to a dictionary of allowed arguments 
+    #        to eval()
     x = x_data
     y = y_data
     w = w_data
@@ -199,8 +214,11 @@ def run(args):
     # Get a dict with info per bin
     #
 
-    bins_content_unweighted,_ ,_  = np.histogram2d(x_data, y_data, bins=xy_bins, range=[x_range, y_range], density=True) 
-    bins_content, x_bin_limits, y_bin_limits = np.histogram2d(x_data, y_data, bins=xy_bins, range=[x_range, y_range], weights=w_data, density=True) 
+    bins_content_unweighted,_ ,_  = np.histogram2d(
+        x_data, y_data, bins=xy_bins, range=[x_range, y_range], density=True)
+    bins_content, x_bin_limits, y_bin_limits = np.histogram2d(
+        x_data, y_data, bins=xy_bins, range=[x_range, y_range], weights=w_data,
+        density=True)
 
     dx = x_bin_limits[1] - x_bin_limits[0]
     dy = y_bin_limits[1] - y_bin_limits[0]
@@ -289,29 +307,37 @@ def run(args):
     fig_width = plot_width
 
     # Add axes
-    axes_mod_func = lambda input_str : utils.prettify(input_str, fg_ccode, bg_ccode, bold=True)
-    plot_lines = utils.add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=axes_mod_func, floatf=ff)
+    axes_mod_func = lambda input_str : utils.prettify(input_str, fg_ccode,
+                                                      bg_ccode, bold=True)
+    plot_lines = utils.add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits,
+                                mod_func=axes_mod_func, floatf=ff)
 
     # Add blank top line
-    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode, insert_pos=0)
+    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width,
+                                              fg_ccode, bg_ccode, insert_pos=0)
 
 
     #
     # Add colorbar, legend, etc
     #
         
-    legend_mod_func = lambda input_str, input_fg_ccode : utils.prettify(input_str, input_fg_ccode, bg_ccode, bold=True)
+    legend_mod_func = lambda input_str, input_fg_ccode : utils.prettify(
+        input_str, input_fg_ccode, bg_ccode, bold=True)
     legend_entries = []
 
     # legend_entries.append(("", fg_ccode, "", fg_ccode))
     for i,cred_reg in enumerate(credible_regions[:-1]):
         cred_reg_str = "{:.12g}% CR".format(cred_reg)
-        legend_entries.append((regular_marker.strip(), ccodes[i], cred_reg_str, fg_ccode))
+        legend_entries.append((regular_marker.strip(), ccodes[i], 
+                               cred_reg_str, fg_ccode))
     
-    legend, legend_width = utils.generate_legend(legend_entries, legend_mod_func, sep="  ")
+    legend, legend_width = utils.generate_legend(legend_entries, 
+                                                 legend_mod_func, sep="  ")
 
-    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode)
-    plot_lines, fig_width = utils.insert_line(legend, legend_width, plot_lines, fig_width, fg_ccode, bg_ccode)
+    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width,
+                                              fg_ccode, bg_ccode)
+    plot_lines, fig_width = utils.insert_line(legend, legend_width, plot_lines,
+                                              fig_width, fg_ccode, bg_ccode)
 
 
     #
@@ -348,8 +374,11 @@ def run(args):
                                           left_padding=left_padding + " ")
 
     for i,line in enumerate(info_lines):
-        pretty_line = utils.prettify(line + "  ", fg_ccode, bg_ccode, bold=False)
-        plot_lines, fig_width = utils.insert_line(pretty_line, len(line), plot_lines, fig_width, fg_ccode, bg_ccode)
+        pretty_line = utils.prettify(line + "  ", fg_ccode, bg_ccode,
+                                     bold=False)
+        plot_lines, fig_width = utils.insert_line(pretty_line, len(line),
+                                                  plot_lines, fig_width, 
+                                                  fg_ccode, bg_ccode)
 
 
     #
