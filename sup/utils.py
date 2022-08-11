@@ -5,6 +5,9 @@ from collections import OrderedDict
 from scipy.stats import chi2
 from io import StringIO 
 
+class SupRuntimeError(Exception):
+    """Exceptions class for sup runtime errors"""
+    pass
 
 
 def prettify(input_string, fg_ccode, bg_ccode, bold=True, reset=True):
@@ -231,23 +234,43 @@ def get_dataset_names_txt(txt_file_name):
     return result
 
 
+def check_file_type(input_file):
+    """Determine file type based on file extension
+
+    Args:
+        input_file (string): The input file path.
+
+    Returns:
+        file_type (string): The identified file type. Can be "text" or "hdf5".
+
+    """
+
+    # Default assumtion is that the input file is a text file.
+    file_type = "text"
+
+    filename_without_extension, file_extension = os.path.splitext(input_file)    
+
+    if file_extension in ['.hdf5', '.h5', '.he5']:
+        file_type = "hdf5"
+
+    return file_type
+
+
 def read_input_file(input_file, dset_indices, read_slice, delimiter=' '):
     dsets = []
     dset_names = []
 
-    filename_without_extension, file_extension = os.path.splitext(input_file)
-    
-    # If a known HDF5 file extension, read as HDF5 file
-    if file_extension in ['.hdf5', '.h5', '.he5']:
-        print("Reading " + input_file + " as an HDF5 file")
-        print()
-        dsets, dset_names = read_input_file_hdf5(input_file, dset_indices, read_slice)
+    file_type = check_file_type(input_file)
 
-    # All other files are treated as text files
-    else:
+    if file_type == "text":
         print("Reading " + input_file + " as a text file with delimiter '" + delimiter + "'")
         print()
         dsets, dset_names = read_input_file_txt(input_file, dset_indices, read_slice, delimiter)
+
+    elif file_type == "hdf5":
+        print("Reading " + input_file + " as an HDF5 file")
+        print()
+        dsets, dset_names = read_input_file_hdf5(input_file, dset_indices, read_slice)
 
     return dsets, dset_names    
 
@@ -299,15 +322,12 @@ def get_filters(input_file, filter_indices, read_slice, delimiter=' '):
     if filter_indices is None:
         return filter_dsets, filter_names
 
-    filename_without_extension, file_extension = os.path.splitext(input_file)
-    
-    # If a known HDF5 file extension, read as HDF5 file
-    if file_extension in ['.hdf5', '.h5', '.he5']:
-        filter_dsets, filter_names = get_filters_hdf5(input_file, filter_indices, read_slice)
+    file_type = check_file_type(input_file)
 
-    # All other files are treated as text files
-    else:
+    if file_type == "text":
         filter_dsets, filter_names = get_filters_txt(input_file, filter_indices, read_slice, delimiter)
+    elif file_type == "hdf5":
+        filter_dsets, filter_names = get_filters_hdf5(input_file, filter_indices, read_slice)        
 
     return filter_dsets, filter_names
 
@@ -363,7 +383,7 @@ def apply_filters(datasets, filters):
         filtered_datasets.append(dset[joint_filter])
 
     if len(filtered_datasets[0]) == 0:
-        raise RuntimeError("No data points left after applying filters.")
+        raise SupRuntimeError("No data points left after applying filters.")
 
     return filtered_datasets
 
@@ -1074,10 +1094,10 @@ def check_weights(w_data, w_name=""):
         extra_info = "The current dataset for weights is {}.".format(w_name) 
 
     if np.any(w_data < 0.0):
-        raise RuntimeError("Negative weights are not allowed. Check the weights data set. " + extra_info)
+        raise SupRuntimeError("Negative weights are not allowed. Check the weights data set. " + extra_info)
 
     elif np.all(w_data <= 0.0):
-        raise RuntimeError("Found no weights greater than zero. Check the weights data set. " + extra_info)
+        raise SupRuntimeError("Found no weights greater than zero. Check the weights data set. " + extra_info)
 
     return 
 

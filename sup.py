@@ -19,7 +19,12 @@ Todo:
 import sys
 import os
 import argparse
-from sup import colors, listmode, colorsmode, colormapsmode, plr2dmode, plr1dmode, maxmin2dmode, maxmin1dmode, avg1dmode, avg2dmode, hist1dmode, hist2dmode, post1dmode, post2dmode, graph1dmode, graph2dmode
+from sup import (
+    colors, listmode, colorsmode, colormapsmode, plr2dmode, plr1dmode, 
+    maxmin2dmode, maxmin1dmode, avg1dmode, avg2dmode, hist1dmode, hist2dmode, 
+    post1dmode, post2dmode, graph1dmode, graph2dmode
+    )
+from sup.utils import SupRuntimeError
 
 
 def main():
@@ -27,11 +32,13 @@ def main():
 
     This function parses the command line arguments using argparse and runs 
     the sup in the requested mode.
-
-    Raises:
-        RuntimeError: If the chosen sup mode fails raises an Exception.
+    
+    Returns:
+        (int): An error code that equals 0 (success) or 1 (error occurred).
 
     """
+    
+    error_prefix = "sup runtime error: "
 
     # Get the script name
     prog_name = os.path.basename(sys.argv[0])
@@ -395,83 +402,83 @@ examples:
 
     if len(sys.argv) < 2:
         parser.print_usage()
-        sys.exit(1)
+        return 1
 
-    error_prefix = os.path.basename(__file__) + ": error: "
     args_dict = vars(args)
 
-    if "x_range" in args_dict.keys():
-        if args.x_range is not None:
-            if args.x_range[0] >= args.x_range[1]:
-                print(error_prefix + "X_MIN must be smaller than X_MAX")
-                return
+    # Consistency checks:
+    try:
+        if "x_range" in args_dict.keys():
+            if args.x_range is not None:
+                if args.x_range[0] >= args.x_range[1]:
+                    raise SupRuntimeError("X_MIN must be smaller than X_MAX")
 
-    if "y_range" in args_dict.keys():
-        if args.y_range is not None:
-            if args.y_range[0] >= args.y_range[1]:
-                print(error_prefix + "Y_MIN must be smaller than Y_MAX")
-                return
+        if "y_range" in args_dict.keys():
+            if args.y_range is not None:
+                if args.y_range[0] >= args.y_range[1]:
+                    raise SupRuntimeError("Y_MIN must be smaller than Y_MAX")
 
-    if "z_range" in args_dict.keys():
-        if args.z_range is not None:
-            if args.z_range[0] >= args.z_range[1]:
-                print(error_prefix + "Z_MIN must be smaller than Z_MAX")
-                return
+        if "z_range" in args_dict.keys():
+            if args.z_range is not None:
+                if args.z_range[0] >= args.z_range[1]:
+                    raise SupRuntimeError("Z_MIN must be smaller than Z_MAX")
 
-    if "xy_bins" in args_dict.keys():
-        if args.xy_bins is not None:
-            if (args.xy_bins[0] < 6) or (args.xy_bins[1] < 6):
-                print(error_prefix + "X_BINS and Y_BINS must be at least 6")
-                return
+        if "xy_bins" in args_dict.keys():
+            if args.xy_bins is not None:
+                if (args.xy_bins[0] < 6) or (args.xy_bins[1] < 6):
+                    raise SupRuntimeError("X_BINS and Y_BINS must be at least 6")
 
-    if "n_colors" in args_dict.keys():
-        if args.n_colors is not None:
-            if (args.n_colors < 1) or (args.n_colors > 10):
-                print(error_prefix + "N_COLORS must be an integer between 1 and 10")
-                return
+        if "n_colors" in args_dict.keys():
+            if args.n_colors is not None:
+                if (args.n_colors < 1) or (args.n_colors > 10):
+                    raise SupRuntimeError("N_COLORS must be an integer between 1 and 10")
 
-    if "cmap_index" in args_dict.keys():
-        if args.cmap_index is not None:
-            n_colormaps = len(colors.cmaps)
-            if args.cmap_index not in range(n_colormaps):
-                print(error_prefix + "the colormap option (CM) must be a integer between 0 and " + str(n_colormaps))
-                return
+        if "cmap_index" in args_dict.keys():
+            if args.cmap_index is not None:
+                n_colormaps = len(colors.cmaps)
+                if args.cmap_index not in range(n_colormaps):
+                    raise SupRuntimeError("the colormap option (CM) must be a integer between 0 and " + str(n_colormaps))
 
-    if "read_slice" in args_dict.keys():
-        if args.read_slice is not None:
-            if args.read_slice[2] <= 0:
-                print(error_prefix + "STEP must be an integer greater than 0")
-                return
+        if "read_slice" in args_dict.keys():
+            if args.read_slice is not None:
+                if args.read_slice[2] <= 0:
+                    raise SupRuntimeError("STEP must be an integer greater than 0")
 
-    if "n_decimals" in args_dict.keys():
-        if args.n_decimals is not None:
-            if (args.n_decimals < 1) or (args.n_decimals > 8):
-                print(error_prefix + "N_DECIMALS must be an integer between 1 and 8")
-                return
+        if "n_decimals" in args_dict.keys():
+            if args.n_decimals is not None:
+                if (args.n_decimals < 1) or (args.n_decimals > 8):
+                    raise SupRuntimeError("N_DECIMALS must be an integer between 1 and 8")
 
-    if "credible_regions" in args_dict.keys():
-        if args.credible_regions is not None:
-            for cr_val in args.credible_regions:
-                if (cr_val < 0.) or (cr_val > 100.):
-                    print(error_prefix + "CR_PROB (credible region probability) must be between 0 and 100")
-                    return 
+        if "credible_regions" in args_dict.keys():
+            if args.credible_regions is not None:
+                for cr_val in args.credible_regions:
+                    if (cr_val < 0.) or (cr_val > 100.):
+                        raise SupRuntimeError("CR_PROB (credible region probability) must be between 0 and 100")
 
-    if "confidence_levels" in args_dict.keys():
-        if args.confidence_levels is not None:
-            for cl_val in args.confidence_levels:
-                if (cl_val < 0.) or (cl_val > 100.):
-                    print(error_prefix + "CL_PROB (confidence level probability) must be between 0 and 100")
-                    return 
+        if "confidence_levels" in args_dict.keys():
+            if args.confidence_levels is not None:
+                for cl_val in args.confidence_levels:
+                    if (cl_val < 0.) or (cl_val > 100.):
+                        raise SupRuntimeError("CL_PROB (confidence level probability) must be between 0 and 100")
+
+    except SupRuntimeError as e:
+        print(error_prefix + "{0}".format(e))
+        return 1
 
     # Try running sup in the chosen mode
     try:
         args.func(args)
-    except RuntimeError as e:
+    except SupRuntimeError as e:
         print(error_prefix + "{0}".format(e))
+        return 1
     except BaseException as e:
         print(error_prefix + "Unexpected error:")
         print()
         raise e
 
+    return 0
+
+
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
+    

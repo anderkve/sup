@@ -126,9 +126,9 @@ def run(args):
 
     confidence_levels = np.array(confidence_levels)
     if np.any(confidence_levels>100.0):
-        raise RuntimeError("Can't use a confidence level of more than 100%.")
+        raise SupRuntimeError("Can't use a confidence level of more than 100%.")
     elif np.any(confidence_levels<=0.0):
-        raise RuntimeError("Can't use a confidence level of <= 0%.")
+        raise SupRuntimeError("Can't use a confidence level of <= 0%.")
 
     filter_indices = args.filter_indices
     use_filters = bool(filter_indices is not None) 

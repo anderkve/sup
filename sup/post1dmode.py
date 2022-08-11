@@ -130,9 +130,9 @@ def run(args):
 
     credible_regions = np.array(credible_regions)
     if np.any(credible_regions>100.0):
-        raise RuntimeError("Can't have a credible region with more than 100% probability.")
+        raise SupRuntimeError("Can't have a credible region with more than 100% probability.")
     elif np.any(credible_regions<=0.0):
-        raise RuntimeError("Can't have a credible region with <= 0% probability.")
+        raise SupRuntimeError("Can't have a credible region with <= 0% probability.")
 
 
     filter_indices = args.filter_indices
