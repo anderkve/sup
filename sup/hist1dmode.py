@@ -165,19 +165,28 @@ def run(args):
     w_data = None
 
     if use_weights:
-        dsets, dset_names = utils.read_input_file(input_file, [x_index, w_index], read_slice, delimiter=args.delimiter)
+        dsets, dset_names = utils.read_input_file(input_file,
+                                                  [x_index, w_index],
+                                                  read_slice,
+                                                  delimiter=args.delimiter)
         x_data, w_data = dsets
         x_name, w_name = dset_names
         utils.check_weights(w_data, w_name)
     else:
-        dsets, dset_names = utils.read_input_file(input_file, [x_index], read_slice, delimiter=args.delimiter)
+        dsets, dset_names = utils.read_input_file(input_file, 
+                                                  [x_index],
+                                                  read_slice,
+                                                  delimiter=args.delimiter)
         x_data,  = dsets
         x_name,  = dset_names
         w_data = np.ones(len(x_data))
 
     assert len(x_data) == len(w_data)
 
-    filter_datasets, filter_names = utils.get_filters(input_file, filter_indices, read_slice=read_slice, delimiter=args.delimiter)
+    filter_datasets, filter_names = utils.get_filters(input_file, 
+                                                      filter_indices,
+                                                      read_slice=read_slice,
+                                                      delimiter=args.delimiter)
 
     if use_filters:
         x_data, w_data = utils.apply_filters([x_data, w_data], filter_datasets)
@@ -186,7 +195,8 @@ def run(args):
     y_transf_expr = args.y_transf_expr
     w_transf_expr = args.w_transf_expr
 
-    # @todo: add the x,y,w variables to a dictionary of allowed arguments to eval()
+    # @todo: add the x,y,w variables to a dictionary of allowed arguments
+    #        to eval()
     x = x_data
     w = w_data
     if x_transf_expr != "":
@@ -202,8 +212,12 @@ def run(args):
     # Get a dict with info per bin
     #
 
-    bins_content_unweighted,_  = np.histogram(x_data, bins=xy_bins[0], range=x_range, density=normalize_histogram) 
-    bins_content, x_bin_limits = np.histogram(x_data, bins=xy_bins[0], range=x_range, weights=w_data, density=normalize_histogram) 
+    bins_content_unweighted,_  = np.histogram(x_data, bins=xy_bins[0],
+                                              range=x_range, 
+                                              density=normalize_histogram) 
+    bins_content, x_bin_limits = np.histogram(x_data, bins=xy_bins[0],
+                                              range=x_range, weights=w_data,
+                                              density=normalize_histogram) 
 
     # Apply y-axis transformation
     y = bins_content
@@ -214,10 +228,13 @@ def run(args):
     x_bin_centres = x_bin_limits[:-1] + 0.5 * dx
 
     if not y_range:
-        y_range = [np.min(bins_content[bins_content > -np.inf]), np.max(bins_content)]
+        y_range = [np.min(bins_content[bins_content > -np.inf]), 
+                   np.max(bins_content)]
     y_min, y_max = y_range
 
-    bins_info, x_bin_limits, y_bin_limits = utils.get_bin_tuples_avg_1d(x_bin_centres, np.minimum(bins_content, y_max), xy_bins, x_range, y_range, fill_below=True, split_marker=True)
+    bins_info, x_bin_limits, y_bin_limits = utils.get_bin_tuples_avg_1d(
+        x_bin_centres, np.minimum(bins_content, y_max), xy_bins, x_range,
+        y_range, fill_below=True, split_marker=True)
 
 
     #
@@ -255,12 +272,19 @@ def run(args):
     fig_width = plot_width
 
     # Add axes
-    axes_mod_func = lambda input_str : utils.prettify(input_str, fg_ccode, bg_ccode, bold=True)
-    fill_mod_func = lambda input_str : utils.prettify(input_str, empty_bin_ccode, bg_ccode, bold=True)
-    plot_lines = utils.add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=axes_mod_func, mod_func_2=fill_mod_func, floatf=ff, add_y_grid_lines=True)
+    axes_mod_func = lambda input_str : utils.prettify(input_str, fg_ccode,
+                                                      bg_ccode, bold=True)
+    fill_mod_func = lambda input_str : utils.prettify(input_str,
+                                                      empty_bin_ccode, bg_ccode,
+                                                      bold=True)
+    plot_lines = utils.add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits,
+                                mod_func=axes_mod_func,
+                                mod_func_2=fill_mod_func, floatf=ff,
+                                add_y_grid_lines=True)
 
     # Add blank top line
-    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode, insert_pos=0)
+    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width,
+                                              fg_ccode, bg_ccode, insert_pos=0)
 
 
     #
@@ -268,23 +292,29 @@ def run(args):
     #
 
     # max bin legend
-    legend_mod_func = lambda input_str, input_fg_ccode : utils.prettify(input_str, input_fg_ccode, bg_ccode, bold=True)
+    legend_mod_func = lambda input_str, input_fg_ccode : utils.prettify(
+        input_str, input_fg_ccode, bg_ccode, bold=True)
 
     maxbin_index = np.argmax(bins_content)
     maxbin_content = bins_content[maxbin_index]
     maxbin_limits = [x_bin_limits[maxbin_index], x_bin_limits[maxbin_index+1]]
     
     maxbin_str = "max bin:  x: "
-    maxbin_str += ("(" + ff2 + ", " + ff2 + ")").format(maxbin_limits[0], maxbin_limits[1])
+    maxbin_str += ("(" + ff2 + ", " + ff2 + ")").format(maxbin_limits[0], 
+                                                        maxbin_limits[1])
     maxbin_str += "  bin height: "
     maxbin_str += (ff2).format(maxbin_content)
 
     legend_maxbin_entries = []
     legend_maxbin_entries.append(("", fg_ccode, maxbin_str, fg_ccode))
-    legend_maxbin, legend_maxbin_width = utils.generate_legend(legend_maxbin_entries, legend_mod_func, sep="  ", internal_sep=" ")
+    legend_maxbin, legend_maxbin_width = utils.generate_legend(
+        legend_maxbin_entries, legend_mod_func, sep="  ", internal_sep=" ")
 
-    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode)
-    plot_lines, fig_width = utils.insert_line(legend_maxbin, legend_maxbin_width, plot_lines, fig_width, fg_ccode, bg_ccode)
+    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, 
+                                              fg_ccode, bg_ccode)
+    plot_lines, fig_width = utils.insert_line(legend_maxbin, 
+                                              legend_maxbin_width, plot_lines, 
+                                              fig_width, fg_ccode, bg_ccode)
 
 
     #
@@ -322,8 +352,11 @@ def run(args):
                                           left_padding=left_padding + " ")
 
     for i,line in enumerate(info_lines):
-        pretty_line = utils.prettify(line + "  ", fg_ccode, bg_ccode, bold=False)
-        plot_lines, fig_width = utils.insert_line(pretty_line, len(line), plot_lines, fig_width, fg_ccode, bg_ccode)
+        pretty_line = utils.prettify(line + "  ", fg_ccode, bg_ccode,
+                                     bold=False)
+        plot_lines, fig_width = utils.insert_line(pretty_line, len(line), 
+                                                  plot_lines, fig_width,
+                                                  fg_ccode, bg_ccode)
 
 
     #

@@ -155,13 +155,19 @@ def run(args):
     # Read datasets from file
     #
 
-    dsets, dset_names = utils.read_input_file(input_file, [x_index, y_index], read_slice, delimiter=args.delimiter)
+    dsets, dset_names = utils.read_input_file(input_file, 
+                                              [x_index, y_index],
+                                              read_slice, 
+                                              delimiter=args.delimiter)
     x_data, y_data = dsets
     x_name, y_name = dset_names
 
     assert len(x_data) == len(y_data)
 
-    filter_datasets, filter_names = utils.get_filters(input_file, filter_indices, read_slice=read_slice, delimiter=args.delimiter)
+    filter_datasets, filter_names = utils.get_filters(input_file, 
+                                                      filter_indices, 
+                                                      read_slice=read_slice, 
+                                                      delimiter=args.delimiter)
 
     if use_filters:
         x_data, y_data = utils.apply_filters([x_data, y_data], filter_datasets)
@@ -187,7 +193,9 @@ def run(args):
     # Get a dict with info per bin
     #
 
-    bins_info, x_bin_limits, y_bin_limits = utils.get_bin_tuples_avg_1d(x_data, y_data, xy_bins, x_range, y_range, fill_below=False, split_marker=True)
+    bins_info, x_bin_limits, y_bin_limits = utils.get_bin_tuples_avg_1d(
+        x_data, y_data, xy_bins, x_range, y_range, fill_below=False, 
+        split_marker=True)
 
 
     #
@@ -225,12 +233,19 @@ def run(args):
     fig_width = plot_width
 
     # Add axes
-    axes_mod_func = lambda input_str : utils.prettify(input_str, fg_ccode, bg_ccode, bold=True)
-    fill_mod_func = lambda input_str : utils.prettify(input_str, empty_bin_ccode, bg_ccode, bold=True)
-    plot_lines = utils.add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=axes_mod_func, mod_func_2=fill_mod_func, floatf=ff, add_y_grid_lines=True)
+    axes_mod_func = lambda input_str : utils.prettify(input_str, fg_ccode, 
+                                                      bg_ccode, bold=True)
+    fill_mod_func = lambda input_str : utils.prettify(input_str,
+                                                      empty_bin_ccode, bg_ccode, 
+                                                      bold=True)
+    plot_lines = utils.add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits, 
+                                mod_func=axes_mod_func, 
+                                mod_func_2=fill_mod_func, floatf=ff, 
+                                add_y_grid_lines=True)
 
     # Add blank top line
-    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode, insert_pos=0)
+    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width,
+                                              fg_ccode, bg_ccode, insert_pos=0)
 
 
     #
@@ -266,8 +281,11 @@ def run(args):
                                           left_padding=left_padding + " ")
 
     for i,line in enumerate(info_lines):
-        pretty_line = utils.prettify(line + "  ", fg_ccode, bg_ccode, bold=False)
-        plot_lines, fig_width = utils.insert_line(pretty_line, len(line), plot_lines, fig_width, fg_ccode, bg_ccode)
+        pretty_line = utils.prettify(line + "  ", fg_ccode, bg_ccode,
+                                     bold=False)
+        plot_lines, fig_width = utils.insert_line(pretty_line, len(line), 
+                                                  plot_lines, fig_width, 
+                                                  fg_ccode, bg_ccode)
 
 
     #
