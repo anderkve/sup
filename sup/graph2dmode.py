@@ -130,7 +130,9 @@ def run(args):
         n_colors = 1
     elif n_colors > 10:
         n_colors = 10
-    ccodes = [ccodes[int(i)] for i in np.round(np.linspace(0, len(ccodes)-1, n_colors))]
+    ccodes = [
+        ccodes[int(i)] for i in np.round(np.linspace(0,len(ccodes)-1,n_colors))
+    ]
 
     if args.reverse_colormap:
         ccodes = ccodes[::-1]
@@ -195,7 +197,8 @@ def run(args):
     # Get a dict with info per bin
     #
 
-    bins_info, x_bin_limits, y_bin_limits = utils.get_bin_tuples_avg(x_data, y_data, z_data, xy_bins, x_range, y_range)
+    bins_info, x_bin_limits, y_bin_limits = utils.get_bin_tuples_avg(
+        x_data, y_data, z_data, xy_bins, x_range, y_range)
 
 
     #
@@ -236,11 +239,14 @@ def run(args):
     fig_width = plot_width
 
     # Add axes
-    axes_mod_func = lambda input_str : utils.prettify(input_str, fg_ccode, bg_ccode, bold=True)
-    plot_lines = utils.add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=axes_mod_func, floatf=ff)
+    axes_mod_func = lambda input_str : utils.prettify(input_str, fg_ccode, 
+                                                      bg_ccode, bold=True)
+    plot_lines = utils.add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits, 
+                                mod_func=axes_mod_func, floatf=ff)
 
     # Add blank top line
-    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode, insert_pos=0)
+    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width,
+                                              fg_ccode, bg_ccode, insert_pos=0)
 
 
     #
@@ -249,7 +255,8 @@ def run(args):
 
     plot_lines, fig_width = utils.generate_colorbar(plot_lines, fig_width, ff,
                                                     ccodes, color_z_lims, 
-                                                    fg_ccode, bg_ccode, empty_bin_ccode)
+                                                    fg_ccode, bg_ccode, 
+                                                    empty_bin_ccode)
 
         
     #
@@ -281,8 +288,11 @@ def run(args):
                                           left_padding=left_padding + " ")
 
     for i,line in enumerate(info_lines):
-        pretty_line = utils.prettify(line + "  ", fg_ccode, bg_ccode, bold=False)
-        plot_lines, fig_width = utils.insert_line(pretty_line, len(line), plot_lines, fig_width, fg_ccode, bg_ccode)
+        pretty_line = utils.prettify(line + "  ", fg_ccode, bg_ccode, 
+                                     bold=False)
+        plot_lines, fig_width = utils.insert_line(pretty_line, len(line), p
+                                                  lot_lines, fig_width, 
+                                                  fg_ccode, bg_ccode)
 
 
     #
