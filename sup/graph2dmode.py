@@ -290,8 +290,8 @@ def run(args):
     for i,line in enumerate(info_lines):
         pretty_line = utils.prettify(line + "  ", fg_ccode, bg_ccode, 
                                      bold=False)
-        plot_lines, fig_width = utils.insert_line(pretty_line, len(line), p
-                                                  lot_lines, fig_width, 
+        plot_lines, fig_width = utils.insert_line(pretty_line, len(line), 
+                                                  plot_lines, fig_width,
                                                   fg_ccode, bg_ccode)
 
 

@@ -228,8 +228,10 @@ def run(args):
     x_bin_centres = x_bin_limits[:-1] + 0.5 * dx
 
     if not y_range:
-        y_range = [np.min(bins_content[bins_content > -np.inf]), 
-                   np.max(bins_content)]
+        y_range = [
+            np.min(bins_content[bins_content > -np.inf]), 
+            np.max(bins_content)
+        ]
     y_min, y_max = y_range
 
     bins_info, x_bin_limits, y_bin_limits = utils.get_bin_tuples_avg_1d(

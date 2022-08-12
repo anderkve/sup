@@ -168,17 +168,24 @@ def run(args, mode):
     # Read datasets from file
     #
 
-    dsets, dset_names = utils.read_input_file(input_file, [x_index, y_index, s_index], read_slice, delimiter=args.delimiter)
+    dsets, dset_names = utils.read_input_file(input_file,
+                                              [x_index, y_index, s_index],
+                                              read_slice,
+                                              delimiter=args.delimiter)
     x_data, y_data, s_data = dsets
     x_name, y_name, s_name = dset_names
 
-    filter_datasets, filter_names = utils.get_filters(input_file, filter_indices, read_slice=read_slice, delimiter=args.delimiter)
+    filter_datasets, filter_names = utils.get_filters(input_file, 
+                                                      filter_indices,
+                                                      read_slice=read_slice,
+                                                      delimiter=args.delimiter)
 
     assert len(x_data) == len(y_data)
     assert len(x_data) == len(s_data)
 
     if use_filters:
-        x_data, y_data, s_data = utils.apply_filters([x_data, y_data, s_data], filter_datasets)
+        x_data, y_data, s_data = utils.apply_filters([x_data, y_data, s_data],
+                                                     filter_datasets)
 
     x_transf_expr = args.x_transf_expr
     y_transf_expr = args.y_transf_expr
@@ -207,13 +214,19 @@ def run(args, mode):
     elif s_type == "min":
         maxmin_index = np.argmin(s_data)
 
-    xys_maxmin = (x_data[maxmin_index], y_data[maxmin_index], s_data[maxmin_index])
+    xys_maxmin = (
+        x_data[maxmin_index],
+        y_data[maxmin_index],
+        s_data[maxmin_index]
+    )
 
     #
     # Get a dict with info per bin
     #
 
-    bins_info, x_bin_limits, y_bin_limits = utils.get_bin_tuples_maxmin_1d(x_data, y_data, xy_bins, x_range, y_range, s_data, s_type, fill_below=False, split_marker=True)
+    bins_info, x_bin_limits, y_bin_limits = utils.get_bin_tuples_maxmin_1d(
+        x_data, y_data, xy_bins, x_range, y_range, s_data, s_type, 
+        fill_below=False, split_marker=True)
 
 
     #
@@ -251,12 +264,19 @@ def run(args, mode):
     fig_width = plot_width
 
     # Add axes
-    axes_mod_func = lambda input_str : utils.prettify(input_str, fg_ccode, bg_ccode, bold=True)
-    fill_mod_func = lambda input_str : utils.prettify(input_str, empty_bin_ccode, bg_ccode, bold=True)
-    plot_lines = utils.add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=axes_mod_func, mod_func_2=fill_mod_func, floatf=ff, add_y_grid_lines=True)
+    axes_mod_func = lambda input_str : utils.prettify(input_str, fg_ccode, 
+                                                      bg_ccode, bold=True)
+    fill_mod_func = lambda input_str : utils.prettify(input_str, 
+                                                      empty_bin_ccode, 
+                                                      bg_ccode, bold=True)
+    plot_lines = utils.add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits,
+                                mod_func=axes_mod_func, 
+                                mod_func_2=fill_mod_func, floatf=ff, 
+                                add_y_grid_lines=True)
 
     # Add blank top line
-    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode, insert_pos=0)
+    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width,
+                                              fg_ccode, bg_ccode, insert_pos=0)
 
 
     #
@@ -264,7 +284,8 @@ def run(args, mode):
     #
 
     # max/min legend
-    legend_mod_func = lambda input_str, input_fg_ccode : utils.prettify(input_str, input_fg_ccode, bg_ccode, bold=True)
+    legend_mod_func = lambda input_str, input_fg_ccode : utils.prettify(
+        input_str, input_fg_ccode, bg_ccode, bold=True)
 
     point_str = ""
     if s_index != y_index:
@@ -277,16 +298,22 @@ def run(args, mode):
     marker_str = ""
 
     if s_index != y_index:
-        point = ("(" + ff2 + ", " + ff2 + ", " + ff2 + ")").format(xys_maxmin[0], xys_maxmin[1], xys_maxmin[2])
+        point = ("(" + ff2 + ", " + ff2 + ", " + ff2 + ")").format(
+            xys_maxmin[0], xys_maxmin[1], xys_maxmin[2])
     else:
-        point = ("(" + ff2 + ", " + ff2 + ")").format(xys_maxmin[0], xys_maxmin[1])
+        point = ("(" + ff2 + ", " + ff2 + ")").format(xys_maxmin[0], 
+                                                      xys_maxmin[1])
 
     point_str += point
     legend_maxmin_entries.append((marker_str, fg_ccode, point_str, fg_ccode))
-    legend_maxmin, legend_maxmin_width = utils.generate_legend(legend_maxmin_entries, legend_mod_func, sep="  ", internal_sep=" ")
+    legend_maxmin, legend_maxmin_width = utils.generate_legend(
+        legend_maxmin_entries, legend_mod_func, sep="  ", internal_sep=" ")
 
-    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode)
-    plot_lines, fig_width = utils.insert_line(legend_maxmin, legend_maxmin_width, plot_lines, fig_width, fg_ccode, bg_ccode)
+    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, 
+                                              fg_ccode, bg_ccode)
+    plot_lines, fig_width = utils.insert_line(legend_maxmin,
+                                              legend_maxmin_width, plot_lines,
+                                              fig_width, fg_ccode, bg_ccode)
 
 
     #
@@ -329,8 +356,11 @@ def run(args, mode):
                                           left_padding=left_padding + " ")
 
     for i,line in enumerate(info_lines):
-        pretty_line = utils.prettify(line + "  ", fg_ccode, bg_ccode, bold=False)
-        plot_lines, fig_width = utils.insert_line(pretty_line, len(line), plot_lines, fig_width, fg_ccode, bg_ccode)
+        pretty_line = utils.prettify(line + "  ", fg_ccode, bg_ccode,
+                                     bold=False)
+        plot_lines, fig_width = utils.insert_line(pretty_line, len(line),
+                                                  plot_lines, fig_width,
+                                                  fg_ccode, bg_ccode)
 
 
     #

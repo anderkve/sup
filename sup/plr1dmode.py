@@ -180,17 +180,24 @@ def run(args):
     # Read datasets from file
     #
 
-    dsets, dset_names = utils.read_input_file(input_file, [x_index, loglike_index, s_index], read_slice, delimiter=args.delimiter)
+    dsets, dset_names = utils.read_input_file(input_file,
+                                              [x_index, loglike_index, s_index],
+                                              read_slice, 
+                                              delimiter=args.delimiter)
     x_data, loglike_data, s_data = dsets
     x_name, loglike_name, s_name = dset_names
 
     assert len(x_data) == len(loglike_data)
     assert len(x_data) == len(s_data)
 
-    filter_datasets, filter_names = utils.get_filters(input_file, filter_indices, read_slice=read_slice, delimiter=args.delimiter)
+    filter_datasets, filter_names = utils.get_filters(input_file,
+                                                      filter_indices,
+                                                      read_slice=read_slice,
+                                                      delimiter=args.delimiter)
 
     if use_filters:
-        x_data, loglike_data, s_data = utils.apply_filters([x_data, loglike_data, s_data], filter_datasets)
+        x_data, loglike_data, s_data = utils.apply_filters(
+            [x_data, loglike_data, s_data], filter_datasets)
 
     x_transf_expr = args.x_transf_expr
     # y_transf_expr = args.y_transf_expr
@@ -233,7 +240,13 @@ def run(args):
     # Get a dict with info per bin
     #
 
-    bins_info, x_bin_limits, y_bin_limits, x_func_data, y_func_data = utils.get_bin_tuples_maxmin_1d(x_data, y_data, xy_bins, x_range, y_range, s_data, s_type, fill_below=False, split_marker=True, return_function_data=True, fill_y_val=np.nan)
+    bins_info, x_bin_limits, y_bin_limits, x_func_data, y_func_data = \
+        utils.get_bin_tuples_maxmin_1d(x_data, y_data, xy_bins, x_range, 
+                                       y_range, s_data, s_type, 
+                                       fill_below=False, split_marker=True, 
+                                       return_function_data=True, 
+                                       fill_y_val=np.nan)
+
 
     #
     # Generate string to be printed
@@ -270,46 +283,65 @@ def run(args):
     fig_width = plot_width
 
     # Add axes
-    axes_mod_func = lambda input_str : utils.prettify(input_str, fg_ccode, bg_ccode, bold=True)
-    fill_mod_func = lambda input_str : utils.prettify(input_str, empty_bin_ccode, bg_ccode, bold=True)
-    plot_lines = utils.add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=axes_mod_func, mod_func_2=fill_mod_func, floatf=ff, add_y_grid_lines=True)
+    axes_mod_func = lambda input_str : utils.prettify(input_str, fg_ccode,
+                                                      bg_ccode, bold=True)
+    fill_mod_func = lambda input_str : utils.prettify(input_str,
+                                                      empty_bin_ccode, bg_ccode,
+                                                      bold=True)
+    plot_lines = utils.add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits,
+                                mod_func=axes_mod_func, 
+                                mod_func_2=fill_mod_func, floatf=ff, 
+                                add_y_grid_lines=True)
 
     # Add blank top line
-    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode, insert_pos=0)
+    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width,
+                                              fg_ccode, bg_ccode, insert_pos=0)
 
 
     #
     # Add horizontal confidence interval bars
     #
 
-    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode)
+    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width,
+                                              fg_ccode, bg_ccode)
 
-    cl_bar_lines = utils.generate_confidence_level_bars(confidence_levels, y_func_data, x_bin_limits, ff2)
+    cl_bar_lines = utils.generate_confidence_level_bars(confidence_levels, 
+                                                        y_func_data, 
+                                                        x_bin_limits, ff2)
 
     for i,line in enumerate(cl_bar_lines):
         cl_bar_width = len(line)
         cl_bar = utils.prettify(line, bar_ccodes[i % 2], bg_ccode)
-        plot_lines, fig_width = utils.insert_line(cl_bar, cl_bar_width, plot_lines, fig_width, fg_ccode, bg_ccode)
+        plot_lines, fig_width = utils.insert_line(cl_bar, cl_bar_width, 
+                                                  plot_lines, fig_width,
+                                                  fg_ccode, bg_ccode)
 
 
     # #
     # # Add legend
     # #
 
-    # legend_mod_func = lambda input_str, input_fg_ccode : utils.prettify(input_str, input_fg_ccode, bg_ccode, bold=True)
+    # legend_mod_func = lambda input_str, input_fg_ccode : utils.prettify(
+    #     input_str, input_fg_ccode, bg_ccode, bold=True)
     # legend_entries = []
 
     # # legend_entries.append(("", fg_ccode, "", fg_ccode))
     # if (not use_capped_loglike) and highlight_maxlike_point:
-    #     legend_entries.append((" " + special_marker.strip(), max_bin_ccode, "best-fit", fg_ccode))
-    # legend_entries.append((" " * use_capped_loglike + regular_marker.strip(), ccode[-1], "1σ", fg_ccode))
+    #     legend_entries.append((" " + special_marker.strip(), max_bin_ccode,
+    #                            "best-fit", fg_ccode))
+    # legend_entries.append((" " * use_capped_loglike + regular_marker.strip(), 
+    #                        ccode[-1], "1σ", fg_ccode))
     # legend_entries.append((regular_marker.strip(), ccode[-2], "2σ", fg_ccode))
     # legend_entries.append((regular_marker.strip(), ccode[-3], "3σ", fg_ccode))
     
-    # legend, legend_width = utils.generate_legend(legend_entries, legend_mod_func, sep="  ")
+    # legend, legend_width = utils.generate_legend(legend_entries, 
+    #                                              legend_mod_func, sep="  ")
 
-    # plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, fg_ccode, bg_ccode)
-    # plot_lines, fig_width = utils.insert_line(legend, legend_width, plot_lines, fig_width, fg_ccode, bg_ccode)
+    # plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width,
+    #                                           fg_ccode, bg_ccode)
+    # plot_lines, fig_width = utils.insert_line(legend, legend_width, 
+    #                                           plot_lines, fig_width, 
+    #                                           fg_ccode, bg_ccode)
 
 
     #
@@ -347,12 +379,16 @@ def run(args):
                                           capped_label="ln(L)",
                                           cap_val=args.cap_loglike_val,
                                           filter_names=filter_names,
-                                          mode_name="profile likelihood ratio, L/L_max",
+                                          mode_name=("profile likelihood ratio"
+                                                     ", L/L_max"),
                                           left_padding=left_padding + " ")
 
     for i,line in enumerate(info_lines):
-        pretty_line = utils.prettify(line + "  ", fg_ccode, bg_ccode, bold=False)
-        plot_lines, fig_width = utils.insert_line(pretty_line, len(line), plot_lines, fig_width, fg_ccode, bg_ccode)
+        pretty_line = utils.prettify(line + "  ", fg_ccode, bg_ccode,
+                                     bold=False)
+        plot_lines, fig_width = utils.insert_line(pretty_line, len(line),
+                                                  plot_lines, fig_width,
+                                                  fg_ccode, bg_ccode)
 
 
     #
