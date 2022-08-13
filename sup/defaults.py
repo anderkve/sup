@@ -34,6 +34,18 @@ Attributes:
 
     empty_bin_marker_2d (string): The default marker for empty bins in 2d plots.
 
+    empty_bin_ccode_color_bb (int): The default color code for empty bins
+        in plots with black background.
+
+    empty_bin_ccode_color_wb (int): The default color code for empty bins
+        in plots with white background.
+
+    empty_bin_ccode_grayscale_bb (int): The default color code for empty bins
+        in grayscale plots with black background.
+
+    empty_bin_ccode_grayscale_wb (int): The default color code for empty bins
+        in grayscale plots with white background.
+
 """
 
 left_padding = 2*" "
@@ -51,3 +63,10 @@ special_marker = " 🟊"
 
 empty_bin_marker_1d = "  "
 empty_bin_marker_2d = " □"
+
+empty_bin_ccode_color_bb = 237
+empty_bin_ccode_color_wb = 252
+
+empty_bin_ccode_grayscale_bb = 237
+empty_bin_ccode_grayscale_wb = 252
+

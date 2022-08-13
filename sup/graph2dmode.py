@@ -21,13 +21,7 @@ special_marker = defaults.special_marker
 
 empty_bin_marker = defaults.empty_bin_marker_2d
 
-empty_bin_ccode_grayscale_bb = 237
-empty_bin_ccode_grayscale_wb = 252
-empty_bin_ccode_grayscale = empty_bin_ccode_grayscale_bb
-
-empty_bin_ccode_color_bb = 237
-empty_bin_ccode_color_wb = 252
-empty_bin_ccode = empty_bin_ccode_color_bb
+empty_bin_ccode = defaults.empty_bin_ccode_color_bb
 
 max_bin_ccode_grayscale_bb = 231
 max_bin_ccode_grayscale_wb = 232
@@ -81,7 +75,6 @@ def run(args):
     global max_bin_ccode
     global max_bin_ccode_grayscale
     global empty_bin_ccode
-    global empty_bin_ccode_grayscale
     global empty_bin_marker
     global special_marker
     global color_z_lims
@@ -104,7 +97,7 @@ def run(args):
     if use_white_bg:
         bg_ccode = defaults.bg_ccode_wb
         fg_ccode = defaults.fg_ccode_wb
-        empty_bin_ccode = empty_bin_ccode_color_wb
+        empty_bin_ccode = defaults.empty_bin_ccode_color_wb
         max_bin_ccode = max_bin_ccode_color_wb
         # ccodes = ccodes_color_wb
 
@@ -113,12 +106,12 @@ def run(args):
             ccodes = cmaps_grayscale[1]
             # ccodes = ccodes_grayscale_wb
             max_bin_ccode = max_bin_ccode_grayscale_wb
-            empty_bin_ccode = empty_bin_ccode_grayscale_wb
+            empty_bin_ccode = defaults.empty_bin_ccode_grayscale_wb
         else:
             ccodes = cmaps_grayscale[0]
             # ccodes = ccodes_grayscale_bb
             max_bin_ccode = max_bin_ccode_grayscale_bb
-            empty_bin_ccode = empty_bin_ccode_grayscale_bb
+            empty_bin_ccode = defaults.empty_bin_ccode_grayscale_bb
 
     n_colors = args.n_colors
     if n_colors < 1:
