@@ -10,19 +10,15 @@ import sup.utils as utils
 
 ff = defaults.ff
 ff2 = defaults.ff2
-left_padding = 2*" "
+left_padding = defaults.left_padding
 
-bg_ccode_bb, fg_ccode_bb = 16, 231
-bg_ccode_wb, fg_ccode_wb = 231, 16
-bg_ccode = bg_ccode_bb
-fg_ccode = fg_ccode_bb
+bg_ccode = defaults.bg_ccode_bb
+fg_ccode = defaults.fg_ccode_bb
 
-regular_marker = " ■"
-special_marker = " 🟊"
+regular_marker = defaults.regular_marker
+special_marker = defaults.special_marker
 
-empty_bin_marker_grayscale = " □"
-empty_bin_marker_color = " ■"
-empty_bin_marker = empty_bin_marker_color
+empty_bin_marker = defaults.empty_bin_marker_2d
 
 empty_bin_ccode_grayscale_bb = 233
 empty_bin_ccode_grayscale_wb = 254
@@ -125,8 +121,8 @@ def run(args):
 
     use_white_bg = args.use_white_bg
     if use_white_bg:
-        bg_ccode = bg_ccode_wb
-        fg_ccode = fg_ccode_wb
+        bg_ccode = defaults.bg_ccode_wb
+        fg_ccode = defaults.fg_ccode_wb
         empty_bin_ccode = empty_bin_ccode_color_wb
         max_bin_ccode = max_bin_ccode_color_wb
         ccodes = ccodes_color_wb
@@ -140,7 +136,6 @@ def run(args):
             ccodes = ccodes_grayscale_bb
             max_bin_ccode = max_bin_ccode_grayscale_bb
             empty_bin_ccode = empty_bin_ccode_grayscale_bb
-        empty_bin_marker = empty_bin_marker_grayscale
 
     highlight_maxlike_point = not(args.no_star)
 
