@@ -28,14 +28,6 @@ def prettify(input_string, fg_ccode, bg_ccode, bold=True, reset=True):
     return result
 
 
-def add_left_padding(plot_lines, fg_ccode, bg_ccode, left_padding=defaults.left_padding):
-
-    for i,line in enumerate(plot_lines):
-        plot_lines[i] = prettify(left_padding, fg_ccode, bg_ccode) + line
-
-    return plot_lines
-
-
 def insert_line(new_line, new_line_width, old_lines_list, old_width, fg_ccode,
                 bg_ccode, insert_pos=None):
 
@@ -59,6 +51,14 @@ def insert_line(new_line, new_line_width, old_lines_list, old_width, fg_ccode,
     result_lines_list.insert(insert_pos, new_line)
 
     return result_lines_list, result_width
+
+
+def add_left_padding(plot_lines, fg_ccode, bg_ccode, left_padding=defaults.left_padding):
+
+    for i,line in enumerate(plot_lines):
+        plot_lines[i] = prettify(left_padding, fg_ccode, bg_ccode) + line
+
+    return plot_lines
 
 
 def fill_missing_bg(lines_1, width_1, lines_2, width_2, bg_ccode):
@@ -250,6 +250,55 @@ def generate_info_text(ff2, x_label, x_range, x_bin_width=None,
     info_lines.append(left_padding)
 
     return info_lines
+
+
+
+def add_info_text(plot_lines, fig_width, fg_ccode, bg_ccode,
+                  ff2, x_label, x_range, x_bin_width=None,
+                  y_label=None, y_range=None, y_bin_width=None,
+                  z_label=None, z_range=None, 
+                  x_transf_expr="", y_transf_expr="", z_transf_expr="", 
+                  y_normalized_hist=False, z_normalized_hist=False,
+                  s_label=None, s_type=None, s_transf_expr="", 
+                  w_label=None, w_transf_expr="",
+                  capped_z=False, capped_label="z-axis", cap_val=1e99,
+                  filter_names=[],
+                  mode_name=None,
+                  left_padding=defaults.left_padding + " "):
+
+    info_lines = generate_info_text(ff2, 
+                                    x_label,
+                                    x_range, 
+                                    x_bin_width=x_bin_width,
+                                    y_label=y_label, 
+                                    y_range=y_range, 
+                                    y_bin_width=y_bin_width,
+                                    z_label=z_label,
+                                    z_range=z_range, 
+                                    x_transf_expr=x_transf_expr, 
+                                    y_transf_expr=y_transf_expr,
+                                    z_transf_expr=z_transf_expr,
+                                    y_normalized_hist=y_normalized_hist,
+                                    z_normalized_hist=z_normalized_hist,
+                                    s_label=s_label,
+                                    s_type=s_type, 
+                                    s_transf_expr=s_transf_expr,
+                                    w_label=w_label,
+                                    w_transf_expr=w_transf_expr,
+                                    capped_z=capped_z,
+                                    capped_label=capped_label,
+                                    cap_val=cap_val,
+                                    filter_names=filter_names,
+                                    mode_name=mode_name,
+                                    left_padding=left_padding)
+
+    for i,line in enumerate(info_lines):
+        pretty_line = prettify(line + "  ", fg_ccode, bg_ccode, bold=False)
+        plot_lines, fig_width = insert_line(pretty_line, len(line),
+                                            plot_lines, fig_width, 
+                                            fg_ccode, bg_ccode)
+
+    return plot_lines, fig_width
 
 
 def get_dataset_names_hdf5(hdf5_file_object):

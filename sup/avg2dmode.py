@@ -252,24 +252,13 @@ def run(args):
     dx = x_bin_limits[1] - x_bin_limits[0]
     dy = y_bin_limits[1] - y_bin_limits[0]
 
-    info_lines = utils.generate_info_text(ff2,
-                                          x_label, x_range, 
-                                          x_bin_width=dx,
-                                          y_label=y_label, y_range=y_range, 
-                                          y_bin_width=dy,
-                                          z_label=z_label, z_range=z_range, 
-                                          x_transf_expr=x_transf_expr, 
-                                          y_transf_expr=y_transf_expr,
-                                          z_transf_expr=z_transf_expr, 
-                                          filter_names=filter_names,
-                                          mode_name="average")
-
-    for i,line in enumerate(info_lines):
-        pretty_line = utils.prettify(line + "  ", fg_ccode, bg_ccode, 
-                                     bold=False)
-        plot_lines, fig_width = utils.insert_line(pretty_line, len(line), 
-                                                  plot_lines, fig_width, 
-                                                  fg_ccode, bg_ccode)
+    plot_lines, fig_width = utils.add_info_text(
+        plot_lines, fig_width, fg_ccode, bg_ccode, ff2, x_label, x_range,
+        x_bin_width=dx, y_label=y_label, y_range=y_range, y_bin_width=dy,
+        z_label=z_label, z_range=z_range, 
+        x_transf_expr=x_transf_expr, y_transf_expr=y_transf_expr,
+        z_transf_expr=z_transf_expr,
+        filter_names=filter_names, mode_name="average")
 
 
     #

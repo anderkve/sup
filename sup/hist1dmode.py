@@ -328,24 +328,13 @@ def run(args):
     # Add info text
     #
 
-    info_lines = utils.generate_info_text(ff2,
-                                          x_label, x_range, 
-                                          x_bin_width=dx,
-                                          y_label=y_label, y_range=y_range, 
-                                          x_transf_expr=x_transf_expr, 
-                                          y_transf_expr=y_transf_expr,
-                                          y_normalized_hist=normalize_histogram,
-                                          w_label=w_label,
-                                          w_transf_expr=w_transf_expr,
-                                          filter_names=filter_names,
-                                          mode_name="histogram")
-
-    for i,line in enumerate(info_lines):
-        pretty_line = utils.prettify(line + "  ", fg_ccode, bg_ccode,
-                                     bold=False)
-        plot_lines, fig_width = utils.insert_line(pretty_line, len(line), 
-                                                  plot_lines, fig_width,
-                                                  fg_ccode, bg_ccode)
+    plot_lines, fig_width = utils.add_info_text(
+        plot_lines, fig_width, fg_ccode, bg_ccode, ff2, x_label, x_range,
+        x_bin_width=dx, y_label=y_label, y_range=y_range, 
+        x_transf_expr=x_transf_expr, y_transf_expr=y_transf_expr,
+        y_normalized_hist=normalize_histogram, 
+        w_label=w_label, w_transf_expr=w_transf_expr,
+        filter_names=filter_names, mode_name="histogram")
 
 
     #

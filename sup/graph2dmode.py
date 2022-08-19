@@ -255,18 +255,10 @@ def run(args):
     # Add info text
     #
 
-    info_lines = utils.generate_info_text(ff2, 
-                                          x_label, x_range, 
-                                          y_label=y_label, y_range=y_range, 
-                                          z_label=z_label, z_range=z_range, 
-                                          mode_name="graph")
-
-    for i,line in enumerate(info_lines):
-        pretty_line = utils.prettify(line + "  ", fg_ccode, bg_ccode, 
-                                     bold=False)
-        plot_lines, fig_width = utils.insert_line(pretty_line, len(line), 
-                                                  plot_lines, fig_width,
-                                                  fg_ccode, bg_ccode)
+    plot_lines, fig_width = utils.add_info_text(
+        plot_lines, fig_width, fg_ccode, bg_ccode, ff2, x_label, x_range,
+        y_label=y_label, y_range=y_range, z_label=z_label, z_range=z_range, 
+        mode_name="graph")
 
 
     #

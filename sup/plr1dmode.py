@@ -355,27 +355,15 @@ def run(args):
 
     dx = x_bin_limits[1] - x_bin_limits[0]
 
-    info_lines = utils.generate_info_text(ff2,
-                                          x_label, x_range, 
-                                          x_bin_width=dx,
-                                          y_label=y_label, y_range=y_range, 
-                                          # z_label=z_label, z_range=z_range, 
-                                          s_label=s_label, s_type=s_type,
-                                          x_transf_expr = x_transf_expr, 
-                                          # y_transf_expr = y_transf_expr,
-                                          capped_z=use_capped_loglike,
-                                          capped_label="ln(L)",
-                                          cap_val=args.cap_loglike_val,
-                                          filter_names=filter_names,
-                                          mode_name=("profile likelihood ratio"
-                                                     ", L/L_max"))
-
-    for i,line in enumerate(info_lines):
-        pretty_line = utils.prettify(line + "  ", fg_ccode, bg_ccode,
-                                     bold=False)
-        plot_lines, fig_width = utils.insert_line(pretty_line, len(line),
-                                                  plot_lines, fig_width,
-                                                  fg_ccode, bg_ccode)
+    plot_lines, fig_width = utils.add_info_text(
+        plot_lines, fig_width, fg_ccode, bg_ccode, ff2, x_label, x_range,
+        x_bin_width=dx, y_label=y_label, y_range=y_range, 
+        s_label=s_label, s_type=s_type,
+        x_transf_expr = x_transf_expr, 
+        capped_z=use_capped_loglike, capped_label="ln(L)", 
+        cap_val=args.cap_loglike_val,
+        filter_names=filter_names, 
+        mode_name="profile likelihood ratio, L/L_max")
 
 
     #
