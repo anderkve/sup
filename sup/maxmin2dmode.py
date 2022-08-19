@@ -31,8 +31,6 @@ max_bin_ccode_color_bb = 231
 max_bin_ccode_color_wb = 232
 max_bin_ccode = max_bin_ccode_color_bb
 
-ccodes_grayscale = cmaps_grayscale[0]
-
 ccodes = cmaps[0]
 
 
@@ -93,7 +91,6 @@ def run(args, mode):
     assert args.cmap_index in range(len(cmaps))
 
     global ccodes 
-    global ccodes_grayscale 
     global bg_ccode
     global fg_ccode
     global max_bin_ccode
@@ -142,12 +139,10 @@ def run(args, mode):
     if args.use_grayscale:
         if use_white_bg:
             ccodes = cmaps_grayscale[1]
-            # ccodes = ccodes_grayscale_wb
             max_bin_ccode = max_bin_ccode_grayscale_wb
             empty_bin_ccode = defaults.empty_bin_ccode_grayscale_wb
         else:
             ccodes = cmaps_grayscale[0]
-            # ccodes = ccodes_grayscale_bb
             max_bin_ccode = max_bin_ccode_grayscale_bb
             empty_bin_ccode = defaults.empty_bin_ccode_grayscale_bb
 
