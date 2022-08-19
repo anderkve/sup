@@ -96,7 +96,6 @@ def run(args, mode):
     global empty_bin_ccode
     global empty_bin_marker
     global special_marker
-    global color_z_lims
 
     input_file = args.input_file
 

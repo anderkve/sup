@@ -52,9 +52,6 @@ left_padding = 2*" "
 
 xy_bins = (40, 40)
 
-ff = "{: .2e}"
-ff2 = "{:.2e}"
-
 bg_ccode_bb, fg_ccode_bb = 16, 231
 bg_ccode_wb, fg_ccode_wb = 231, 16
 
