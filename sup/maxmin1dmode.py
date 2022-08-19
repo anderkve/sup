@@ -8,8 +8,6 @@ import sup.utils as utils
 # Variables for colors, markers, padding, etc
 #
 
-left_padding = defaults.left_padding
-
 bg_ccode = defaults.bg_ccode_bb
 fg_ccode = defaults.fg_ccode_bb
 
@@ -311,8 +309,7 @@ def run(args, mode):
     # Add left padding
     #
 
-    for i,line in enumerate(plot_lines):
-        plot_lines[i] = utils.prettify(left_padding, fg_ccode, bg_ccode) + line
+    plot_lines = utils.add_left_padding(plot_lines, fg_ccode, bg_ccode)
 
 
     #
@@ -343,8 +340,7 @@ def run(args, mode):
                                           # capped_label="ln(L)",
                                           # cap_val=args.cap_loglike_val,
                                           filter_names=filter_names,
-                                          mode_name=mode,
-                                          left_padding=left_padding + " ")
+                                          mode_name=mode)
 
     for i,line in enumerate(info_lines):
         pretty_line = utils.prettify(line + "  ", fg_ccode, bg_ccode,

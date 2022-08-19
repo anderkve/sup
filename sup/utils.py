@@ -4,6 +4,8 @@ import numpy as np
 from collections import OrderedDict
 from scipy.stats import chi2
 from io import StringIO 
+import sup.defaults as defaults
+
 
 class SupRuntimeError(Exception):
     """Exceptions class for sup runtime errors"""
@@ -24,6 +26,14 @@ def prettify(input_string, fg_ccode, bg_ccode, bold=True, reset=True):
         result += "\u001b[0m"
 
     return result
+
+
+def add_left_padding(plot_lines, fg_ccode, bg_ccode, left_padding=defaults.left_padding):
+
+    for i,line in enumerate(plot_lines):
+        plot_lines[i] = prettify(left_padding, fg_ccode, bg_ccode) + line
+
+    return plot_lines
 
 
 def insert_line(new_line, new_line_width, old_lines_list, old_width, fg_ccode,
@@ -144,7 +154,7 @@ def generate_info_text(ff2, x_label, x_range, x_bin_width=None,
                        capped_z=False, capped_label="z-axis", cap_val=1e99,
                        filter_names=[],
                        mode_name=None,
-                       left_padding=""):
+                       left_padding=defaults.left_padding + " "):
 
     info_lines = []
     info_lines.append(left_padding)
