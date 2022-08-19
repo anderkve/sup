@@ -8,8 +8,6 @@ import sup.utils as utils
 # Variables for colors, markers, padding, etc
 #
 
-ff = defaults.ff
-ff2 = defaults.ff2
 left_padding = defaults.left_padding
 
 bg_ccode = defaults.bg_ccode_bb
@@ -90,8 +88,6 @@ def run(args):
     global empty_bin_ccode_grayscale
     global empty_bin_marker
     global special_marker
-    global ff
-    global ff2
 
     input_file = args.input_file
     x_index = args.x_index

@@ -10,8 +10,6 @@ from sup.colors import cmaps, cmaps_grayscale
 # Variables for colors, markers, padding, etc
 #
 
-ff = defaults.ff
-ff2 = defaults.ff2
 left_padding = defaults.left_padding
 
 bg_ccode = defaults.bg_ccode_bb
@@ -64,8 +62,6 @@ def run(args):
     global empty_bin_marker
     global special_marker
     global color_z_lims
-    global ff
-    global ff2
 
     input_file = args.input_file
 
