@@ -15,19 +15,15 @@ empty_bin_marker = defaults.empty_bin_marker_2d
 
 empty_bin_ccode_grayscale_bb = 233
 empty_bin_ccode_grayscale_wb = 254
-empty_bin_ccode_grayscale = empty_bin_ccode_grayscale_bb
 
 empty_bin_ccode_color_bb = 233
 empty_bin_ccode_color_wb = 255
-empty_bin_ccode = empty_bin_ccode_color_bb
 
 max_bin_ccode_grayscale_bb = 231
 max_bin_ccode_grayscale_wb = 232
-max_bin_ccode_grayscale = max_bin_ccode_grayscale_bb
 
 max_bin_ccode_color_bb = 231
 max_bin_ccode_color_wb = 232
-max_bin_ccode = max_bin_ccode_color_bb
 
 ccodes_grayscale_bb = [233, 237, 242, 231]
 ccodes_grayscale_wb = [254, 250, 243, 232]
@@ -37,7 +33,9 @@ ccodes_color_wb = [248, 19, 45, 220]
 
 color_z_lims = [0.0, 0.003, 0.046, 0.317]
 
-def get_color_code(ccodes, z_norm, highlight_maxlike_point, use_capped_loglike=False):
+
+def get_color_code(ccodes, max_bin_ccode, z_norm, highlight_maxlike_point, 
+                   use_capped_loglike=False):
 
     if z_norm == 1.0:
         if use_capped_loglike or (not highlight_maxlike_point):
@@ -71,10 +69,6 @@ def get_marker(z_norm, highlight_maxlike_point, use_capped_loglike=False):
 
 def run(args):
 
-    global max_bin_ccode
-    global max_bin_ccode_grayscale
-    global empty_bin_ccode
-    global empty_bin_ccode_grayscale
     global empty_bin_marker
     global special_marker
 
@@ -91,9 +85,6 @@ def run(args):
     x_range = args.x_range
     y_range = args.y_range
 
-    # z_min = defaults.z_min
-    # z_max = defaults.z_max
-
     read_slice = slice(*args.read_slice)
 
     xy_bins = args.xy_bins
@@ -107,6 +98,8 @@ def run(args):
     bg_ccode = defaults.bg_ccode_bb
     fg_ccode = defaults.fg_ccode_bb
 
+    empty_bin_ccode = empty_bin_ccode_color_bb
+    max_bin_ccode = max_bin_ccode_color_bb
     ccodes = ccodes_color_bb
     use_white_bg = args.use_white_bg
     if use_white_bg:
@@ -225,7 +218,8 @@ def run(args):
                 z_norm = z_val
                 # z_norm = (z_val - z_min) / (z_max - z_min)
 
-                ccode = get_color_code(ccodes, z_norm, highlight_maxlike_point, 
+                ccode = get_color_code(ccodes, max_bin_ccode, z_norm, 
+                                       highlight_maxlike_point, 
                                        use_capped_loglike=use_capped_loglike)
                 marker = get_marker(z_norm, highlight_maxlike_point,
                                     use_capped_loglike=use_capped_loglike)

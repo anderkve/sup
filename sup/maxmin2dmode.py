@@ -14,19 +14,15 @@ special_marker = defaults.special_marker
 
 empty_bin_marker = defaults.empty_bin_marker_2d
 
-empty_bin_ccode = defaults.empty_bin_ccode_color_bb
-
 max_bin_ccode_grayscale_bb = 231
 max_bin_ccode_grayscale_wb = 232
-max_bin_ccode_grayscale = max_bin_ccode_grayscale_bb
 
 max_bin_ccode_color_bb = 231
 max_bin_ccode_color_wb = 232
-max_bin_ccode = max_bin_ccode_color_bb
 
 
-
-def get_color_code(ccodes, z_val, z_norm, color_z_lims, s_type, highlight_maxmin_point):
+def get_color_code(ccodes, max_bin_ccode, z_val, z_norm, color_z_lims, s_type,
+                   highlight_maxmin_point):
 
     assert s_type in ["min", "max"]
 
@@ -81,9 +77,6 @@ def run(args, mode):
     assert mode in ["max", "min"]
     assert args.cmap_index in range(len(cmaps))
 
-    global max_bin_ccode
-    global max_bin_ccode_grayscale
-    global empty_bin_ccode
     global empty_bin_marker
     global special_marker
 
@@ -115,6 +108,8 @@ def run(args, mode):
     fg_ccode = defaults.fg_ccode_bb
 
     cmap_index = args.cmap_index
+    empty_bin_ccode = defaults.empty_bin_ccode_color_bb
+    max_bin_ccode = max_bin_ccode_color_bb
     ccodes = cmaps[cmap_index]
     use_white_bg = args.use_white_bg
     if use_white_bg:
@@ -122,7 +117,6 @@ def run(args, mode):
         fg_ccode = defaults.fg_ccode_wb
         empty_bin_ccode = defaults.empty_bin_ccode_color_wb
         max_bin_ccode = max_bin_ccode_color_wb
-        # ccodes = ccodes_color_wb
 
     if args.use_grayscale:
         if use_white_bg:
@@ -257,8 +251,9 @@ def run(args, mode):
                 if (z_max != z_min):
                     z_norm = (z_val - z_min) / (z_max - z_min)
 
-                ccode = get_color_code(ccodes, z_val, z_norm, color_z_lims,
-                                       s_type, highlight_maxmin_point)
+                ccode = get_color_code(ccodes, max_bin_ccode, z_val, z_norm,
+                                       color_z_lims, s_type, 
+                                       highlight_maxmin_point)
                 marker = get_marker(z_norm, s_type, highlight_maxmin_point)
 
             # Add point to line

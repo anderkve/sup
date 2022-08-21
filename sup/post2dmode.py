@@ -15,9 +15,6 @@ special_marker = defaults.special_marker
 
 empty_bin_marker = defaults.empty_bin_marker_2d
 
-empty_bin_ccode = defaults.empty_bin_ccode_color_bb
-
-
 
 def get_color_code(ccodes, z_val, z_norm, color_z_lims):
 
@@ -43,7 +40,6 @@ def run(args):
 
     assert args.cmap_index in range(len(cmaps))
 
-    global empty_bin_ccode
     global empty_bin_marker
     global special_marker
 
@@ -85,13 +81,13 @@ def run(args):
     fg_ccode = defaults.fg_ccode_bb
     
     cmap_index = args.cmap_index
+    empty_bin_ccode = defaults.empty_bin_ccode_color_bb
     ccodes = cmaps[cmap_index]
     use_white_bg = args.use_white_bg
     if use_white_bg:
         bg_ccode = defaults.bg_ccode_wb
         fg_ccode = defaults.fg_ccode_wb
         empty_bin_ccode = defaults.empty_bin_ccode_color_wb
-        # ccodes = ccodes_color_wb
 
     if args.use_grayscale:
         if use_white_bg:
