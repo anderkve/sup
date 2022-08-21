@@ -90,13 +90,8 @@ def run(args):
             max_bin_ccode = max_bin_ccode_grayscale_bb
             empty_bin_ccode = defaults.empty_bin_ccode_grayscale_bb
 
-    n_colors = args.n_colors
-    if n_colors < 1:
-        n_colors = 1
-    elif n_colors > 10:
-        n_colors = 10
     ccodes = [
-        ccodes[int(i)] for i in np.round(np.linspace(0,len(ccodes)-1,n_colors))
+        ccodes[int(i)] for i in np.round(np.linspace(0,len(ccodes)-1,args.n_colors))
     ]
 
     if args.reverse_colormap:

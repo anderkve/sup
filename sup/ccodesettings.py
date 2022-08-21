@@ -1,0 +1,54 @@
+# -*- coding: utf-8 -*-
+import sup.defaults as defaults
+
+class CCodeSettings:
+
+    def __init__(self):
+        self.bg_ccode_bb = defaults.bg_ccode_bb
+        self.bg_ccode_wb = defaults.bg_ccode_wb
+        self.fg_ccode_bb = defaults.fg_ccode_bb
+        self.fg_ccode_wb = defaults.fg_ccode_wb
+        self.empty_bin_ccode_color_bb = defaults.empty_bin_ccode_color_bb
+        self.empty_bin_ccode_color_wb = defaults.empty_bin_ccode_color_wb
+        self.empty_bin_ccode_grayscale_bb = defaults.empty_bin_ccode_grayscale_bb
+        self.empty_bin_ccode_grayscale_wb = defaults.empty_bin_ccode_grayscale_wb
+
+        self.cmap_grayscale_bb = [233, 236, 239, 242, 244, 247, 250, 253, 255, 231]
+        self.cmap_grayscale_wb = [232, 235, 238, 240, 243, 246, 248, 251, 253, 255][::-1]
+
+        self.cmaps = [
+            [53, 56, 62, 26, 31, 36, 42, 47, 154, 226],         # viridis
+            [18, 20, 27, 45, 122, 155, 226, 214, 202, 196],     # jet
+            [233, 234, 53, 126, 162, 199, 202, 208, 220, 226],  # inferno
+            [25, 32, 81, 123, 195, 230, 222, 214, 202, 1],      # blue-red
+        ]
+
+        # Active settings
+        self.bg_ccode = self.bg_ccode_bb
+        self.fg_ccode = self.fg_ccode_bb
+        self.empty_bin_ccode = self.empty_bin_ccode_color_bb
+        self.ccodes = self.cmaps[0]
+
+
+    def switch_settings(self, use_white_bg=False, use_grayscale=False):
+        if use_white_bg and use_grayscale:
+            self.bg_ccode = self.bg_ccode_wb
+            self.fg_ccode = self.fg_ccode_wb
+            self.empty_bin_ccode = self.empty_bin_ccode_grayscale_wb
+            self.ccodes = self.cmap_grayscale_wb
+
+        elif use_white_bg and not use_grayscale:
+            self.bg_ccode = self.bg_ccode_wb
+            self.fg_ccode = self.fg_ccode_wb
+            self.empty_bin_ccode = self.empty_bin_ccode_color_wb
+
+        elif not use_white_bg and use_grayscale:        
+            self.bg_ccode = self.bg_ccode_bb
+            self.fg_ccode = self.fg_ccode_bb
+            self.empty_bin_ccode = self.empty_bin_ccode_grayscale_bb
+            self.ccodes = self.cmap_grayscale_bb
+
+        elif not use_white_bg and not use_grayscale:
+            self.bg_ccode = self.bg_ccode_bb
+            self.fg_ccode = self.fg_ccode_bb
+            self.empty_bin_ccode = self.empty_bin_ccode_color_bb

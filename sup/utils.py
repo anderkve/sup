@@ -6,7 +6,6 @@ from scipy.stats import chi2
 from io import StringIO 
 import sup.defaults as defaults
 
-
 class SupRuntimeError(Exception):
     """Exceptions class for sup runtime errors"""
     pass

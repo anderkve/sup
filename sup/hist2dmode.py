@@ -4,6 +4,8 @@ import sup.defaults as defaults
 import sup.utils as utils
 from collections import OrderedDict
 from sup.colors import cmaps, cmaps_grayscale
+from sup.ccodesettings import CCodeSettings
+
 
 
 #
@@ -17,12 +19,12 @@ empty_bin_marker = defaults.empty_bin_marker_2d
 
 
 
-def get_color_code(ccodes, z_val, z_norm, color_z_lims):
+def get_color_code(ccs, z_val, z_norm, color_z_lims):
 
     if z_norm == 1.0:
-        return ccodes[-1]
+        return ccs.ccodes[-1]
     elif z_norm == 0.0:
-        return ccodes[0]
+        return ccs.ccodes[0]
 
     i = 0
     for j, lim in enumerate(color_z_lims):
@@ -30,7 +32,7 @@ def get_color_code(ccodes, z_val, z_norm, color_z_lims):
             i = j
         else:
             break
-    return ccodes[i]
+    return ccs.ccodes[i]
 
 
 def get_marker(z_norm):
@@ -74,37 +76,17 @@ def run(args):
     if not xy_bins:
         xy_bins = defaults.xy_bins
     
-    bg_ccode = defaults.bg_ccode_bb
-    fg_ccode = defaults.fg_ccode_bb
+    ccs = CCodeSettings()
+    ccs.ccodes = ccs.cmaps[args.cmap_index]
+    ccs.switch_settings(use_white_bg=args.use_white_bg, 
+                        use_grayscale=args.use_grayscale)
 
-    cmap_index = args.cmap_index
-    empty_bin_ccode = defaults.empty_bin_ccode_color_bb
-    ccodes = cmaps[cmap_index]
-    use_white_bg = args.use_white_bg
-    if use_white_bg:
-        bg_ccode = defaults.bg_ccode_wb
-        fg_ccode = defaults.fg_ccode_wb
-        empty_bin_ccode = defaults.empty_bin_ccode_color_wb
-
-    if args.use_grayscale:
-        if use_white_bg:
-            ccodes = cmaps_grayscale[1]
-            empty_bin_ccode = defaults.empty_bin_ccode_grayscale_wb
-        else:
-            ccodes = cmaps_grayscale[0]
-            empty_bin_ccode = defaults.empty_bin_ccode_grayscale_bb
-
-    n_colors = args.n_colors
-    if n_colors < 1:
-        n_colors = 1
-    elif n_colors > 10:
-        n_colors = 10
-    ccodes = [
-        ccodes[int(i)] for i in np.round(np.linspace(0,len(ccodes)-1,n_colors))
+    ccs.ccodes = [
+        ccs.ccodes[int(i)] for i in np.round(np.linspace(0, len(ccs.ccodes)-1, args.n_colors))
     ]
 
     if args.reverse_colormap:
-        ccodes = ccodes[::-1]
+        ccs.ccodes = ccs.ccodes[::-1]
 
     n_decimals = args.n_decimals
     ff = "{: ." + str(n_decimals) + "e}"
@@ -218,7 +200,7 @@ def run(args):
     z_min, z_max = z_range 
 
     # Set color limits
-    color_z_lims = list(np.linspace(z_min, z_max, len(ccodes)+1))
+    color_z_lims = list(np.linspace(z_min, z_max, len(ccs.ccodes)+1))
 
 
     #
@@ -229,13 +211,13 @@ def run(args):
     fig_width = 0
     for yi in range(xy_bins[1]):
 
-        yi_line = utils.prettify(" ", fg_ccode, bg_ccode)
+        yi_line = utils.prettify(" ", ccs.fg_ccode, ccs.bg_ccode)
 
         for xi in range(xy_bins[0]):
 
             xiyi = (xi,yi)
 
-            ccode = empty_bin_ccode
+            ccode = ccs.empty_bin_ccode
             marker = empty_bin_marker
 
             if xiyi in bins_info.keys():
@@ -248,11 +230,11 @@ def run(args):
                 elif z_norm < 0.0:
                     z_norm = 0.0
 
-                ccode = get_color_code(ccodes, z_val, z_norm, color_z_lims)
+                ccode = get_color_code(ccs, z_val, z_norm, color_z_lims)
                 marker = get_marker(z_norm)
 
             # Add point to line
-            yi_line += utils.prettify(marker, ccode, bg_ccode)
+            yi_line += utils.prettify(marker, ccode, ccs.bg_ccode)
 
         plot_lines.append(yi_line)
 
@@ -263,14 +245,15 @@ def run(args):
     fig_width = plot_width
 
     # Add axes
-    axes_mod_func = lambda input_str : utils.prettify(input_str, fg_ccode,
-                                                      bg_ccode, bold=True)
+    axes_mod_func = lambda input_str : utils.prettify(input_str, ccs.fg_ccode,
+                                                      ccs.bg_ccode, bold=True)
     plot_lines = utils.add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits,
                                 mod_func=axes_mod_func, floatf=ff)
 
     # Add blank top line
     plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width,
-                                              fg_ccode, bg_ccode, insert_pos=0)
+                                              ccs.fg_ccode, ccs.bg_ccode,
+                                              insert_pos=0)
 
 
     #
@@ -278,13 +261,13 @@ def run(args):
     #
 
     plot_lines, fig_width = utils.generate_colorbar(plot_lines, fig_width, ff,
-                                                    ccodes, color_z_lims,
-                                                    fg_ccode, bg_ccode,
-                                                    empty_bin_ccode)
+                                                    ccs.ccodes, color_z_lims,
+                                                    ccs.fg_ccode, ccs.bg_ccode,
+                                                    ccs.empty_bin_ccode)
 
     # max bin legend
     legend_mod_func = lambda input_str, input_fg_ccode : utils.prettify(
-        input_str, input_fg_ccode, bg_ccode, bold=True)
+        input_str, input_fg_ccode, ccs.bg_ccode, bold=True)
 
     maxbin_content = -np.inf
     maxbin_x_index = 0
@@ -312,22 +295,23 @@ def run(args):
     maxbin_str += (ff2).format(maxbin_content)
 
     legend_maxbin_entries = []
-    legend_maxbin_entries.append(("", fg_ccode, maxbin_str, fg_ccode))
+    legend_maxbin_entries.append(("", ccs.fg_ccode, maxbin_str, ccs.fg_ccode))
     legend_maxbin, legend_maxbin_width = utils.generate_legend(
         legend_maxbin_entries, legend_mod_func, sep="  ", internal_sep=" ")
 
     plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width,
-                                              fg_ccode, bg_ccode)
+                                              ccs.fg_ccode, ccs.bg_ccode)
     plot_lines, fig_width = utils.insert_line(legend_maxbin, 
                                               legend_maxbin_width, plot_lines, 
-                                              fig_width, fg_ccode, bg_ccode)
+                                              fig_width, ccs.fg_ccode, 
+                                              ccs.bg_ccode)
 
 
     #
     # Add left padding
     #
 
-    plot_lines = utils.add_left_padding(plot_lines, fg_ccode, bg_ccode)
+    plot_lines = utils.add_left_padding(plot_lines, ccs.fg_ccode, ccs.bg_ccode)
 
 
     #
@@ -344,7 +328,7 @@ def run(args):
     #
 
     plot_lines, fig_width = utils. add_info_text(
-        plot_lines, fig_width, fg_ccode, bg_ccode, ff2, x_label, x_range,
+        plot_lines, fig_width, ccs.fg_ccode, ccs.bg_ccode, ff2, x_label, x_range,
         x_bin_width=dx, y_label=y_label, y_range=y_range, y_bin_width=dy,
         z_label=z_label, z_range=z_range, 
         x_transf_expr=x_transf_expr, y_transf_expr=y_transf_expr,
