@@ -46,6 +46,8 @@ Attributes:
     empty_bin_ccode_grayscale_wb (int): The default color code for empty bins
         in grayscale plots with white background.
 
+    n_decimals (int): The default numer of decimals.
+
 """
 
 left_padding = 2*" "
@@ -66,4 +68,6 @@ empty_bin_ccode_color_wb = 252
 
 empty_bin_ccode_grayscale_bb = 237
 empty_bin_ccode_grayscale_wb = 252
+
+n_decimals = 2
 
