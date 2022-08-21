@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import numpy as np
 import sup.defaults as defaults
 
 class CCodeSettings:
@@ -52,3 +53,12 @@ class CCodeSettings:
             self.bg_ccode = self.bg_ccode_bb
             self.fg_ccode = self.fg_ccode_bb
             self.empty_bin_ccode = self.empty_bin_ccode_color_bb
+
+
+    def set_n_colors(self, n_colors):
+        n_colors_current = len(self.ccodes)
+        new_ccodes = []
+        for i in np.round(np.linspace(0, n_colors_current - 1, n_colors)).astype(int):
+            new_ccodes.append(self.ccodes[i])
+        self.ccodes = new_ccodes
+

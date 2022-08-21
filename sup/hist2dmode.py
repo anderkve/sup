@@ -80,10 +80,7 @@ def run(args):
     ccs.ccodes = ccs.cmaps[args.cmap_index]
     ccs.switch_settings(use_white_bg=args.use_white_bg, 
                         use_grayscale=args.use_grayscale)
-
-    ccs.ccodes = [
-        ccs.ccodes[int(i)] for i in np.round(np.linspace(0, len(ccs.ccodes)-1, args.n_colors))
-    ]
+    ccs.set_n_colors(args.n_colors)
 
     if args.reverse_colormap:
         ccs.ccodes = ccs.ccodes[::-1]
