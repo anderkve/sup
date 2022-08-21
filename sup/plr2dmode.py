@@ -8,9 +8,6 @@ import sup.utils as utils
 # Variables for colors, markers, padding, etc
 #
 
-bg_ccode = defaults.bg_ccode_bb
-fg_ccode = defaults.fg_ccode_bb
-
 regular_marker = defaults.regular_marker
 special_marker = defaults.special_marker
 
@@ -74,8 +71,6 @@ def get_marker(z_norm, highlight_maxlike_point, use_capped_loglike=False):
 
 def run(args):
 
-    global bg_ccode
-    global fg_ccode
     global max_bin_ccode
     global max_bin_ccode_grayscale
     global empty_bin_ccode
@@ -108,6 +103,9 @@ def run(args):
     use_capped_loglike = False
     if args.cap_loglike_val is not None:
         use_capped_loglike = True
+
+    bg_ccode = defaults.bg_ccode_bb
+    fg_ccode = defaults.fg_ccode_bb
 
     ccodes = ccodes_color_bb
     use_white_bg = args.use_white_bg

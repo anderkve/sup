@@ -10,9 +10,6 @@ from sup.colors import cmaps, cmaps_grayscale
 # Variables for colors, markers, padding, etc
 #
 
-bg_ccode = defaults.bg_ccode_bb
-fg_ccode = defaults.fg_ccode_bb
-
 regular_marker = defaults.regular_marker
 special_marker = defaults.special_marker
 
@@ -46,8 +43,6 @@ def run(args):
 
     assert args.cmap_index in range(len(cmaps))
 
-    global bg_ccode
-    global fg_ccode
     global empty_bin_ccode
     global empty_bin_marker
     global special_marker
@@ -85,6 +80,9 @@ def run(args):
     xy_bins = args.xy_bins
     if not xy_bins:
         xy_bins = defaults.xy_bins
+
+    bg_ccode = defaults.bg_ccode_bb
+    fg_ccode = defaults.fg_ccode_bb
     
     cmap_index = args.cmap_index
     ccodes = cmaps[cmap_index]

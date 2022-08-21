@@ -8,9 +8,6 @@ import sup.utils as utils
 # Variables for colors, markers, padding, etc
 #
 
-bg_ccode = defaults.bg_ccode_bb
-fg_ccode = defaults.fg_ccode_bb
-
 regular_marker_up = " █"
 regular_marker_down = " ▄"
 
@@ -80,8 +77,6 @@ def get_marker(z_val):
 
 def run(args):
 
-    global bg_ccode
-    global fg_ccode
     global empty_bin_marker
     global special_marker
 
@@ -121,6 +116,9 @@ def run(args):
     if not xy_bins:
         xy_bins = defaults.xy_bins
     
+    bg_ccode = defaults.bg_ccode_bb
+    fg_ccode = defaults.fg_ccode_bb
+
     empty_bin_ccode = empty_bin_ccode_color_bb
     max_bin_ccode = max_bin_ccode_color_bb
     fill_bin_ccode = fill_bin_ccode_color_bb
