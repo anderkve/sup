@@ -22,37 +22,30 @@ empty_bin_marker = defaults.empty_bin_marker_1d
 
 empty_bin_ccode_grayscale_bb = 235
 empty_bin_ccode_grayscale_wb = 253
-empty_bin_ccode_grayscale = empty_bin_ccode_grayscale_bb
 
 empty_bin_ccode_color_bb = 235
 empty_bin_ccode_color_wb = 253
-empty_bin_ccode = empty_bin_ccode_color_bb
 
 max_bin_ccode_grayscale_bb = 231
 max_bin_ccode_grayscale_wb = 232
-max_bin_ccode_grayscale = max_bin_ccode_grayscale_bb
 
 max_bin_ccode_color_bb = 231
 max_bin_ccode_color_wb = 232
-max_bin_ccode = max_bin_ccode_color_bb
 
 fill_bin_ccode_grayscale_bb = empty_bin_ccode_grayscale_bb
 fill_bin_ccode_grayscale_wb = empty_bin_ccode_grayscale_wb
-fill_bin_ccode_grayscale = empty_bin_ccode_grayscale_bb
 
 fill_bin_ccode_color_bb = empty_bin_ccode_color_bb
 fill_bin_ccode_color_wb = empty_bin_ccode_color_wb
-fill_bin_ccode = fill_bin_ccode_color_bb
 
 ccode_grayscale_bb = 231
 ccode_grayscale_wb = 232
-ccode_grayscale = ccode_grayscale_bb
 
 ccode_color_bb = 5  # 231
 ccode_color_wb = 13 # 232
-ccode = ccode_color_bb
 
-def get_color_code(z_val):
+
+def get_color_code(ccode, fill_bin_ccode, empty_bin_ccode, z_val):
 
     if z_val in [1,2]:
         return ccode
@@ -84,16 +77,8 @@ def get_marker(z_val):
 
 def run(args):
 
-    global ccode
-    global ccode_grayscale 
     global bg_ccode
     global fg_ccode
-    global max_bin_ccode
-    global max_bin_ccode_grayscale
-    global empty_bin_ccode
-    global empty_bin_ccode_grayscale
-    global fill_bin_ccode
-    global fill_bin_ccode_grayscale
     global empty_bin_marker
     global special_marker
 
@@ -114,6 +99,10 @@ def run(args):
     if not xy_bins:
         xy_bins = defaults.xy_bins
     
+    empty_bin_ccode = empty_bin_ccode_color_bb
+    max_bin_ccode = max_bin_ccode_color_bb
+    fill_bin_ccode = fill_bin_ccode_color_bb
+    ccode = ccode_color_bb
     use_white_bg = args.use_white_bg
     if use_white_bg:
         bg_ccode = defaults.bg_ccode_wb
@@ -207,7 +196,7 @@ def run(args):
             if xiyi in bins_info.keys():
                 z_val = bins_info[xiyi][2]
 
-                cc = get_color_code(z_val)
+                cc = get_color_code(ccode, fill_bin_ccode, empty_bin_ccode, z_val)
                 marker = get_marker(z_val)
 
             # Add point to line

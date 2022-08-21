@@ -20,11 +20,9 @@ empty_bin_marker = defaults.empty_bin_marker_2d
 
 empty_bin_ccode = defaults.empty_bin_ccode_color_bb
 
-ccodes = cmaps[0]
 
 
-
-def get_color_code(z_val, z_norm, color_z_lims):
+def get_color_code(ccodes, z_val, z_norm, color_z_lims):
 
     if z_norm == 1.0:
         return ccodes[-1]
@@ -53,7 +51,6 @@ def run(args):
 
     assert args.cmap_index in range(len(cmaps))
 
-    global ccodes 
     global bg_ccode
     global fg_ccode
     global empty_bin_ccode
@@ -256,7 +253,7 @@ def run(args):
                 elif z_norm < 0.0:
                     z_norm = 0.0
 
-                ccode = get_color_code(z_val, z_norm, color_z_lims)
+                ccode = get_color_code(ccodes, z_val, z_norm, color_z_lims)
                 marker = get_marker(z_norm)
 
             # Add point to line

@@ -34,15 +34,13 @@ max_bin_ccode = max_bin_ccode_color_bb
 
 ccodes_grayscale_bb = [233, 237, 242, 231]
 ccodes_grayscale_wb = [254, 250, 243, 232]
-ccodes_grayscale = ccodes_grayscale_bb
 
 ccodes_color_bb = [236, 19, 45, 226]
 ccodes_color_wb = [248, 19, 45, 220]
-ccodes = ccodes_color_bb
 
 color_z_lims = [0.0, 0.003, 0.046, 0.317]
 
-def get_color_code(z_norm, highlight_maxlike_point, use_capped_loglike=False):
+def get_color_code(ccodes, z_norm, highlight_maxlike_point, use_capped_loglike=False):
 
     if z_norm == 1.0:
         if use_capped_loglike or (not highlight_maxlike_point):
@@ -76,8 +74,6 @@ def get_marker(z_norm, highlight_maxlike_point, use_capped_loglike=False):
 
 def run(args):
 
-    global ccodes 
-    global ccodes_grayscale 
     global bg_ccode
     global fg_ccode
     global max_bin_ccode
@@ -113,6 +109,7 @@ def run(args):
     if args.cap_loglike_val is not None:
         use_capped_loglike = True
 
+    ccodes = ccodes_color_bb
     use_white_bg = args.use_white_bg
     if use_white_bg:
         bg_ccode = defaults.bg_ccode_wb
@@ -230,7 +227,7 @@ def run(args):
                 z_norm = z_val
                 # z_norm = (z_val - z_min) / (z_max - z_min)
 
-                ccode = get_color_code(z_norm, highlight_maxlike_point, 
+                ccode = get_color_code(ccodes, z_norm, highlight_maxlike_point, 
                                        use_capped_loglike=use_capped_loglike)
                 marker = get_marker(z_norm, highlight_maxlike_point,
                                     use_capped_loglike=use_capped_loglike)

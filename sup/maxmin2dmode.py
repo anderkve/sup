@@ -27,11 +27,9 @@ max_bin_ccode_color_bb = 231
 max_bin_ccode_color_wb = 232
 max_bin_ccode = max_bin_ccode_color_bb
 
-ccodes = cmaps[0]
 
 
-
-def get_color_code(z_val, z_norm, color_z_lims, s_type, highlight_maxmin_point):
+def get_color_code(ccodes, z_val, z_norm, color_z_lims, s_type, highlight_maxmin_point):
 
     assert s_type in ["min", "max"]
 
@@ -86,7 +84,6 @@ def run(args, mode):
     assert mode in ["max", "min"]
     assert args.cmap_index in range(len(cmaps))
 
-    global ccodes 
     global bg_ccode
     global fg_ccode
     global max_bin_ccode
@@ -262,8 +259,8 @@ def run(args, mode):
                 if (z_max != z_min):
                     z_norm = (z_val - z_min) / (z_max - z_min)
 
-                ccode = get_color_code(z_val, z_norm, color_z_lims, s_type, 
-                                       highlight_maxmin_point)
+                ccode = get_color_code(ccodes, z_val, z_norm, color_z_lims,
+                                       s_type, highlight_maxmin_point)
                 marker = get_marker(z_norm, s_type, highlight_maxmin_point)
 
             # Add point to line
