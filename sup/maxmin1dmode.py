@@ -80,8 +80,6 @@ def run_min(args):
 
 def run(args, mode):
 
-    assert mode in ["max", "min"]
-
     global empty_bin_marker
     global special_marker
 

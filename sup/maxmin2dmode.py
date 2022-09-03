@@ -3,6 +3,7 @@ import numpy as np
 import sup.defaults as defaults
 import sup.utils as utils
 from sup.colors import cmaps, cmaps_grayscale
+from sup.ccodesettings import CCodeSettings
 
 
 #
@@ -73,9 +74,6 @@ def run_min(args):
     run(args, "min")
 
 def run(args, mode):
-
-    assert mode in ["max", "min"]
-    assert args.cmap_index in range(len(cmaps))
 
     global empty_bin_marker
     global special_marker

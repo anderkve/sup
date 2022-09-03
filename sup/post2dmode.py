@@ -39,8 +39,6 @@ def get_marker(z_norm):
 
 def run(args):
 
-    assert args.cmap_index in range(len(cmaps))
-
     global empty_bin_marker
     global special_marker
 

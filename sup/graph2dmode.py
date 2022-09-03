@@ -51,8 +51,6 @@ def get_marker():
 
 def run(args):
 
-    assert args.cmap_index in range(len(cmaps))
-
     global empty_bin_marker
     global special_marker
 

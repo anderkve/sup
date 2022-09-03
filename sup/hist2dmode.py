@@ -7,7 +7,6 @@ from sup.colors import cmaps, cmaps_grayscale
 from sup.ccodesettings import CCodeSettings
 
 
-
 #
 # Variables for colors, markers, padding, etc
 #
@@ -16,7 +15,6 @@ regular_marker = defaults.regular_marker
 special_marker = defaults.special_marker
 
 empty_bin_marker = defaults.empty_bin_marker_2d
-
 
 
 def get_color_code(ccs, z_val, z_norm, color_z_lims):
@@ -45,8 +43,6 @@ def get_marker(z_norm):
 #
 
 def run(args):
-
-    assert args.cmap_index in range(len(cmaps))
 
     global empty_bin_marker
     global special_marker
