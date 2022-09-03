@@ -98,8 +98,6 @@ def run(args):
     # Create y data set by evaluating the function_str
     y_data = eval(function_str)
 
-    assert len(x_data) == len(y_data)
-
     if not y_range:
         y_range = [np.min(y_data), np.max(y_data)]
 

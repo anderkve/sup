@@ -114,9 +114,6 @@ def run(args):
         x_name, y_name = dset_names
         w_data = np.ones(len(x_data))
 
-    assert len(x_data) == len(y_data)
-    assert len(x_data) == len(w_data)
-
     filter_datasets, filter_names = utils.get_filters(input_file,
                                                       filter_indices,
                                                       read_slice=read_slice,

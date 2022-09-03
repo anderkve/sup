@@ -45,8 +45,6 @@ def get_color_code(ccs, z_val, z_norm, color_z_lims, s_type,
 
 def get_marker(z_norm, s_type, highlight_maxmin_point):
 
-    assert s_type in ["min", "max"]
-
     if highlight_maxmin_point and (z_norm == 1.0) and (s_type == "max"):
         return special_marker
     elif highlight_maxmin_point and (z_norm == 0.0) and (s_type == "min"):
@@ -125,10 +123,6 @@ def run(args, mode):
                                                       filter_indices, 
                                                       read_slice=read_slice,
                                                       delimiter=args.delimiter)
-
-    assert len(x_data) == len(y_data)
-    assert len(x_data) == len(z_data)
-    assert len(x_data) == len(s_data)
 
     if use_filters:
         x_data, y_data, z_data, s_data = utils.apply_filters(

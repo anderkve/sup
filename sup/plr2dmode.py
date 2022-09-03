@@ -136,10 +136,6 @@ def run(args):
     x_data, y_data, loglike_data, s_data = dsets
     x_name, y_name, loglike_name, s_name = dset_names
 
-    assert len(x_data) == len(y_data)
-    assert len(x_data) == len(loglike_data)
-    assert len(x_data) == len(s_data)
-
     filter_datasets, filter_names = utils.get_filters(input_file, 
                                                       filter_indices, 
                                                       read_slice=read_slice, 

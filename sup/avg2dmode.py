@@ -90,9 +90,6 @@ def run(args):
     x_data, y_data, z_data = dsets
     x_name, y_name, z_name = dset_names
 
-    assert len(x_data) == len(y_data)
-    assert len(x_data) == len(z_data)
-
     filter_datasets, filter_names = utils.get_filters(input_file, 
                                                       filter_indices, 
                                                       read_slice=read_slice, 

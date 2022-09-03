@@ -108,9 +108,6 @@ def run(args):
     y_data = np.array(y_data)
     z_data = np.array(z_data)
 
-    assert len(x_data) == len(y_data)
-    assert len(x_data) == len(z_data)
-
     if not x_range:
         x_range = [np.min(x_data), np.max(x_data)]
     if not y_range:

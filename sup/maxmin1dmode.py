@@ -105,9 +105,6 @@ def run(args, mode):
                                                       read_slice=read_slice,
                                                       delimiter=args.delimiter)
 
-    assert len(x_data) == len(y_data)
-    assert len(x_data) == len(s_data)
-
     if use_filters:
         x_data, y_data, s_data = utils.apply_filters([x_data, y_data, s_data],
                                                      filter_datasets)
