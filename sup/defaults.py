@@ -46,6 +46,18 @@ Attributes:
     empty_bin_ccode_grayscale_wb (int): The default color code for empty bins
         in grayscale plots with white background.
 
+    fill_bin_ccode_color_bb (int): The default color code for "fill bins", 
+        in plots with black background.
+
+    fill_bin_ccode_color_wb (int): The default color code for "fill bins",
+        in plots with white background.
+
+    fill_bin_ccode_grayscale_bb (int): The default color code for "fill bins"
+        in grayscale plots with black background.
+
+    fill_bin_ccode_grayscale_wb (int): The default color code for "fill bins"
+        in grayscale plots with white background.
+
     max_bin_ccode_color_bb (int): The default color code for the bin/marker
         with the max z value, in plots with black background.
 
@@ -57,6 +69,18 @@ Attributes:
 
     max_bin_ccode_grayscale_wb (int): The default color code for the bin/marker
         with the max z value, in grayscale plots with white background.
+
+    graph_ccode_color_bb (int): The default color code for 1d graph drawing,
+        in plots with black background.
+
+    graph_ccode_color_wb (int): The default color code for 1d graph drawing,
+        in plots with white background.
+
+    graph_ccode_grayscale_bb (int): The default color code for 1d graph drawing,
+        in grayscale plots with black background.
+
+    graph_ccode_grayscale_wb (int): The default color code for 1d graph drawing,
+        in grayscale plots with white background.
 
     n_decimals (int): The default numer of decimals.
 
