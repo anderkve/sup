@@ -82,6 +82,12 @@ Attributes:
     graph_ccode_grayscale_wb (int): The default color code for 1d graph drawing,
         in grayscale plots with white background.
 
+    bar_ccodes_color (int): The default color codes for drawing horizontal
+        bars (e.g. CR/CI bars) below plots.
+
+    bar_ccodes_grayscale (int): The default color codes for drawing horizontal
+        bars (e.g. CR/CI bars) below grayscale plots.
+
     n_decimals (int): The default numer of decimals.
 
 """
@@ -122,6 +128,9 @@ graph_ccode_color_wb = 252
 
 graph_ccode_grayscale_bb = 237
 graph_ccode_grayscale_wb = 252
+
+bar_ccodes_color = [4,12]
+bar_ccodes_grayscale = [243, 240]
 
 n_decimals = 2
 

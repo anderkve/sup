@@ -2,6 +2,7 @@
 import numpy as np
 import sup.defaults as defaults
 import sup.utils as utils
+from sup.ccodesettings import CCodeSettings
 
 
 #
@@ -17,42 +18,15 @@ fill_marker = " █"
 
 empty_bin_marker = defaults.empty_bin_marker_1d
 
-empty_bin_ccode_grayscale_bb = 235
-empty_bin_ccode_grayscale_wb = 253
 
-empty_bin_ccode_color_bb = 235
-empty_bin_ccode_color_wb = 253
-
-max_bin_ccode_grayscale_bb = 231
-max_bin_ccode_grayscale_wb = 232
-
-max_bin_ccode_color_bb = 231
-max_bin_ccode_color_wb = 232
-
-fill_bin_ccode_grayscale_bb = empty_bin_ccode_grayscale_bb
-fill_bin_ccode_grayscale_wb = empty_bin_ccode_grayscale_wb
-
-fill_bin_ccode_color_bb = empty_bin_ccode_color_bb
-fill_bin_ccode_color_wb = empty_bin_ccode_color_wb
-
-ccode_grayscale_bb = 231
-ccode_grayscale_wb = 232
-
-ccode_color_bb = 3 # 2  # 231
-ccode_color_wb = 11 # 10 # 232
-
-bar_ccodes_grayscale = [243, 240]
-bar_ccodes_color = [4,12]
-
-
-def get_color_code(ccode, empty_bin_ccode, z_val):
+def get_color_code(ccs, z_val):
 
     if z_val in [1,2]:
-        return ccode
+        return ccs.graph_ccode
     elif z_val == -1:
-        return ccode
+        return ccs.graph_ccode
     elif z_val == 0:
-        return empty_bin_ccode
+        return ccs.empty_bin_ccode
     else:
         raise Exception("Unexpected z_val. This shouldn't happen...")
 
@@ -92,8 +66,6 @@ def run(args):
     credible_regions = args.credible_regions
     if not credible_regions:
         credible_regions = [68.3, 95.45]
-    # if credible_regions[-1] < 100.:
-    # credible_regions.append(100.0)
 
     credible_regions = np.array(credible_regions)
     if np.any(credible_regions>100.0):
@@ -116,35 +88,13 @@ def run(args):
     if not xy_bins:
         xy_bins = defaults.xy_bins
     
-    bg_ccode = defaults.bg_ccode_bb
-    fg_ccode = defaults.fg_ccode_bb
-
-    empty_bin_ccode = empty_bin_ccode_color_bb
-    max_bin_ccode = max_bin_ccode_color_bb
-    fill_bin_ccode = fill_bin_ccode_color_bb
-    ccode = ccode_color_bb
-    bar_ccodes = bar_ccodes_color
-    use_white_bg = args.use_white_bg
-    if use_white_bg:
-        bg_ccode = defaults.bg_ccode_wb
-        fg_ccode = defaults.fg_ccode_wb
-        empty_bin_ccode = empty_bin_ccode_color_wb
-        max_bin_ccode = max_bin_ccode_color_wb
-        fill_bin_ccode = fill_bin_ccode_color_wb
-        ccode = ccode_color_wb
-
-    if args.use_grayscale:
-        if use_white_bg:
-            ccode = ccode_grayscale_wb
-            max_bin_ccode = max_bin_ccode_grayscale_wb
-            empty_bin_ccode = empty_bin_ccode_grayscale_wb
-            fill_bin_ccode = fill_bin_ccode_grayscale_wb
-        else:
-            ccode = ccode_grayscale_bb
-            max_bin_ccode = max_bin_ccode_grayscale_bb
-            empty_bin_ccode = empty_bin_ccode_grayscale_bb
-            fill_bin_ccode = fill_bin_ccode_grayscale_bb
-        bar_ccodes = bar_ccodes_grayscale
+    ccs = CCodeSettings()
+    ccs.graph_ccode_grayscale_bb = 231
+    ccs.graph_ccode_grayscale_wb = 232
+    ccs.graph_ccode_color_bb = 3
+    ccs.graph_ccode_color_wb = 11
+    ccs.switch_settings(use_white_bg=args.use_white_bg, 
+                        use_grayscale=args.use_grayscale)
 
     n_decimals = args.n_decimals
     ff = "{: ." + str(n_decimals) + "e}"
@@ -244,23 +194,23 @@ def run(args):
     fig_width = 0
     for yi in range(xy_bins[1]):
 
-        yi_line = utils.prettify(" ", fg_ccode, bg_ccode)
+        yi_line = utils.prettify(" ", ccs.fg_ccode, ccs.bg_ccode)
 
         for xi in range(xy_bins[0]):
 
             xiyi = (xi,yi)
 
-            cc = empty_bin_ccode
+            cc = ccs.empty_bin_ccode
             marker = empty_bin_marker
 
             if xiyi in bins_info.keys():
                 z_val = bins_info[xiyi][2]
 
-                cc = get_color_code(ccode, empty_bin_ccode, z_val)
+                cc = get_color_code(ccs, z_val)
                 marker = get_marker(z_val)
 
             # Add point to line
-            yi_line += utils.prettify(marker, cc, bg_ccode)
+            yi_line += utils.prettify(marker, cc, ccs.bg_ccode)
 
         plot_lines.append(yi_line)
 
@@ -271,11 +221,11 @@ def run(args):
     fig_width = plot_width
 
     # Add axes
-    axes_mod_func = lambda input_str : utils.prettify(input_str, fg_ccode,
-                                                      bg_ccode, bold=True)
+    axes_mod_func = lambda input_str : utils.prettify(input_str, ccs.fg_ccode,
+                                                      ccs.bg_ccode, bold=True)
     fill_mod_func = lambda input_str : utils.prettify(input_str,
-                                                      empty_bin_ccode, bg_ccode,
-                                                      bold=True)
+                                                      ccs.empty_bin_ccode,
+                                                      ccs.bg_ccode, bold=True)
     plot_lines = utils.add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits,
                                 mod_func=axes_mod_func, 
                                 mod_func_2=fill_mod_func, floatf=ff,
@@ -283,7 +233,8 @@ def run(args):
 
     # Add blank top line
     plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width,
-                                              fg_ccode, bg_ccode, insert_pos=0)
+                                              ccs.fg_ccode, ccs.bg_ccode,
+                                              insert_pos=0)
 
 
     #
@@ -291,17 +242,17 @@ def run(args):
     #
 
     plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width,
-                                              fg_ccode, bg_ccode)
+                                              ccs.fg_ccode, ccs.bg_ccode)
 
     cr_bar_lines = utils.generate_credible_region_bars(
         credible_regions, bins_content_not_transformed, x_bin_limits, ff2)
 
     for i,line in enumerate(cr_bar_lines):
         cr_bar_width = len(line)
-        cr_bar = utils.prettify(line, bar_ccodes[i % 2], bg_ccode)
+        cr_bar = utils.prettify(line, ccs.bar_ccodes[i % 2], ccs.bg_ccode)
         plot_lines, fig_width = utils.insert_line(cr_bar, cr_bar_width,
                                                   plot_lines, fig_width,
-                                                  fg_ccode, bg_ccode)
+                                                  ccs.fg_ccode, ccs.bg_ccode)
 
 
     #
@@ -310,7 +261,7 @@ def run(args):
 
     # max bin legend
     legend_mod_func = lambda input_str, input_fg_ccode : utils.prettify(
-        input_str, input_fg_ccode, bg_ccode, bold=True)
+        input_str, input_fg_ccode, ccs.bg_ccode, bold=True)
 
     maxbin_index = np.argmax(bins_content)
     maxbin_content = bins_content[maxbin_index]
@@ -323,22 +274,23 @@ def run(args):
     maxbin_str += (ff2).format(maxbin_content)
 
     legend_maxbin_entries = []
-    legend_maxbin_entries.append(("", fg_ccode, maxbin_str, fg_ccode))
+    legend_maxbin_entries.append(("", ccs.fg_ccode, maxbin_str, ccs.fg_ccode))
     legend_maxbin, legend_maxbin_width = utils.generate_legend(
         legend_maxbin_entries, legend_mod_func, sep="  ", internal_sep=" ")
 
     plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width,
-                                              fg_ccode, bg_ccode)
+                                              ccs.fg_ccode, ccs.bg_ccode)
     plot_lines, fig_width = utils.insert_line(legend_maxbin, 
                                               legend_maxbin_width, plot_lines, 
-                                              fig_width, fg_ccode, bg_ccode)
+                                              fig_width, ccs.fg_ccode,
+                                              ccs.bg_ccode)
 
 
     #
     # Add left padding
     #
 
-    plot_lines = utils.add_left_padding(plot_lines, fg_ccode, bg_ccode)
+    plot_lines = utils.add_left_padding(plot_lines, ccs.fg_ccode, ccs.bg_ccode)
 
 
     #
@@ -355,8 +307,9 @@ def run(args):
     #
 
     plot_lines, fig_width = utils.add_info_text(
-        plot_lines, fig_width, fg_ccode, bg_ccode, ff2, x_label, x_range,
-        x_bin_width=dx, y_label=y_label, y_range=y_range, 
+        plot_lines, fig_width, ccs.fg_ccode, ccs.bg_ccode, ff2,
+        x_label, x_range, x_bin_width=dx,
+        y_label=y_label, y_range=y_range, 
         x_transf_expr=x_transf_expr, y_transf_expr=y_transf_expr,
         y_normalized_hist=normalize_histogram, 
         w_label=w_label, w_transf_expr=w_transf_expr,
