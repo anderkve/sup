@@ -9,10 +9,16 @@ class CCodeSettings:
         self.bg_ccode_wb = defaults.bg_ccode_wb
         self.fg_ccode_bb = defaults.fg_ccode_bb
         self.fg_ccode_wb = defaults.fg_ccode_wb
+
         self.empty_bin_ccode_color_bb = defaults.empty_bin_ccode_color_bb
         self.empty_bin_ccode_color_wb = defaults.empty_bin_ccode_color_wb
         self.empty_bin_ccode_grayscale_bb = defaults.empty_bin_ccode_grayscale_bb
         self.empty_bin_ccode_grayscale_wb = defaults.empty_bin_ccode_grayscale_wb
+
+        self.max_bin_ccode_color_bb = defaults.max_bin_ccode_color_bb
+        self.max_bin_ccode_color_wb = defaults.max_bin_ccode_color_wb
+        self.max_bin_ccode_grayscale_bb = defaults.max_bin_ccode_grayscale_bb
+        self.max_bin_ccode_grayscale_wb = defaults.max_bin_ccode_grayscale_wb
 
         self.cmap_grayscale_bb = [233, 236, 239, 242, 244, 247, 250, 253, 255, 231]
         self.cmap_grayscale_wb = [232, 235, 238, 240, 243, 246, 248, 251, 253, 255][::-1]
@@ -28,6 +34,7 @@ class CCodeSettings:
         self.bg_ccode = self.bg_ccode_bb
         self.fg_ccode = self.fg_ccode_bb
         self.empty_bin_ccode = self.empty_bin_ccode_color_bb
+        self.max_bin_ccode = self.max_bin_ccode_color_bb
         self.ccodes = self.cmaps[0]
 
 
@@ -36,23 +43,27 @@ class CCodeSettings:
             self.bg_ccode = self.bg_ccode_wb
             self.fg_ccode = self.fg_ccode_wb
             self.empty_bin_ccode = self.empty_bin_ccode_grayscale_wb
+            self.max_bin_ccode = self.max_bin_ccode_grayscale_wb
             self.ccodes = self.cmap_grayscale_wb
 
         elif use_white_bg and not use_grayscale:
             self.bg_ccode = self.bg_ccode_wb
             self.fg_ccode = self.fg_ccode_wb
             self.empty_bin_ccode = self.empty_bin_ccode_color_wb
+            self.max_bin_ccode = self.max_bin_ccode_color_wb
 
         elif not use_white_bg and use_grayscale:        
             self.bg_ccode = self.bg_ccode_bb
             self.fg_ccode = self.fg_ccode_bb
             self.empty_bin_ccode = self.empty_bin_ccode_grayscale_bb
+            self.max_bin_ccode = self.max_bin_ccode_grayscale_bb
             self.ccodes = self.cmap_grayscale_bb
 
         elif not use_white_bg and not use_grayscale:
             self.bg_ccode = self.bg_ccode_bb
             self.fg_ccode = self.fg_ccode_bb
             self.empty_bin_ccode = self.empty_bin_ccode_color_bb
+            self.max_bin_ccode = self.max_bin_ccode_color_bb
 
 
     def set_n_colors(self, n_colors):
