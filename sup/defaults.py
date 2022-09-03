@@ -81,11 +81,23 @@ empty_bin_ccode_color_wb = 252
 empty_bin_ccode_grayscale_bb = 237
 empty_bin_ccode_grayscale_wb = 252
 
+fill_bin_ccode_color_bb = 237
+fill_bin_ccode_color_wb = 252
+
+fill_bin_ccode_grayscale_bb = 237
+fill_bin_ccode_grayscale_wb = 252
+
 max_bin_ccode_color_bb = 231
 max_bin_ccode_color_wb = 232
 
 max_bin_ccode_grayscale_bb = 231
 max_bin_ccode_grayscale_wb = 232
+
+graph_ccode_color_bb = 237
+graph_ccode_color_wb = 252
+
+graph_ccode_grayscale_bb = 237
+graph_ccode_grayscale_wb = 252
 
 n_decimals = 2
 

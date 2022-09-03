@@ -515,7 +515,7 @@ def apply_filters(datasets, filters):
 
 
 def get_bin_tuples_maxmin_1d(x_data, y_data, xy_bins, x_range, y_range, s_data,
-                             s_type, fill_below=True, fill_z_val=-1, 
+                             s_type, fill_below=False, fill_z_val=-1, 
                              split_marker=False, return_function_data=False,
                              fill_y_val=np.nan):
 
@@ -735,7 +735,7 @@ def get_bin_tuples_maxmin(x_data, y_data, z_data, xy_bins, x_range, y_range,
 
 
 def get_bin_tuples_avg_1d(x_data, y_data, xy_bins, x_range, y_range,
-                          fill_below=True, fill_z_val=-1, split_marker=False):
+                          fill_below=False, fill_z_val=-1, split_marker=False):
 
     assert len(x_data) == len(y_data)
     data_length = len(x_data)

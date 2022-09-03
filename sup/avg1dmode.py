@@ -2,6 +2,7 @@
 import numpy as np
 import sup.defaults as defaults
 import sup.utils as utils
+from sup.ccodesettings import CCodeSettings
 
 
 #
@@ -13,43 +14,15 @@ regular_marker_down = " ▄"
 
 special_marker = defaults.special_marker
 
-fill_marker = "  "
-
 empty_bin_marker = defaults.empty_bin_marker_1d
 
-empty_bin_ccode_grayscale_bb = 235
-empty_bin_ccode_grayscale_wb = 253
 
-empty_bin_ccode_color_bb = 235
-empty_bin_ccode_color_wb = 253
-
-max_bin_ccode_grayscale_bb = 231
-max_bin_ccode_grayscale_wb = 232
-
-max_bin_ccode_color_bb = 231
-max_bin_ccode_color_wb = 232
-
-fill_bin_ccode_grayscale_bb = empty_bin_ccode_grayscale_bb
-fill_bin_ccode_grayscale_wb = empty_bin_ccode_grayscale_wb
-
-fill_bin_ccode_color_bb = empty_bin_ccode_color_bb
-fill_bin_ccode_color_wb = empty_bin_ccode_color_wb
-
-ccode_grayscale_bb = 231
-ccode_grayscale_wb = 232
-
-ccode_color_bb = 5  # 231
-ccode_color_wb = 13 # 232
-
-
-def get_color_code(ccode, fill_bin_ccode, empty_bin_ccode, z_val):
+def get_color_code(ccs, z_val):
 
     if z_val in [1,2]:
-        return ccode
-    elif z_val == -1:
-        return fill_bin_ccode
+        return ccs.graph_ccode
     elif z_val == 0:
-        return empty_bin_ccode
+        return ccs.empty_bin_ccode
     else:
         raise Exception("Unexpected z_val. This shouldn't happen...")
 
@@ -60,8 +33,6 @@ def get_marker(z_val):
         return regular_marker_up
     elif z_val == 1:
         return regular_marker_down
-    elif z_val == -1:
-        return fill_marker
     elif z_val == 0:
         return empty_bin_marker
     else:
@@ -94,33 +65,13 @@ def run(args):
     if not xy_bins:
         xy_bins = defaults.xy_bins
 
-    bg_ccode = defaults.bg_ccode_bb
-    fg_ccode = defaults.fg_ccode_bb
-    
-    empty_bin_ccode = empty_bin_ccode_color_bb
-    max_bin_ccode = max_bin_ccode_color_bb
-    fill_bin_ccode = fill_bin_ccode_color_bb
-    ccode = ccode_color_bb
-    use_white_bg = args.use_white_bg
-    if use_white_bg:
-        bg_ccode = defaults.bg_ccode_wb
-        fg_ccode = defaults.fg_ccode_wb
-        empty_bin_ccode = empty_bin_ccode_color_wb
-        max_bin_ccode = max_bin_ccode_color_wb
-        fill_bin_ccode = fill_bin_ccode_color_wb
-        ccode = ccode_color_wb
-
-    if args.use_grayscale:
-        if use_white_bg:
-            ccode = ccode_grayscale_wb
-            max_bin_ccode = max_bin_ccode_grayscale_wb
-            empty_bin_ccode = empty_bin_ccode_grayscale_wb
-            fill_bin_ccode = fill_bin_ccode_grayscale_wb
-        else:
-            ccode = ccode_grayscale_bb
-            max_bin_ccode = max_bin_ccode_grayscale_bb
-            empty_bin_ccode = empty_bin_ccode_grayscale_bb
-            fill_bin_ccode = fill_bin_ccode_grayscale_bb
+    ccs = CCodeSettings()
+    ccs.graph_ccode_grayscale_bb = 231
+    ccs.graph_ccode_grayscale_wb = 232
+    ccs.graph_ccode_color_bb = 5
+    ccs.graph_ccode_color_wb = 6
+    ccs.switch_settings(use_white_bg=args.use_white_bg, 
+                        use_grayscale=args.use_grayscale)
 
     n_decimals = args.n_decimals
     ff = "{: ." + str(n_decimals) + "e}"
@@ -170,8 +121,7 @@ def run(args):
     #
 
     bins_info, x_bin_limits, y_bin_limits = utils.get_bin_tuples_avg_1d(
-        x_data, y_data, xy_bins, x_range, y_range, fill_below=False, 
-        split_marker=True)
+        x_data, y_data, xy_bins, x_range, y_range, split_marker=True)
 
 
     #
@@ -182,23 +132,23 @@ def run(args):
     fig_width = 0
     for yi in range(xy_bins[1]):
 
-        yi_line = utils.prettify(" ", fg_ccode, bg_ccode)
+        yi_line = utils.prettify(" ", ccs.fg_ccode, ccs.bg_ccode)
 
         for xi in range(xy_bins[0]):
 
             xiyi = (xi,yi)
 
-            cc = empty_bin_ccode
+            cc = ccs.empty_bin_ccode
             marker = empty_bin_marker
 
             if xiyi in bins_info.keys():
                 z_val = bins_info[xiyi][2]
 
-                cc = get_color_code(ccode, fill_bin_ccode, empty_bin_ccode, z_val)
+                cc = get_color_code(ccs, z_val)
                 marker = get_marker(z_val)
 
             # Add point to line
-            yi_line += utils.prettify(marker, cc, bg_ccode)
+            yi_line += utils.prettify(marker, cc, ccs.bg_ccode)
 
         plot_lines.append(yi_line)
 
@@ -209,11 +159,11 @@ def run(args):
     fig_width = plot_width
 
     # Add axes
-    axes_mod_func = lambda input_str : utils.prettify(input_str, fg_ccode, 
-                                                      bg_ccode, bold=True)
+    axes_mod_func = lambda input_str : utils.prettify(input_str, ccs.fg_ccode, 
+                                                      ccs.bg_ccode, bold=True)
     fill_mod_func = lambda input_str : utils.prettify(input_str,
-                                                      empty_bin_ccode, bg_ccode, 
-                                                      bold=True)
+                                                      ccs.empty_bin_ccode, 
+                                                      ccs.bg_ccode, bold=True)
     plot_lines = utils.add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits, 
                                 mod_func=axes_mod_func, 
                                 mod_func_2=fill_mod_func, floatf=ff, 
@@ -221,14 +171,15 @@ def run(args):
 
     # Add blank top line
     plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width,
-                                              fg_ccode, bg_ccode, insert_pos=0)
+                                              ccs.fg_ccode, ccs.bg_ccode,
+                                              insert_pos=0)
 
 
     #
     # Add left padding
     #
 
-    plot_lines = utils.add_left_padding(plot_lines, fg_ccode, bg_ccode)
+    plot_lines = utils.add_left_padding(plot_lines, ccs.fg_ccode, ccs.bg_ccode)
 
 
     #
@@ -246,8 +197,9 @@ def run(args):
     dx = x_bin_limits[1] - x_bin_limits[0]
 
     plot_lines, fig_width = utils.add_info_text(
-        plot_lines, fig_width, fg_ccode, bg_ccode, ff2, x_label, x_range,
-        x_bin_width=dx, y_label=y_label, y_range=y_range, 
+        plot_lines, fig_width, ccs.fg_ccode, ccs.bg_ccode, ff2, 
+        x_label, x_range, x_bin_width=dx,
+        y_label=y_label, y_range=y_range, 
         x_transf_expr=x_transf_expr, y_transf_expr=y_transf_expr,
         filter_names=filter_names, mode_name="average")
 
