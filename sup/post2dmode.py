@@ -5,16 +5,7 @@ import sup.utils as utils
 import sup.colors as colors
 from collections import OrderedDict
 from sup.ccodesettings import CCodeSettings
-
-
-#
-# Variables for colors, markers, padding, etc
-#
-
-regular_marker = defaults.regular_marker
-special_marker = defaults.special_marker
-
-empty_bin_marker = defaults.empty_bin_marker_2d
+from sup.markersettings import MarkerSettings
 
 
 def get_color_code(ccs, z_val, z_norm, color_z_lims):
@@ -28,9 +19,9 @@ def get_color_code(ccs, z_val, z_norm, color_z_lims):
     return ccs.ccodes[i]
 
 
-def get_marker(z_norm):
+def get_marker(ms):
 
-    return regular_marker
+    return ms.regular_marker
 
 
 #
@@ -38,9 +29,6 @@ def get_marker(z_norm):
 #
 
 def run(args):
-
-    global empty_bin_marker
-    global special_marker
 
     input_file = args.input_file
 
@@ -91,6 +79,9 @@ def run(args):
     # The user can still reverse it, though.
     if args.reverse_colormap:
         ccs.ccodes = ccs.ccodes[::-1]
+
+    ms = MarkerSettings()
+    ms.empty_bin_marker = defaults.empty_bin_marker_2d
 
     n_decimals = args.n_decimals
     ff = "{: ." + str(n_decimals) + "e}"
@@ -226,7 +217,7 @@ def run(args):
             xiyi = (xi,yi)
 
             ccode = ccs.empty_bin_ccode
-            marker = empty_bin_marker
+            marker = ms.empty_bin_marker
 
             if xiyi in bins_info.keys():
                 z_val = bins_info[xiyi][2]
@@ -239,7 +230,7 @@ def run(args):
                     z_norm = 0.0
 
                 ccode = get_color_code(ccs, z_val, z_norm, color_z_lims)
-                marker = get_marker(z_norm)
+                marker = get_marker(ms)
 
             # Add point to line
             yi_line += utils.prettify(marker, ccode, ccs.bg_ccode)
@@ -274,7 +265,7 @@ def run(args):
     # legend_entries.append(("", fg_ccode, "", fg_ccode))
     for i,cred_reg in enumerate(credible_regions[:-1]):
         cred_reg_str = "{:.12g}% CR".format(cred_reg)
-        legend_entries.append((regular_marker.strip(), ccs.ccodes[i], 
+        legend_entries.append((ms.regular_marker.strip(), ccs.ccodes[i], 
                                cred_reg_str, ccs.fg_ccode))
     
     legend, legend_width = utils.generate_legend(legend_entries, 

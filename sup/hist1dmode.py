@@ -3,20 +3,7 @@ import numpy as np
 import sup.defaults as defaults
 import sup.utils as utils
 from sup.ccodesettings import CCodeSettings
-
-
-#
-# Variables for colors, markers, padding, etc
-#
-
-regular_marker_up = " █"
-regular_marker_down = " ▄"
-
-special_marker = defaults.special_marker
-
-fill_marker = " █"
-
-empty_bin_marker = defaults.empty_bin_marker_1d
+from sup.markersettings import MarkerSettings
 
 
 def get_color_code(ccs, z_val):
@@ -31,16 +18,16 @@ def get_color_code(ccs, z_val):
         raise Exception("Unexpected z_val. This shouldn't happen...")
 
 
-def get_marker(z_val):
+def get_marker(ms, z_val):
 
     if z_val == 2:
-        return regular_marker_up
+        return ms.regular_marker_up
     elif z_val == 1:
-        return regular_marker_down
+        return ms.regular_marker_down
     elif z_val == -1:
-        return fill_marker
+        return ms.fill_marker
     elif z_val == 0:
-        return empty_bin_marker
+        return ms.empty_bin_marker
     else:
         raise Exception("Unexpected z_val. This shouldn't happen...")
 
@@ -50,9 +37,6 @@ def get_marker(z_val):
 #
 
 def run(args):
-
-    global empty_bin_marker
-    global special_marker
 
     input_file = args.input_file
 
@@ -83,6 +67,12 @@ def run(args):
     ccs.use_white_bg = args.use_white_bg
     ccs.use_grayscale = args.use_grayscale
     ccs.update()
+
+    ms = MarkerSettings()
+    ms.regular_marker_up = " █"
+    ms.regular_marker_down = " ▄"
+    ms.fill_marker = " █"
+    ms.empty_bin_marker = defaults.empty_bin_marker_1d
 
     n_decimals = args.n_decimals
     ff = "{: ." + str(n_decimals) + "e}"
@@ -186,13 +176,13 @@ def run(args):
             xiyi = (xi,yi)
 
             cc = ccs.empty_bin_ccode
-            marker = empty_bin_marker
+            marker = ms.empty_bin_marker
 
             if xiyi in bins_info.keys():
                 z_val = bins_info[xiyi][2]
 
                 cc = get_color_code(ccs, z_val)
-                marker = get_marker(z_val)
+                marker = get_marker(ms, z_val)
 
             # Add point to line
             yi_line += utils.prettify(marker, cc, ccs.bg_ccode)

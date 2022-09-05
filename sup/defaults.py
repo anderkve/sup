@@ -27,6 +27,13 @@ Attributes:
 
     regular_marker (string): The default marker used to fill plots.
 
+    regular_marker_up (string): The default marker, shifted upwards.
+
+    regular_marker_down (string): The default marker, shifted downwards.
+
+    fill_marker (string): The default marker used to fill vertical blocks,
+        e.g. for use in 1d histograms.
+
     special_marker (string): The default marker used to highlight special points
         in the plots.
 
@@ -115,6 +122,11 @@ bg_ccode_bb, fg_ccode_bb = 16, 231
 bg_ccode_wb, fg_ccode_wb = 231, 16
 
 regular_marker = " ■"
+regular_marker_up = " ▀"
+regular_marker_down = " ▄"
+
+fill_marker = " █"
+
 special_marker = " 🟊"
 
 empty_bin_marker_1d = "  "

@@ -3,16 +3,7 @@ import numpy as np
 import sup.defaults as defaults
 import sup.utils as utils
 from sup.ccodesettings import CCodeSettings
-
-
-#
-# Variables for colors, markers, padding, etc
-#
-
-regular_marker = defaults.regular_marker
-special_marker = defaults.special_marker
-
-empty_bin_marker = defaults.empty_bin_marker_2d
+from sup.markersettings import MarkerSettings
 
 
 def get_color_code(ccs, z_norm, color_z_lims, highlight_maxlike_point,
@@ -33,15 +24,15 @@ def get_color_code(ccs, z_norm, color_z_lims, highlight_maxlike_point,
     return ccs.ccodes[i]
 
 
-def get_marker(z_norm, highlight_maxlike_point, use_capped_loglike=False):
+def get_marker(ms, z_norm, highlight_maxlike_point, use_capped_loglike=False):
 
     if z_norm == 1.0:
         if use_capped_loglike or (not highlight_maxlike_point):
-            return regular_marker
+            return ms.regular_marker
         else:
-            return special_marker
+            return ms.special_marker
     else:
-        return regular_marker
+        return ms.regular_marker
 
 
 #
@@ -49,9 +40,6 @@ def get_marker(z_norm, highlight_maxlike_point, use_capped_loglike=False):
 #
 
 def run(args):
-
-    global empty_bin_marker
-    global special_marker
 
     input_file = args.input_file
     x_index = args.x_index
@@ -87,6 +75,9 @@ def run(args):
     ccs.use_grayscale = args.use_grayscale
     ccs.use_n_colors = len(color_z_lims)
     ccs.update()
+
+    ms = MarkerSettings()
+    ms.empty_bin_marker = defaults.empty_bin_marker_2d
 
     highlight_maxlike_point = not(args.no_star)
 
@@ -176,7 +167,7 @@ def run(args):
             xiyi = (xi,yi)
 
             ccode = ccs.empty_bin_ccode
-            marker = empty_bin_marker
+            marker = ms.empty_bin_marker
 
             if xiyi in bins_info.keys():
                 z_val = bins_info[xiyi][2]
@@ -186,7 +177,7 @@ def run(args):
                 ccode = get_color_code(ccs, z_norm, color_z_lims,
                                        highlight_maxlike_point, 
                                        use_capped_loglike=use_capped_loglike)
-                marker = get_marker(z_norm, highlight_maxlike_point,
+                marker = get_marker(ms, z_norm, highlight_maxlike_point,
                                     use_capped_loglike=use_capped_loglike)
 
             # Add point to line
@@ -222,13 +213,13 @@ def run(args):
 
     # legend_entries.append(("", ccs.fg_ccode, "", ccs.fg_ccode))
     if (not use_capped_loglike) and highlight_maxlike_point:
-        legend_entries.append((special_marker.strip(), ccs.max_bin_ccode, 
+        legend_entries.append((ms.special_marker.strip(), ccs.max_bin_ccode, 
                                "best-fit", ccs.fg_ccode))
-    legend_entries.append((regular_marker.strip(), ccs.ccodes[-1], "1σ",
+    legend_entries.append((ms.regular_marker.strip(), ccs.ccodes[-1], "1σ",
                            ccs.fg_ccode))
-    legend_entries.append((regular_marker.strip(), ccs.ccodes[-2], "2σ",
+    legend_entries.append((ms.regular_marker.strip(), ccs.ccodes[-2], "2σ",
                            ccs.fg_ccode))
-    legend_entries.append((regular_marker.strip(), ccs.ccodes[-3], "3σ",
+    legend_entries.append((ms.regular_marker.strip(), ccs.ccodes[-3], "3σ",
                            ccs.fg_ccode))
     
     legend, legend_width = utils.generate_legend(legend_entries,

@@ -4,16 +4,7 @@ import sup.defaults as defaults
 import sup.utils as utils
 import sup.colors as colors
 from sup.ccodesettings import CCodeSettings
-
-
-#
-# Variables for colors, markers, padding, etc
-#
-
-regular_marker = defaults.regular_marker
-special_marker = defaults.special_marker
-
-empty_bin_marker = defaults.empty_bin_marker_2d
+from sup.markersettings import MarkerSettings
 
 
 def get_color_code(ccs, z_val, z_norm, color_z_lims, s_type,
@@ -43,14 +34,14 @@ def get_color_code(ccs, z_val, z_norm, color_z_lims, s_type,
     return ccs.ccodes[i]
 
 
-def get_marker(z_norm, s_type, highlight_maxmin_point):
+def get_marker(ms, z_norm, s_type, highlight_maxmin_point):
 
     if highlight_maxmin_point and (z_norm == 1.0) and (s_type == "max"):
-        return special_marker
+        return ms.special_marker
     elif highlight_maxmin_point and (z_norm == 0.0) and (s_type == "min"):
-        return special_marker
+        return ms.special_marker
     else:
-        return regular_marker
+        return ms.regular_marker
 
 
 #
@@ -64,9 +55,6 @@ def run_min(args):
     run(args, "min")
 
 def run(args, mode):
-
-    global empty_bin_marker
-    global special_marker
 
     input_file = args.input_file
 
@@ -99,6 +87,9 @@ def run(args, mode):
     ccs.use_grayscale = args.use_grayscale
     ccs.use_n_colors = args.n_colors
     ccs.update()
+
+    ms = MarkerSettings()
+    ms.empty_bin_marker = defaults.empty_bin_marker_2d
 
     if args.reverse_colormap:
         ccs.ccodes = ccs.ccodes[::-1]
@@ -200,7 +191,7 @@ def run(args, mode):
             xiyi = (xi,yi)
 
             ccode = ccs.empty_bin_ccode
-            marker = empty_bin_marker
+            marker = ms.empty_bin_marker
 
             if xiyi in bins_info.keys():
                 z_val = bins_info[xiyi][2]
@@ -210,7 +201,7 @@ def run(args, mode):
 
                 ccode = get_color_code(ccs, z_val, z_norm, color_z_lims, s_type, 
                                        highlight_maxmin_point)
-                marker = get_marker(z_norm, s_type, highlight_maxmin_point)
+                marker = get_marker(ms, z_norm, s_type, highlight_maxmin_point)
 
             # Add point to line
             yi_line += utils.prettify(marker, ccode, ccs.bg_ccode)
@@ -256,7 +247,7 @@ def run(args, mode):
 
     marker_str = ""
     if (highlight_maxmin_point) and (s_index == z_index): 
-        marker_str = "" + special_marker.strip()
+        marker_str = "" + ms.special_marker.strip()
 
     if s_index != z_index:
         point = ("(" + ff2 + ", " + ff2 + ", " + ff2 + ", " + ff2 + ")").format(
