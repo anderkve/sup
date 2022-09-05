@@ -52,13 +52,6 @@ def run(args):
         credible_regions = [68.3, 95.45]
 
     credible_regions = np.array(credible_regions)
-    if np.any(credible_regions>100.0):
-        raise SupRuntimeError("Can't have a credible region with more than "
-                              "100% probability.")
-    elif np.any(credible_regions<=0.0):
-        raise SupRuntimeError("Can't have a credible region with "
-                              "<= 0% probability.")
-
 
     filter_indices = args.filter_indices
     use_filters = bool(filter_indices is not None) 
@@ -189,17 +182,17 @@ def run(args):
 
             xiyi = (xi,yi)
 
-            cc = ccs.empty_bin_ccode
+            ccode = ccs.empty_bin_ccode
             marker = ms.empty_bin_marker
 
             if xiyi in bins_info.keys():
                 z_val = bins_info[xiyi][2]
 
-                cc = get_color_code(ccs, z_val)
+                ccode = get_color_code(ccs, z_val)
                 marker = get_marker(ms, z_val)
 
             # Add point to line
-            yi_line += utils.prettify(marker, cc, ccs.bg_ccode)
+            yi_line += utils.prettify(marker, ccode, ccs.bg_ccode)
 
         plot_lines.append(yi_line)
 

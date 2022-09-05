@@ -171,17 +171,17 @@ def run(args):
 
             xiyi = (xi,yi)
 
-            cc = ccs.empty_bin_ccode
+            ccode = ccs.empty_bin_ccode
             marker = ms.empty_bin_marker
 
             if xiyi in bins_info.keys():
                 z_val = bins_info[xiyi][2]
 
-                cc = get_color_code(ccs, z_val)
+                ccode = get_color_code(ccs, z_val)
                 marker = get_marker(ms, z_val)
 
             # Add point to line
-            yi_line += utils.prettify(marker, cc, ccs.bg_ccode)
+            yi_line += utils.prettify(marker, ccode, ccs.bg_ccode)
 
         plot_lines.append(yi_line)
 
