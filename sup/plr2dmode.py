@@ -2,6 +2,7 @@
 import numpy as np
 import sup.defaults as defaults
 import sup.utils as utils
+from sup.ccodesettings import CCodeSettings
 
 
 #
@@ -13,35 +14,15 @@ special_marker = defaults.special_marker
 
 empty_bin_marker = defaults.empty_bin_marker_2d
 
-empty_bin_ccode_grayscale_bb = 233
-empty_bin_ccode_grayscale_wb = 254
 
-empty_bin_ccode_color_bb = 233
-empty_bin_ccode_color_wb = 255
-
-max_bin_ccode_grayscale_bb = 231
-max_bin_ccode_grayscale_wb = 232
-
-max_bin_ccode_color_bb = 231
-max_bin_ccode_color_wb = 232
-
-ccodes_grayscale_bb = [233, 237, 242, 231]
-ccodes_grayscale_wb = [254, 250, 243, 232]
-
-ccodes_color_bb = [236, 19, 45, 226]
-ccodes_color_wb = [248, 19, 45, 220]
-
-color_z_lims = [0.0, 0.003, 0.046, 0.317]
-
-
-def get_color_code(ccodes, max_bin_ccode, z_norm, highlight_maxlike_point, 
+def get_color_code(ccs, z_norm, color_z_lims, highlight_maxlike_point,
                    use_capped_loglike=False):
 
     if z_norm == 1.0:
         if use_capped_loglike or (not highlight_maxlike_point):
-            return ccodes[-1]
+            return ccs.ccodes[-1]
         else:
-            return max_bin_ccode
+            return ccs.max_bin_ccode
 
     i = 0
     for j, lim in enumerate(color_z_lims):
@@ -49,7 +30,7 @@ def get_color_code(ccodes, max_bin_ccode, z_norm, highlight_maxlike_point,
             i = j
         else:
             break
-    return ccodes[i]
+    return ccs.ccodes[i]
 
 
 def get_marker(z_norm, highlight_maxlike_point, use_capped_loglike=False):
@@ -95,29 +76,16 @@ def run(args):
     if args.cap_loglike_val is not None:
         use_capped_loglike = True
 
-    bg_ccode = defaults.bg_ccode_bb
-    fg_ccode = defaults.fg_ccode_bb
+    color_z_lims = [0.0, 0.003, 0.046, 0.317]
 
-    empty_bin_ccode = empty_bin_ccode_color_bb
-    max_bin_ccode = max_bin_ccode_color_bb
-    ccodes = ccodes_color_bb
-    use_white_bg = args.use_white_bg
-    if use_white_bg:
-        bg_ccode = defaults.bg_ccode_wb
-        fg_ccode = defaults.fg_ccode_wb
-        empty_bin_ccode = empty_bin_ccode_color_wb
-        max_bin_ccode = max_bin_ccode_color_wb
-        ccodes = ccodes_color_wb
-
-    if args.use_grayscale:
-        if use_white_bg:
-            ccodes = ccodes_grayscale_wb
-            max_bin_ccode = max_bin_ccode_grayscale_wb
-            empty_bin_ccode = empty_bin_ccode_grayscale_wb
-        else:
-            ccodes = ccodes_grayscale_bb
-            max_bin_ccode = max_bin_ccode_grayscale_bb
-            empty_bin_ccode = empty_bin_ccode_grayscale_bb
+    ccs = CCodeSettings()
+    ccs.cmap_grayscale_bb = [233, 237, 242, 231]
+    ccs.cmap_grayscale_wb = [254, 250, 243, 232]
+    ccs.cmap_color_bb = [236, 19, 45, 226]
+    ccs.cmap_color_wb = [248, 19, 45, 220]
+    ccs.switch_settings(use_white_bg=args.use_white_bg, 
+                        use_grayscale=args.use_grayscale)
+    # ccs.set_n_colors(len(color_z_lims))
 
     highlight_maxlike_point = not(args.no_star)
 
@@ -200,13 +168,13 @@ def run(args):
     fig_width = 0
     for yi in range(xy_bins[1]):
 
-        yi_line = utils.prettify(" ", fg_ccode, bg_ccode)
+        yi_line = utils.prettify(" ", ccs.fg_ccode, ccs.bg_ccode)
 
         for xi in range(xy_bins[0]):
 
             xiyi = (xi,yi)
 
-            ccode = empty_bin_ccode
+            ccode = ccs.empty_bin_ccode
             marker = empty_bin_marker
 
             if xiyi in bins_info.keys():
@@ -214,14 +182,14 @@ def run(args):
                 z_norm = z_val
                 # z_norm = (z_val - z_min) / (z_max - z_min)
 
-                ccode = get_color_code(ccodes, max_bin_ccode, z_norm, 
+                ccode = get_color_code(ccs, z_norm, color_z_lims,
                                        highlight_maxlike_point, 
                                        use_capped_loglike=use_capped_loglike)
                 marker = get_marker(z_norm, highlight_maxlike_point,
                                     use_capped_loglike=use_capped_loglike)
 
             # Add point to line
-            yi_line += utils.prettify(marker, ccode, bg_ccode)
+            yi_line += utils.prettify(marker, ccode, ccs.bg_ccode)
 
         plot_lines.append(yi_line)
 
@@ -232,14 +200,15 @@ def run(args):
     fig_width = plot_width
 
     # Add axes
-    axes_mod_func = lambda input_str : utils.prettify(input_str, fg_ccode,
-                                                      bg_ccode, bold=True)
+    axes_mod_func = lambda input_str : utils.prettify(input_str, ccs.fg_ccode,
+                                                      ccs.bg_ccode, bold=True)
     plot_lines = utils.add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits,
                                 mod_func=axes_mod_func, floatf=ff)
 
     # Add blank top line
     plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, 
-                                              fg_ccode, bg_ccode, insert_pos=0)
+                                              ccs.fg_ccode, ccs.bg_ccode,
+                                              insert_pos=0)
 
 
     #
@@ -247,32 +216,36 @@ def run(args):
     #
 
     legend_mod_func = lambda input_str, input_fg_ccode : utils.prettify(
-        input_str, input_fg_ccode, bg_ccode, bold=True)
+        input_str, input_fg_ccode, ccs.bg_ccode, bold=True)
     legend_entries = []
 
-    # legend_entries.append(("", fg_ccode, "", fg_ccode))
+    # legend_entries.append(("", ccs.fg_ccode, "", ccs.fg_ccode))
     if (not use_capped_loglike) and highlight_maxlike_point:
-        legend_entries.append((special_marker.strip(), max_bin_ccode, 
-                               "best-fit", fg_ccode))
-    legend_entries.append((regular_marker.strip(), ccodes[-1], "1σ", fg_ccode))
-    legend_entries.append((regular_marker.strip(), ccodes[-2], "2σ", fg_ccode))
-    legend_entries.append((regular_marker.strip(), ccodes[-3], "3σ", fg_ccode))
+        legend_entries.append((special_marker.strip(), ccs.max_bin_ccode, 
+                               "best-fit", ccs.fg_ccode))
+    legend_entries.append((regular_marker.strip(), ccs.ccodes[-1], "1σ",
+                           ccs.fg_ccode))
+    legend_entries.append((regular_marker.strip(), ccs.ccodes[-2], "2σ",
+                           ccs.fg_ccode))
+    legend_entries.append((regular_marker.strip(), ccs.ccodes[-3], "3σ",
+                           ccs.fg_ccode))
     
     legend, legend_width = utils.generate_legend(legend_entries,
                                                  legend_mod_func,
                                                  sep="  ")
 
     plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, 
-                                              fg_ccode, bg_ccode)
+                                              ccs.fg_ccode, ccs.bg_ccode)
     plot_lines, fig_width = utils.insert_line(legend, legend_width, plot_lines,
-                                              fig_width, fg_ccode, bg_ccode)
+                                              fig_width, ccs.fg_ccode,
+                                              ccs.bg_ccode)
 
 
     #
     # Add left padding
     #
 
-    plot_lines = utils.add_left_padding(plot_lines, fg_ccode, bg_ccode)
+    plot_lines = utils.add_left_padding(plot_lines, ccs.fg_ccode, ccs.bg_ccode)
 
 
     #
@@ -292,8 +265,9 @@ def run(args):
     dy = y_bin_limits[1] - y_bin_limits[0]
 
     plot_lines, fig_width = utils.add_info_text(
-        plot_lines, fig_width, fg_ccode, bg_ccode, ff2, x_label, x_range,
-        x_bin_width=dx, y_label=y_label, y_range=y_range, y_bin_width=dy,
+        plot_lines, fig_width, ccs.fg_ccode, ccs.bg_ccode, ff2,
+        x_label, x_range, x_bin_width=dx, 
+        y_label=y_label, y_range=y_range, y_bin_width=dy,
         s_label=s_label, s_type=s_type,
         x_transf_expr=x_transf_expr, y_transf_expr=y_transf_expr,
         capped_z=use_capped_loglike, capped_label="ln(L)",

@@ -43,6 +43,10 @@ class CCodeSettings:
             [25, 32, 81, 123, 195, 230, 222, 214, 202, 1],      # blue-red
         ]
 
+        self.cmap_color_bb = self.cmaps[0]
+        self.cmap_color_wb = self.cmaps[0]
+
+
         # Active settings
         self.bg_ccode = self.bg_ccode_bb
         self.fg_ccode = self.fg_ccode_bb
@@ -51,7 +55,7 @@ class CCodeSettings:
         self.max_bin_ccode = self.max_bin_ccode_color_bb
         self.graph_ccode = self.graph_ccode_color_bb
         self.bar_ccodes = self.bar_ccodes_color
-        self.ccodes = self.cmaps[0]
+        self.ccodes = self.cmap_color_bb
 
 
     def switch_settings(self, use_white_bg=False, use_grayscale=False):
@@ -73,6 +77,7 @@ class CCodeSettings:
             self.max_bin_ccode = self.max_bin_ccode_color_wb
             self.graph_ccode = self.graph_ccode_color_wb
             self.bar_ccodes = self.bar_ccodes_color
+            self.ccodes = self.cmap_color_wb
 
         elif not use_white_bg and use_grayscale:        
             self.bg_ccode = self.bg_ccode_bb
@@ -81,8 +86,8 @@ class CCodeSettings:
             self.fill_bin_ccode = self.fill_bin_ccode_grayscale_bb
             self.max_bin_ccode = self.max_bin_ccode_grayscale_bb
             self.graph_ccode = self.graph_ccode_grayscale_bb
-            self.ccodes = self.cmap_grayscale_bb
             self.bar_ccodes = self.bar_ccodes_grayscale
+            self.ccodes = self.cmap_grayscale_bb
 
         elif not use_white_bg and not use_grayscale:
             self.bg_ccode = self.bg_ccode_bb
@@ -92,6 +97,7 @@ class CCodeSettings:
             self.max_bin_ccode = self.max_bin_ccode_color_bb
             self.graph_ccode = self.graph_ccode_color_bb
             self.bar_ccodes = self.bar_ccodes_color
+            self.ccodes = self.cmap_color_bb
 
 
     def set_n_colors(self, n_colors):
