@@ -115,8 +115,6 @@ def run(args):
     # Get z max and minimum
     z_min, z_max = z_range
 
-    # z_norm = (z_data - z_min) / (z_max - z_min)
-
     # Set color limits
     color_z_lims = list(np.linspace(z_min, z_max, len(ccs.ccodes)+1))
 

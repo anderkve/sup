@@ -172,7 +172,6 @@ def run(args):
             if xiyi in bins_info.keys():
                 z_val = bins_info[xiyi][2]
                 z_norm = z_val
-                # z_norm = (z_val - z_min) / (z_max - z_min)
 
                 ccode = get_color_code(ccs, z_norm, color_z_lims,
                                        highlight_maxlike_point, 
