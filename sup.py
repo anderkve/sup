@@ -2,7 +2,7 @@
 
 """sup -- the Simlpe Unicode Plotter. 
 
-A program for generating quick data visualisation directly in the terminal.
+A program for generating quick data visualisations directly in the terminal.
 
 Example:
     Run the command 
@@ -11,13 +11,11 @@ Example:
   
     to see a list of examples.
 
-Todo:
-    * Add a "--watch N" option which generates the same plot every N-th second.
-
 """
 
 import sys
 import os
+import time
 import argparse
 from sup import (
     colors, listmode, colorsmode, colormapsmode, plr2dmode, plr1dmode, 
@@ -117,6 +115,7 @@ examples:
     parser_hist1dmode.add_argument("-rs", "--read-slice", nargs=3, type=int, action="store", dest="read_slice", default=[0,-1,1], help="read only the given slice of each dataset", metavar=("START", "END", "STEP"))
     parser_hist1dmode.add_argument("-d", "--decimals", type=int, action="store", dest="n_decimals", default=defaults.n_decimals, help="set the number of decimals for axis and colorbar tick labels", metavar="N_DECIMALS")
     parser_hist1dmode.add_argument("-dl", "--delimiter", type=str, action="store", dest="delimiter", default=" ", help="set the delimiter used in the input data file (only for text files)", metavar="DELIMITER")
+    parser_hist1dmode.add_argument("-wa", "--watch", type=float, action="store", dest="watch_n_seconds", default=None, help="regenerate the plot at fixed time intervals", metavar="N_SECONDS")
 
     # Parser for "hist2d" mode
     parser_hist2dmode = subparsers.add_parser("hist2d")
@@ -143,6 +142,7 @@ examples:
     parser_hist2dmode.add_argument("-rs", "--read-slice", nargs=3, type=int, action="store", dest="read_slice", default=[0,-1,1], help="read only the given slice of each dataset", metavar=("START", "END", "STEP"))
     parser_hist2dmode.add_argument("-d", "--decimals", type=int, action="store", dest="n_decimals", default=defaults.n_decimals, help="set the number of decimals for axis and colorbar tick labels", metavar="N_DECIMALS")
     parser_hist2dmode.add_argument("-dl", "--delimiter", type=str, action="store", dest="delimiter", default=" ", help="set the delimiter used in the input data file (only for text files)", metavar="DELIMITER")
+    parser_hist2dmode.add_argument("-wa", "--watch", type=float, action="store", dest="watch_n_seconds", default=None, help="regenerate the plot at fixed time intervals", metavar="N_SECONDS")
 
     # Parser for "max1d" mode
     parser_max1dmode = subparsers.add_parser("max1d")
@@ -163,6 +163,7 @@ examples:
     parser_max1dmode.add_argument("-rs", "--read-slice", nargs=3, type=int, action="store", dest="read_slice", default=[0,-1,1], help="read only the given slice of each dataset", metavar=("START", "END", "STEP"))
     parser_max1dmode.add_argument("-d", "--decimals", type=int, action="store", dest="n_decimals", default=defaults.n_decimals, help="set the number of decimals for axis and colorbar tick labels", metavar="N_DECIMALS")
     parser_max1dmode.add_argument("-dl", "--delimiter", type=str, action="store", dest="delimiter", default=" ", help="set the delimiter used in the input data file (only for text files)", metavar="DELIMITER")
+    parser_max1dmode.add_argument("-wa", "--watch", type=float, action="store", dest="watch_n_seconds", default=None, help="regenerate the plot at fixed time intervals", metavar="N_SECONDS")
 
     # Parser for "min1d" mode
     parser_min1dmode = subparsers.add_parser("min1d")
@@ -183,6 +184,7 @@ examples:
     parser_min1dmode.add_argument("-rs", "--read-slice", nargs=3, type=int, action="store", dest="read_slice", default=[0,-1,1], help="read only the given slice of each dataset", metavar=("START", "END", "STEP"))
     parser_min1dmode.add_argument("-d", "--decimals", type=int, action="store", dest="n_decimals", default=defaults.n_decimals, help="set the number of decimals for axis and colorbar tick labels", metavar="N_DECIMALS")
     parser_min1dmode.add_argument("-dl", "--delimiter", type=str, action="store", dest="delimiter", default=" ", help="set the delimiter used in the input data file (only for text files)", metavar="DELIMITER")
+    parser_min1dmode.add_argument("-wa", "--watch", type=float, action="store", dest="watch_n_seconds", default=None, help="regenerate the plot at fixed time intervals", metavar="N_SECONDS")
 
     # Parser for "max2d" mode
     parser_max2dmode = subparsers.add_parser("max2d")
@@ -210,6 +212,7 @@ examples:
     parser_max2dmode.add_argument("-rs", "--read-slice", nargs=3, type=int, action="store", dest="read_slice", default=[0,-1,1], help="read only the given slice of each dataset", metavar=("START", "END", "STEP"))
     parser_max2dmode.add_argument("-d", "--decimals", type=int, action="store", dest="n_decimals", default=defaults.n_decimals, help="set the number of decimals for axis and colorbar tick labels", metavar="N_DECIMALS")
     parser_max2dmode.add_argument("-dl", "--delimiter", type=str, action="store", dest="delimiter", default=" ", help="set the delimiter used in the input data file (only for text files)", metavar="DELIMITER")
+    parser_max2dmode.add_argument("-wa", "--watch", type=float, action="store", dest="watch_n_seconds", default=None, help="regenerate the plot at fixed time intervals", metavar="N_SECONDS")
 
     # Parser for "min2d" mode
     parser_min2dmode = subparsers.add_parser("min2d")
@@ -237,6 +240,7 @@ examples:
     parser_min2dmode.add_argument("-rs", "--read-slice", nargs=3, type=int, action="store", dest="read_slice", default=[0,-1,1], help="read only the given slice of each dataset", metavar=("START", "END", "STEP"))
     parser_min2dmode.add_argument("-d", "--decimals", type=int, action="store", dest="n_decimals", default=defaults.n_decimals, help="set the number of decimals for axis and colorbar tick labels", metavar="N_DECIMALS")
     parser_min2dmode.add_argument("-dl", "--delimiter", type=str, action="store", dest="delimiter", default=" ", help="set the delimiter used in the input data file (only for text files)", metavar="DELIMITER")
+    parser_min2dmode.add_argument("-wa", "--watch", type=float, action="store", dest="watch_n_seconds", default=None, help="regenerate the plot at fixed time intervals", metavar="N_SECONDS")
 
     # Parser for "avg1d" mode
     parser_avg1dmode = subparsers.add_parser("avg1d")
@@ -255,6 +259,7 @@ examples:
     parser_avg1dmode.add_argument("-rs", "--read-slice", nargs=3, type=int, action="store", dest="read_slice", default=[0,-1,1], help="read only the given slice of each dataset", metavar=("START", "END", "STEP"))
     parser_avg1dmode.add_argument("-d", "--decimals", type=int, action="store", dest="n_decimals", default=defaults.n_decimals, help="set the number of decimals for axis and colorbar tick labels", metavar="N_DECIMALS")
     parser_avg1dmode.add_argument("-dl", "--delimiter", type=str, action="store", dest="delimiter", default=" ", help="set the delimiter used in the input data file (only for text files)", metavar="DELIMITER")
+    parser_avg1dmode.add_argument("-wa", "--watch", type=float, action="store", dest="watch_n_seconds", default=None, help="regenerate the plot at fixed time intervals", metavar="N_SECONDS")
 
     # Parser for "avg2d" mode
     parser_avg2dmode = subparsers.add_parser("avg2d")
@@ -279,6 +284,7 @@ examples:
     parser_avg2dmode.add_argument("-rs", "--read-slice", nargs=3, type=int, action="store", dest="read_slice", default=[0,-1,1], help="read only the given slice of each dataset", metavar=("START", "END", "STEP"))
     parser_avg2dmode.add_argument("-d", "--decimals", type=int, action="store", dest="n_decimals", default=defaults.n_decimals, help="set the number of decimals for axis and colorbar tick labels", metavar="N_DECIMALS")
     parser_avg2dmode.add_argument("-dl", "--delimiter", type=str, action="store", dest="delimiter", default=" ", help="set the delimiter used in the input data file (only for text files)", metavar="DELIMITER")
+    parser_avg2dmode.add_argument("-wa", "--watch", type=float, action="store", dest="watch_n_seconds", default=None, help="regenerate the plot at fixed time intervals", metavar="N_SECONDS")
 
     # Parser for "post1d" mode
     parser_post1dmode = subparsers.add_parser("post1d")
@@ -301,6 +307,7 @@ examples:
     parser_post1dmode.add_argument("-rs", "--read-slice", nargs=3, type=int, action="store", dest="read_slice", default=[0,-1,1], help="read only the given slice of each dataset", metavar=("START", "END", "STEP"))
     parser_post1dmode.add_argument("-d", "--decimals", type=int, action="store", dest="n_decimals", default=defaults.n_decimals, help="set the number of decimals for axis and colorbar tick labels", metavar="N_DECIMALS")
     parser_post1dmode.add_argument("-dl", "--delimiter", type=str, action="store", dest="delimiter", default=" ", help="set the delimiter used in the input data file (only for text files)", metavar="DELIMITER")
+    parser_post1dmode.add_argument("-wa", "--watch", type=float, action="store", dest="watch_n_seconds", default=None, help="regenerate the plot at fixed time intervals", metavar="N_SECONDS")
 
     # Parser for "post2d" mode
     parser_post2dmode = subparsers.add_parser("post2d")
@@ -324,6 +331,7 @@ examples:
     parser_post2dmode.add_argument("-rs", "--read-slice", nargs=3, type=int, action="store", dest="read_slice", default=[0,-1,1], help="read only the given slice of each dataset", metavar=("START", "END", "STEP"))
     parser_post2dmode.add_argument("-d", "--decimals", type=int, action="store", dest="n_decimals", default=defaults.n_decimals, help="set the number of decimals for axis and colorbar tick labels", metavar="N_DECIMALS")
     parser_post2dmode.add_argument("-dl", "--delimiter", type=str, action="store", dest="delimiter", default=" ", help="set the delimiter used in the input data file (only for text files)", metavar="DELIMITER")
+    parser_post2dmode.add_argument("-wa", "--watch", type=float, action="store", dest="watch_n_seconds", default=None, help="regenerate the plot at fixed time intervals", metavar="N_SECONDS")
 
     # Parser for "plr1d" mode
     parser_plr1dmode = subparsers.add_parser("plr1d")
@@ -343,6 +351,7 @@ examples:
     parser_plr1dmode.add_argument("-rs", "--read-slice", nargs=3, type=int, action="store", dest="read_slice", default=[0,-1,1], help="read only the given slice of each dataset", metavar=("START", "END", "STEP"))
     parser_plr1dmode.add_argument("-d", "--decimals", type=int, action="store", dest="n_decimals", default=defaults.n_decimals, help="set the number of decimals for axis and colorbar tick labels", metavar="N_DECIMALS")
     parser_plr1dmode.add_argument("-dl", "--delimiter", type=str, action="store", dest="delimiter", default=" ", help="set the delimiter used in the input data file (only for text files)", metavar="DELIMITER")
+    parser_plr1dmode.add_argument("-wa", "--watch", type=float, action="store", dest="watch_n_seconds", default=None, help="regenerate the plot at fixed time intervals", metavar="N_SECONDS")
 
     # Parser for "plr2d" mode
     parser_plr2dmode = subparsers.add_parser("plr2d")
@@ -364,6 +373,7 @@ examples:
     parser_plr2dmode.add_argument("-rs", "--read-slice", nargs=3, type=int, action="store", dest="read_slice", default=[0,-1,1], help="read only the given slice of each dataset", metavar=("START", "END", "STEP"))
     parser_plr2dmode.add_argument("-d", "--decimals", type=int, action="store", dest="n_decimals", default=defaults.n_decimals, help="set the number of decimals for axis and colorbar tick labels", metavar="N_DECIMALS")
     parser_plr2dmode.add_argument("-dl", "--delimiter", type=str, action="store", dest="delimiter", default=" ", help="set the delimiter used in the input data file (only for text files)", metavar="DELIMITER")
+    parser_plr2dmode.add_argument("-wa", "--watch", type=float, action="store", dest="watch_n_seconds", default=None, help="regenerate the plot at fixed time intervals", metavar="N_SECONDS")
 
     # Parser for "graph1d" mode
     parser_graph1dmode = subparsers.add_parser("graph1d")
@@ -474,16 +484,49 @@ examples:
                                               "probability) must be between 0 "
                                               "and 100")
 
+        if "watch_n_seconds" in args_dict.keys():
+            if args.watch_n_seconds is not None:
+                if args.watch_n_seconds <= 0.0:
+                    raise SupRuntimeError("N_SECONDS must be greater than 0")
+
     except SupRuntimeError as e:
         print(error_prefix + "{0}".format(e))
         return 1
 
+
     # Now try running sup in the chosen mode.
     try:
-        args.func(args)
+        # If the watch flag is in use, run the chosen sup mode repeatedly until 
+        # the user hits ctrl+c.
+        if (("watch_n_seconds" in args_dict.keys()) and 
+            (args.watch_n_seconds is not None)):
+
+            keep_going = True
+
+            while keep_going:
+                # Run
+                args.func(args)
+
+                # Print message
+                message = ("Regenerating the plot every {} seconds. Press "
+                           "CTRL+C to abort.".format(args.watch_n_seconds))
+                print()
+                print("\033[1m" + message + "\033[0m")  # Use bold text
+                print()
+
+                # Sleep, then repeat (unless the user aborts)
+                try:
+                    time.sleep(args.watch_n_seconds)
+                except KeyboardInterrupt:
+                    keep_going = False
+        # Else, run once
+        else:
+            args.func(args)
+
     except SupRuntimeError as e:
         print(error_prefix + "{0}".format(e))
         return 1
+
     except BaseException as e:
         print(error_prefix + "Unexpected error:")
         print()
