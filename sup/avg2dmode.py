@@ -2,7 +2,7 @@
 import numpy as np
 import sup.defaults as defaults
 import sup.utils as utils
-from sup.colors import cmaps, cmaps_grayscale
+import sup.colors as colors
 from sup.ccodesettings import CCodeSettings
 
 
@@ -66,10 +66,12 @@ def run(args):
         xy_bins = defaults.xy_bins
     
     ccs = CCodeSettings()
-    ccs.ccodes = ccs.cmaps[args.cmap_index]
-    ccs.switch_settings(use_white_bg=args.use_white_bg, 
-                        use_grayscale=args.use_grayscale)
-    ccs.set_n_colors(args.n_colors)
+    ccs.cmaps["color_bb"] = colors.cmaps[args.cmap_index]
+    ccs.cmaps["color_wb"] = colors.cmaps[args.cmap_index]
+    ccs.use_white_bg = args.use_white_bg
+    ccs.use_grayscale = args.use_grayscale
+    ccs.use_n_colors = args.n_colors
+    ccs.update()
 
     if args.reverse_colormap:
         ccs.ccodes = ccs.ccodes[::-1]

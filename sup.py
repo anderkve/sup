@@ -443,7 +443,7 @@ examples:
                 if args.cmap_index not in range(n_colormaps):
                     raise SupRuntimeError("the colormap option (CM) must be an "
                                           "integer between 0 and "
-                                          + format(n_colormaps))
+                                          + format(n_colormaps - 1))
 
         if "read_slice" in args_dict.keys():
             if args.read_slice is not None:

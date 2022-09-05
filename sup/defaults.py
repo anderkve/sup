@@ -92,6 +92,9 @@ Attributes:
 
 """
 
+import sup.colors as colors
+
+
 left_padding = 2*" "
 
 xy_bins = (40, 40)
@@ -131,6 +134,11 @@ graph_ccode_grayscale_wb = 252
 
 bar_ccodes_color = [4,12]
 bar_ccodes_grayscale = [243, 240]
+
+cmap_color_bb = colors.cmaps[0]
+cmap_color_wb = colors.cmaps[0]
+cmap_grayscale_bb = colors.cmaps_grayscale[0]
+cmap_grayscale_wb = colors.cmaps_grayscale[1]
 
 n_decimals = 2
 

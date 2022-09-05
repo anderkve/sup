@@ -79,13 +79,14 @@ def run(args):
     color_z_lims = [0.0, 0.003, 0.046, 0.317]
 
     ccs = CCodeSettings()
-    ccs.cmap_grayscale_bb = [233, 237, 242, 231]
-    ccs.cmap_grayscale_wb = [254, 250, 243, 232]
-    ccs.cmap_color_bb = [236, 19, 45, 226]
-    ccs.cmap_color_wb = [248, 19, 45, 220]
-    ccs.switch_settings(use_white_bg=args.use_white_bg, 
-                        use_grayscale=args.use_grayscale)
-    # ccs.set_n_colors(len(color_z_lims))
+    ccs.cmaps["color_bb"] = [236, 19, 45, 226]
+    ccs.cmaps["color_wb"] = [248, 19, 45, 220]
+    ccs.cmaps["grayscale_bb"] = [233, 237, 242, 231]
+    ccs.cmaps["grayscale_wb"] = [254, 250, 243, 232]
+    ccs.use_white_bg = args.use_white_bg
+    ccs.use_grayscale = args.use_grayscale
+    ccs.use_n_colors = len(color_z_lims)
+    ccs.update()
 
     highlight_maxlike_point = not(args.no_star)
 

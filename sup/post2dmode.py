@@ -2,8 +2,8 @@
 import numpy as np
 import sup.defaults as defaults
 import sup.utils as utils
+import sup.colors as colors
 from collections import OrderedDict
-from sup.colors import cmaps, cmaps_grayscale
 from sup.ccodesettings import CCodeSettings
 
 
@@ -77,10 +77,12 @@ def run(args):
         xy_bins = defaults.xy_bins
 
     ccs = CCodeSettings()
-    ccs.ccodes = ccs.cmaps[args.cmap_index]
-    ccs.switch_settings(use_white_bg=args.use_white_bg, 
-                        use_grayscale=args.use_grayscale)
-    ccs.set_n_colors(len(credible_regions))
+    ccs.cmaps["color_bb"] = colors.cmaps[args.cmap_index]
+    ccs.cmaps["color_wb"] = colors.cmaps[args.cmap_index]
+    ccs.use_white_bg = args.use_white_bg
+    ccs.use_grayscale = args.use_grayscale
+    ccs.use_n_colors = len(credible_regions)
+    ccs.update()
 
     # In posterior mode we use a reversed colormap by default, to assign the
     # "warmest" colour to the first credible region (z_val = region index = 0).

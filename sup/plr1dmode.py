@@ -82,14 +82,17 @@ def run(args):
         use_capped_loglike = True
 
     ccs = CCodeSettings()
-    ccs.graph_ccode_grayscale_bb = 231
-    ccs.graph_ccode_grayscale_wb = 232
-    ccs.graph_ccode_color_bb = 1
-    ccs.graph_ccode_color_wb = 9
-    ccs.bar_ccodes_grayscale = [243, 240]
-    ccs.bar_ccodes_color = [3,11]
-    ccs.switch_settings(use_white_bg=args.use_white_bg, 
-                        use_grayscale=args.use_grayscale)
+    ccs.graph_ccodes["grayscale_bb"] = 231
+    ccs.graph_ccodes["grayscale_wb"] = 232
+    ccs.graph_ccodes["color_bb"] = 1
+    ccs.graph_ccodes["color_wb"] = 9
+    ccs.bar_ccodes_lists["grayscale_bb"] = [243, 240]
+    ccs.bar_ccodes_lists["grayscale_wb"] = [243, 240]
+    ccs.bar_ccodes_lists["color_bb"] = [3,11]
+    ccs.bar_ccodes_lists["color_wb"] = [3,11]
+    ccs.use_white_bg = args.use_white_bg
+    ccs.use_grayscale = args.use_grayscale
+    ccs.update()
 
     n_decimals = args.n_decimals
     ff = "{: ." + str(n_decimals) + "e}"
