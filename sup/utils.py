@@ -92,9 +92,9 @@ def generate_legend(legend_entries, mod_func, sep="  ", internal_sep=" ",
     return legend, legend_width
 
 
-def generate_colorbar(plot_lines, fig_width, ff,
-                      ccodes, color_z_lims,
-                      fg_ccode, bg_ccode, empty_bin_ccode):
+def generate_colorbar_2(plot_lines, fig_width, ff,
+                        ccodes, color_z_lims,
+                        fg_ccode, bg_ccode, empty_bin_ccode):
 
     legend_mod_func = lambda input_str, input_fg_ccode : prettify(
         input_str, input_fg_ccode, bg_ccode, bold=True)
@@ -141,6 +141,14 @@ def generate_colorbar(plot_lines, fig_width, ff,
                                         fig_width, fg_ccode, bg_ccode)
 
     return plot_lines, fig_width
+
+
+def generate_colorbar(plot_lines, fig_width, ff,
+                      ccs, color_z_lims):
+
+    return generate_colorbar_2(plot_lines, fig_width, ff, ccs.ccodes, 
+                               color_z_lims, ccs.fg_ccode, ccs.bg_ccode, 
+                               ccs.empty_bin_ccode)
 
 
 def generate_info_text(ff2, x_label, x_range, x_bin_width=None,

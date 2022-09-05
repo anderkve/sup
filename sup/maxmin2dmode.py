@@ -238,9 +238,7 @@ def run(args, mode):
     #
 
     plot_lines, fig_width = utils.generate_colorbar(plot_lines, fig_width, ff,
-                                                    ccs.ccodes, color_z_lims, 
-                                                    ccs.fg_ccode, ccs.bg_ccode, 
-                                                    ccs.empty_bin_ccode)
+                                                    ccs, color_z_lims) 
 
     # max/min legend
     legend_mod_func = lambda input_str, input_fg_ccode : utils.prettify(
