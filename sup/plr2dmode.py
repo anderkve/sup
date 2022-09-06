@@ -179,7 +179,7 @@ def run(args):
         return ccode, marker
 
 
-    # Pass the above function to utils.fill_plot, recieve back the generated
+    # Pass the above function to utils.fill_plot, receive back the generated
     # plot as a list of strings
     plot_lines = utils.fill_plot(xy_bins, bins_info, ccs, ms, 
                                  get_ccode_and_marker)
