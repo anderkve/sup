@@ -1,4 +1,12 @@
 # -*- coding: utf-8 -*-
+
+"""sup.post2dmode
+
+A sup run mode that produces a 2d joint posterior distribution for 
+variables x and y.
+
+"""
+
 import numpy as np
 import sup.defaults as defaults
 import sup.utils as utils

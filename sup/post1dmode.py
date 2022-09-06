@@ -1,4 +1,11 @@
 # -*- coding: utf-8 -*-
+
+"""sup.post1dmode
+
+A sup run mode that produces a 1d posterior distribution for variable x.
+
+"""
+
 import numpy as np
 import sup.defaults as defaults
 import sup.utils as utils

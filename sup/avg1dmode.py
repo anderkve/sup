@@ -1,4 +1,12 @@
 # -*- coding: utf-8 -*-
+
+"""sup.avg1dmode
+
+A sup run mode that produces a 1d graph of the average y value for each bin 
+along the x axis.
+
+"""
+
 import numpy as np
 import sup.defaults as defaults
 import sup.utils as utils
@@ -7,6 +15,17 @@ from sup.markersettings import MarkerSettings
 
 
 def get_color_code(ccs, z_val):
+    """Determine the color code for a position in the plot.
+
+    Args:
+        ccs (CCodeSettings): An object with color code settings.
+
+        z_val (int): Integer specifying what type of content is in the given 
+            plot position.
+
+    Returns:
+        A color code (int).
+    """
 
     if z_val in [1,2]:
         return ccs.graph_ccode
@@ -17,6 +36,18 @@ def get_color_code(ccs, z_val):
 
 
 def get_marker(ms, z_val):
+    """Determine the marker for a position in the plot.
+
+    Args:
+        ms (MarkerSetting): An object with marker settings.
+
+        z_val (int): Integer specifying what type of content is in the given 
+            plot position.
+
+    Returns:
+        A marker (string).
+    """
+
 
     if z_val == 2:
         return ms.regular_marker_up

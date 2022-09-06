@@ -1,4 +1,11 @@
 # -*- coding: utf-8 -*-
+
+"""sup.hist2dmode
+
+A sup run mode that produces a 2d histogram binned in the (x,y) plane.
+
+"""
+
 import numpy as np
 import sup.defaults as defaults
 import sup.utils as utils

@@ -1,4 +1,12 @@
 # -*- coding: utf-8 -*-
+
+"""sup.maxmin1dmode
+
+A sup run mode that produces a 1d graph of the maximum or minimum y value for 
+each bin along the x axis.
+
+"""
+
 import numpy as np
 import sup.defaults as defaults
 import sup.utils as utils

@@ -1,4 +1,11 @@
 # -*- coding: utf-8 -*-
+
+"""sup.graph1dmode
+
+A sup run mode that produces a 1d graph of a function y = f(x).
+
+"""
+
 import numpy as np
 import sup.defaults as defaults
 import sup.utils as utils

@@ -1,4 +1,11 @@
 # -*- coding: utf-8 -*-
+
+"""sup.graph2dmode
+
+A sup run mode that produces a 2d map of a function z = f(x,y).
+
+"""
+
 import numpy as np
 import sup.defaults as defaults
 import sup.utils as utils

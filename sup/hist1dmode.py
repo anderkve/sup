@@ -1,4 +1,11 @@
 # -*- coding: utf-8 -*-
+
+"""sup.hist1dmode
+
+A sup run mode that produces a 1d histogram binned along the x axis.
+
+"""
+
 import numpy as np
 import sup.defaults as defaults
 import sup.utils as utils

@@ -1,4 +1,12 @@
 # -*- coding: utf-8 -*-
+
+"""sup.maxmin2dmode
+
+A sup run mode that produces a 2d map of the maximum or minimum z value for 
+each bin in the (x,y) plane.
+
+"""
+
 import numpy as np
 import sup.defaults as defaults
 import sup.utils as utils
