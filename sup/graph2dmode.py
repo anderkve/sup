@@ -36,12 +36,19 @@ def get_marker(ms):
     return ms.regular_marker
 
 
-
-#
-# Run
-#
-
 def run(args):
+    """The main function for the 'graph2d' run mode.
+
+    This function 
+    - interprets the command-line arguments for this run mode;
+    - generates data from the provided function definition;
+    - constructs the full output as a list of strings; and
+    - prints the output to screen.
+
+    Args:
+        args (argparse.Namespace): The parsed command-line arguments.
+    
+    """
 
     function_str = args.function
 

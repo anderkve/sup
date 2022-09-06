@@ -59,11 +59,19 @@ def get_marker(ms, z_val):
         raise Exception("Unexpected z_val. This shouldn't happen...")
 
 
-#
-# Run
-#
-
 def run(args):
+    """The main function for the 'avg1d' run mode.
+
+    This function 
+    - interprets the command-line arguments for this run mode;
+    - reads and processes the data as appropriate for this run mode;
+    - constructs the full output as a list of strings; and
+    - prints the output to screen.
+
+    Args:
+        args (argparse.Namespace): The parsed command-line arguments.
+    
+    """
 
     input_file = args.input_file
 

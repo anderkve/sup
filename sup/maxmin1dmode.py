@@ -36,10 +36,6 @@ def get_marker(ms, z_val):
         raise Exception("Unexpected z_val. This shouldn't happen...")
 
 
-#
-# Run
-#
-
 def run_max(args):
     run(args, "max")
 
@@ -47,6 +43,20 @@ def run_min(args):
     run(args, "min")
 
 def run(args, mode):
+    """The main function for the 'maxmin1d' run mode.
+
+    This function 
+    - interprets the command-line arguments for this run mode;
+    - reads and processes the data as appropriate for this run mode;
+    - constructs the full output as a list of strings; and
+    - prints the output to screen.
+
+    Args:
+        args (argparse.Namespace): The parsed command-line arguments.
+
+        mode (string): The specific run mode, "max" or "min".
+    
+    """
 
     input_file = args.input_file
 

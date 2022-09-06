@@ -5,13 +5,13 @@ from sup.utils import (
     )
 
 def run(args):
-    """Run sup in mode 'list'.
+    """The main function for the 'list' run mode.
 
     This function reads the input file and outputs an enumerated list of all
     the datasets contained in the file.
 
     Args:
-        args (argparse.Namespace): The command-line arguments.
+        args (argparse.Namespace): The parsed command-line arguments.
 
     """
 

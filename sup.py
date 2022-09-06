@@ -28,7 +28,7 @@ import sup.defaults as defaults
 
 
 def main():
-    """The main function.
+    """The sup main function.
 
     This function parses the command line arguments using argparse and runs 
     the sup in the requested mode.
