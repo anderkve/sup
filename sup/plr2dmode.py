@@ -14,35 +14,6 @@ from sup.ccodesettings import CCodeSettings
 from sup.markersettings import MarkerSettings
 
 
-def get_color_code(ccs, z_norm, color_z_lims, highlight_maxlike_point,
-                   use_capped_loglike=False):
-
-    if z_norm == 1.0:
-        if use_capped_loglike or (not highlight_maxlike_point):
-            return ccs.ccodes[-1]
-        else:
-            return ccs.max_bin_ccode
-
-    i = 0
-    for j, lim in enumerate(color_z_lims):
-        if z_norm > lim:
-            i = j
-        else:
-            break
-    return ccs.ccodes[i]
-
-
-def get_marker(ms, z_norm, highlight_maxlike_point, use_capped_loglike=False):
-
-    if z_norm == 1.0:
-        if use_capped_loglike or (not highlight_maxlike_point):
-            return ms.regular_marker
-        else:
-            return ms.special_marker
-    else:
-        return ms.regular_marker
-
-
 def run(args):
     """The main function for the 'plr2d' run mode.
 
@@ -172,35 +143,46 @@ def run(args):
     # Generate string to be printed
     #
 
-    plot_lines = []
-    fig_width = 0
-    for yi in range(xy_bins[1]):
+    # Define a function that returns the color code and marker for any bin 
+    # coordinate xiyi in the plot
+    def get_ccode_and_marker(xiyi):
 
-        yi_line = utils.prettify(" ", ccs.fg_ccode, ccs.bg_ccode)
+        z_val = bins_info[xiyi][2]
+        z_norm = z_val
 
-        for xi in range(xy_bins[0]):
+        # Set color code
+        ccode = None
+        if z_norm == 1.0:
+            if use_capped_loglike or (not highlight_maxlike_point):
+                ccode = ccs.ccodes[-1]
+            else:
+                ccode = ccs.max_bin_ccode
+        else:
+            i = 0
+            for j, lim in enumerate(color_z_lims):
+                if z_norm > lim:
+                    i = j
+                else:
+                    break
+            ccode = ccs.ccodes[i]
 
-            xiyi = (xi,yi)
+        # Set marker
+        marker = None
+        if z_norm == 1.0:
+            if use_capped_loglike or (not highlight_maxlike_point):
+                marker = ms.regular_marker
+            else:
+                marker = ms.special_marker
+        else:
+            marker = ms.regular_marker
 
-            ccode = ccs.empty_bin_ccode
-            marker = ms.empty_bin_marker
+        return ccode, marker
 
-            if xiyi in bins_info.keys():
-                z_val = bins_info[xiyi][2]
-                z_norm = z_val
 
-                ccode = get_color_code(ccs, z_norm, color_z_lims,
-                                       highlight_maxlike_point, 
-                                       use_capped_loglike=use_capped_loglike)
-                marker = get_marker(ms, z_norm, highlight_maxlike_point,
-                                    use_capped_loglike=use_capped_loglike)
-
-            # Add point to line
-            yi_line += utils.prettify(marker, ccode, ccs.bg_ccode)
-
-        plot_lines.append(yi_line)
-
-    plot_lines.reverse()
+    # Pass the above function to utils.fill_plot, recieve back the generated
+    # plot as a list of strings
+    plot_lines = utils.fill_plot(xy_bins, bins_info, ccs, ms, 
+                                 get_ccode_and_marker)
 
     # Save plot width
     plot_width = xy_bins[0] * 2 + 5 + len(ff.format(0))

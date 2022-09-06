@@ -1287,4 +1287,29 @@ def check_weights(w_data, w_name=""):
     return 
 
 
+def fill_plot(xy_bins, bins_info, ccs, ms, get_ccode_and_marker):
 
+    plot_lines = []
+    for yi in range(xy_bins[1]):
+
+        yi_line = prettify(" ", ccs.fg_ccode, ccs.bg_ccode)
+
+        for xi in range(xy_bins[0]):
+
+            xiyi = (xi,yi)
+
+            ccode = ccs.empty_bin_ccode
+            marker = ms.empty_bin_marker
+
+            if xiyi in bins_info.keys():
+
+                ccode, marker = get_ccode_and_marker(xiyi)
+
+            # Add point to line
+            yi_line += prettify(marker, ccode, ccs.bg_ccode)
+
+        plot_lines.append(yi_line)
+
+    plot_lines.reverse()
+
+    return plot_lines
