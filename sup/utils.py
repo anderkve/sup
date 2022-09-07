@@ -1312,4 +1312,11 @@ def fill_plot(xy_bins, bins_info, ccs, ms, get_ccode_and_marker):
 
     plot_lines.reverse()
 
-    return plot_lines
+    plot_width = xy_bins[0] * 2
+
+    return plot_lines, plot_width
+
+
+def figure_width_from_plot_width(plot_width, ff):
+
+    return plot_width + 5 + len(ff.format(0))

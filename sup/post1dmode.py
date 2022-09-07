@@ -196,12 +196,11 @@ def run(args):
 
     # Pass the above function to utils.fill_plot, receive back the generated
     # plot as a list of strings
-    plot_lines = utils.fill_plot(xy_bins, bins_info, ccs, ms, 
-                                 get_ccode_and_marker)
+    plot_lines, plot_width = utils.fill_plot(xy_bins, bins_info, ccs, ms, 
+                                             get_ccode_and_marker)
 
-    # Save plot width
-    plot_width = xy_bins[0] * 2 + 5 + len(ff.format(0))
-    fig_width = plot_width
+    # Total figure width
+    fig_width = utils.figure_width_from_plot_width(plot_width, ff)
 
     # Add axes
     axes_mod_func = lambda input_str : utils.prettify(input_str, ccs.fg_ccode,
