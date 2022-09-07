@@ -14,51 +14,6 @@ from sup.ccodesettings import CCodeSettings
 from sup.markersettings import MarkerSettings
 
 
-def get_color_code(ccs, z_val):
-    """Determine the color code for a position in the plot.
-
-    Args:
-        ccs (CCodeSettings): An object with color code settings.
-
-        z_val (int): Integer specifying what type of content is in the given 
-            plot position.
-
-    Returns:
-        A color code (int).
-    """
-
-    if z_val in [1,2]:
-        return ccs.graph_ccode
-    elif z_val == 0:
-        return ccs.empty_bin_ccode
-    else:
-        raise Exception("Unexpected z_val. This shouldn't happen...")
-
-
-def get_marker(ms, z_val):
-    """Determine the marker for a position in the plot.
-
-    Args:
-        ms (MarkerSetting): An object with marker settings.
-
-        z_val (int): Integer specifying what type of content is in the given 
-            plot position.
-
-    Returns:
-        A marker (string).
-    """
-
-
-    if z_val == 2:
-        return ms.regular_marker_up
-    elif z_val == 1:
-        return ms.regular_marker_down
-    elif z_val == 0:
-        return ms.empty_bin_marker
-    else:
-        raise Exception("Unexpected z_val. This shouldn't happen...")
-
-
 def run(args):
     """The main function for the 'avg1d' run mode.
 
@@ -155,31 +110,39 @@ def run(args):
     # Generate string to be printed
     #
 
-    plot_lines = []
-    fig_width = 0
-    for yi in range(xy_bins[1]):
+    # Define a function that returns the color code and marker for any bin 
+    # coordinate xiyi in the plot
+    def get_ccode_and_marker(xiyi):
 
-        yi_line = utils.prettify(" ", ccs.fg_ccode, ccs.bg_ccode)
+        z_val = bins_info[xiyi][2]
 
-        for xi in range(xy_bins[0]):
-
-            xiyi = (xi,yi)
-
+        # Set color code
+        ccode = None
+        if z_val in [1,2]:
+            ccode = ccs.graph_ccode
+        elif z_val == 0:
             ccode = ccs.empty_bin_ccode
+        else:
+            raise Exception("Unexpected z_val. This shouldn't happen...")
+
+        # Set marker
+        marker = None
+        if z_val == 2:
+            marker = ms.regular_marker_up
+        elif z_val == 1:
+            marker = ms.regular_marker_down
+        elif z_val == 0:
             marker = ms.empty_bin_marker
+        else:
+            raise Exception("Unexpected z_val. This shouldn't happen...")
 
-            if xiyi in bins_info.keys():
-                z_val = bins_info[xiyi][2]
+        return ccode, marker
 
-                ccode = get_color_code(ccs, z_val)
-                marker = get_marker(ms, z_val)
 
-            # Add point to line
-            yi_line += utils.prettify(marker, ccode, ccs.bg_ccode)
-
-        plot_lines.append(yi_line)
-
-    plot_lines.reverse()
+    # Pass the above function to utils.fill_plot, receive back the generated
+    # plot as a list of strings
+    plot_lines = utils.fill_plot(xy_bins, bins_info, ccs, ms, 
+                                 get_ccode_and_marker)
 
     # Save plot width
     plot_width = xy_bins[0] * 2 + 5 + len(ff.format(0))

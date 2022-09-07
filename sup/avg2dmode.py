@@ -15,27 +15,6 @@ from sup.ccodesettings import CCodeSettings
 from sup.markersettings import MarkerSettings
 
 
-def get_color_code(ccs, z_val, z_norm, color_z_lims):
-
-    if z_norm == 1.0:
-        return ccs.ccodes[-1]
-    elif z_norm == 0.0:
-        return ccs.ccodes[0]
-
-    i = 0
-    for j, lim in enumerate(color_z_lims):
-        if z_val >= lim:
-            i = j
-        else:
-            break
-    return ccs.ccodes[i]
-
-
-def get_marker(ms):
-
-    return ms.regular_marker
-
-
 def run(args):
     """The main function for the 'avg2d' run mode.
 
@@ -146,34 +125,40 @@ def run(args):
     # Generate string to be printed
     #
 
-    plot_lines = []
-    fig_width = 0
-    for yi in range(xy_bins[1]):
+    # Define a function that returns the color code and marker for any bin 
+    # coordinate xiyi in the plot
+    def get_ccode_and_marker(xiyi):
 
-        yi_line = utils.prettify(" ", ccs.fg_ccode, ccs.bg_ccode)
+        z_val = bins_info[xiyi][2]
+        z_norm = 0.0
+        if (z_max != z_min):
+            z_norm = (z_val - z_min) / (z_max - z_min)
 
-        for xi in range(xy_bins[0]):
+        # Set color code
+        ccode = None
+        if z_norm == 1.0:
+            ccode = ccs.ccodes[-1]
+        elif z_norm == 0.0:
+            ccode = ccs.ccodes[0]
+        else:
+            i = 0
+            for j, lim in enumerate(color_z_lims):
+                if z_val >= lim:
+                    i = j
+                else:
+                    break
+            ccode = ccs.ccodes[i]
 
-            xiyi = (xi,yi)
+        # Set marker
+        marker = ms.regular_marker
 
-            ccode = ccs.empty_bin_ccode
-            marker = ms.empty_bin_marker
+        return ccode, marker
 
-            if xiyi in bins_info.keys():
-                z_val = bins_info[xiyi][2]
-                z_norm = 0.0
-                if (z_max != z_min):
-                    z_norm = (z_val - z_min) / (z_max - z_min)
 
-                ccode = get_color_code(ccs, z_val, z_norm, color_z_lims)
-                marker = get_marker(ms)
-
-            # Add point to line
-            yi_line += utils.prettify(marker, ccode, ccs.bg_ccode)
-
-        plot_lines.append(yi_line)
-
-    plot_lines.reverse()
+    # Pass the above function to utils.fill_plot, receive back the generated
+    # plot as a list of strings
+    plot_lines = utils.fill_plot(xy_bins, bins_info, ccs, ms, 
+                                 get_ccode_and_marker)
 
     # Save plot width
     plot_width = xy_bins[0] * 2 + 5 + len(ff.format(0))

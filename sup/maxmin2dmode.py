@@ -15,43 +15,6 @@ from sup.ccodesettings import CCodeSettings
 from sup.markersettings import MarkerSettings
 
 
-def get_color_code(ccs, z_val, z_norm, color_z_lims, s_type,
-                   highlight_maxmin_point):
-
-    if (z_norm == 1.0) and (s_type == "max"):
-        if highlight_maxmin_point:
-            return ccs.max_bin_ccode
-        else:
-            return ccs.ccodes[-1]
-    elif (z_norm == 0.0) and (s_type == "max"):
-        return ccs.ccodes[0]
-    elif (z_norm == 1.0) and (s_type == "min"):
-        return ccs.ccodes[-1]
-    elif (z_norm == 0.0) and (s_type == "min"):
-        if highlight_maxmin_point:
-            return ccs.max_bin_ccode
-        else:
-            return ccs.ccodes[0]
-
-    i = 0
-    for j, lim in enumerate(color_z_lims):
-        if z_val >= lim:
-            i = j
-        else:
-            break
-    return ccs.ccodes[i]
-
-
-def get_marker(ms, z_norm, s_type, highlight_maxmin_point):
-
-    if highlight_maxmin_point and (z_norm == 1.0) and (s_type == "max"):
-        return ms.special_marker
-    elif highlight_maxmin_point and (z_norm == 0.0) and (s_type == "min"):
-        return ms.special_marker
-    else:
-        return ms.regular_marker
-
-
 def run_max(args):
     run(args, "max")
 
@@ -198,35 +161,56 @@ def run(args, mode):
     # Generate string to be printed
     #
 
-    plot_lines = []
-    fig_width = 0
-    for yi in range(xy_bins[1]):
+    # Define a function that returns the color code and marker for any bin 
+    # coordinate xiyi in the plot
+    def get_ccode_and_marker(xiyi):
 
-        yi_line = utils.prettify(" ", ccs.fg_ccode, ccs.bg_ccode)
+        z_val = bins_info[xiyi][2]
+        z_norm = 0.0
+        if (z_max != z_min):
+            z_norm = (z_val - z_min) / (z_max - z_min)
 
-        for xi in range(xy_bins[0]):
+        # Set color code
+        ccode = None
+        if (z_norm == 1.0) and (s_type == "max"):
+            if highlight_maxmin_point:
+                ccode = ccs.max_bin_ccode
+            else:
+                ccode = ccs.ccodes[-1]
+        elif (z_norm == 0.0) and (s_type == "max"):
+            ccode = ccs.ccodes[0]
+        elif (z_norm == 1.0) and (s_type == "min"):
+            ccode = ccs.ccodes[-1]
+        elif (z_norm == 0.0) and (s_type == "min"):
+            if highlight_maxmin_point:
+                ccode = ccs.max_bin_ccode
+            else:
+                ccode = ccs.ccodes[0]
+        else:
+            i = 0
+            for j, lim in enumerate(color_z_lims):
+                if z_val >= lim:
+                    i = j
+                else:
+                    break
+            ccode = ccs.ccodes[i]
 
-            xiyi = (xi,yi)
+        # Set marker
+        marker = None
+        if highlight_maxmin_point and (z_norm == 1.0) and (s_type == "max"):
+            marker = ms.special_marker
+        elif highlight_maxmin_point and (z_norm == 0.0) and (s_type == "min"):
+            marker = ms.special_marker
+        else:
+            marker = ms.regular_marker
 
-            ccode = ccs.empty_bin_ccode
-            marker = ms.empty_bin_marker
+        return ccode, marker
 
-            if xiyi in bins_info.keys():
-                z_val = bins_info[xiyi][2]
-                z_norm = 0.0
-                if (z_max != z_min):
-                    z_norm = (z_val - z_min) / (z_max - z_min)
 
-                ccode = get_color_code(ccs, z_val, z_norm, color_z_lims, s_type, 
-                                       highlight_maxmin_point)
-                marker = get_marker(ms, z_norm, s_type, highlight_maxmin_point)
-
-            # Add point to line
-            yi_line += utils.prettify(marker, ccode, ccs.bg_ccode)
-
-        plot_lines.append(yi_line)
-
-    plot_lines.reverse()
+    # Pass the above function to utils.fill_plot, receive back the generated
+    # plot as a list of strings
+    plot_lines = utils.fill_plot(xy_bins, bins_info, ccs, ms, 
+                                 get_ccode_and_marker)
 
     # Save plot width
     plot_width = xy_bins[0] * 2 + 5 + len(ff.format(0))
