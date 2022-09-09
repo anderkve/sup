@@ -419,8 +419,18 @@ examples:
 
     args_dict = vars(args)
 
+    do_watch = False
+    if (("watch_n_seconds" in args_dict.keys()) and 
+        (args.watch_n_seconds is not None)): 
+        do_watch = True
+
     # Consistency checks:
     try:
+        if "input_file" in args_dict.keys():
+            if (not do_watch) and (not os.path.isfile(args.input_file)):
+                raise SupRuntimeError("File not found:"
+                                      " {}".format(args.input_file))
+
         if "x_range" in args_dict.keys():
             if args.x_range is not None:
                 if args.x_range[0] >= args.x_range[1]:
@@ -499,18 +509,27 @@ examples:
     try:
         # If the watch flag is in use, run the chosen sup mode repeatedly until 
         # the user hits ctrl+c.
-        if (("watch_n_seconds" in args_dict.keys()) and 
-            (args.watch_n_seconds is not None)):
+        if do_watch:
 
             keep_going = True
 
             while keep_going:
-                # Run
-                args.func(args)
+
+                message = ""
+
+                # If input file is *not* found:
+                if not os.path.isfile(args.input_file):
+                    message += ("File not found: {}\n".format(args.input_file))
+                    message += ("Trying again in {} seconds. Press CTRL+C to "
+                                "abort.".format(args.watch_n_seconds))
+                # If input file *is* found:
+                else:
+                    args.func(args)
+
+                    message += ("Regenerating the plot in {} seconds. Press "
+                                "CTRL+C to abort.".format(args.watch_n_seconds))
 
                 # Print message
-                message = ("Regenerating the plot every {} seconds. Press "
-                           "CTRL+C to abort.".format(args.watch_n_seconds))
                 print()
                 print("\033[1m" + message + "\033[0m")  # Use bold text
                 print()
@@ -520,6 +539,7 @@ examples:
                     time.sleep(args.watch_n_seconds)
                 except KeyboardInterrupt:
                     keep_going = False
+
         # Else, run once
         else:
             args.func(args)
