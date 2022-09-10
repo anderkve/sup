@@ -920,11 +920,17 @@ def get_bin_tuples_avg(x_data, y_data, z_data, xy_bins, x_range, y_range):
     return result_dict, x_bin_limits, y_bin_limits
 
 
-def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None,
-             mod_func_2=None, floatf="{: .1e}", add_y_grid_lines=False):
+def add_axes(lines, fig_width, xy_bins, x_bin_limits, y_bin_limits, ccs,
+             floatf="{: .1e}", add_y_grid_lines=False, add_blank_top_line=True):
 
-    if mod_func is None:
-        mod_func = lambda x : x
+    mod_func = lambda input_str : prettify(input_str, ccs.fg_ccode,
+                                           ccs.bg_ccode, bold=True)
+
+    mod_func_2 = lambda input_str : prettify(input_str, ccs.empty_bin_ccode,
+                                             ccs.bg_ccode, bold=True)
+
+    # if mod_func is None:
+    #     mod_func = lambda x : x
 
     x_tick_indicies = []
     tick_spacing = 0
@@ -1034,7 +1040,7 @@ def add_axes(lines, xy_bins, x_bin_limits, y_bin_limits, mod_func=None,
     x_ticks = mod_func(x_ticks + "     ")
     lines.append(x_ticks)
 
-    return lines
+    return lines, fig_width
 
 
 def get_cl_included_bins_1d(confidence_levels, y_func_data, dx):
@@ -1287,7 +1293,8 @@ def check_weights(w_data, w_name=""):
     return 
 
 
-def fill_plot(xy_bins, bins_info, ccs, ms, get_ccode_and_marker):
+def fill_plot(xy_bins, bins_info, x_bin_limits, y_bin_limits, ccs, ms, 
+              get_ccode_and_marker, ff, add_y_grid_lines=True):
 
     plot_lines = []
     for yi in range(xy_bins[1]):
@@ -1314,9 +1321,18 @@ def fill_plot(xy_bins, bins_info, ccs, ms, get_ccode_and_marker):
 
     plot_width = xy_bins[0] * 2
 
-    return plot_lines, plot_width
+    # Total figure width
+    fig_width = plot_width + 5 + len(ff.format(0))
 
+    # Add axes
+    plot_lines, fig_width = add_axes(plot_lines, fig_width, xy_bins, 
+                                     x_bin_limits, y_bin_limits, ccs, 
+                                     floatf=ff, 
+                                     add_y_grid_lines=add_y_grid_lines)
 
-def figure_width_from_plot_width(plot_width, ff):
+    # Add blank top line
+    plot_lines, fig_width = insert_line("", 0, plot_lines, fig_width, 
+                                        ccs.fg_ccode, ccs.bg_ccode, 
+                                        insert_pos=0)
 
-    return plot_width + 5 + len(ff.format(0))
+    return plot_lines, fig_width

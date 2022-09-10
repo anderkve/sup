@@ -171,28 +171,11 @@ def run(args, mode):
 
 
     # Pass the above function to utils.fill_plot, receive back the generated
-    # plot as a list of strings
-    plot_lines, plot_width = utils.fill_plot(xy_bins, bins_info, ccs, ms, 
-                                             get_ccode_and_marker)
-
-    # Total figure width
-    fig_width = utils.figure_width_from_plot_width(plot_width, ff)
-
-    # Add axes
-    axes_mod_func = lambda input_str : utils.prettify(input_str, ccs.fg_ccode, 
-                                                      ccs.bg_ccode, bold=True)
-    fill_mod_func = lambda input_str : utils.prettify(input_str, 
-                                                      ccs.empty_bin_ccode, 
-                                                      ccs.bg_ccode, bold=True)
-    plot_lines = utils.add_axes(plot_lines, xy_bins, x_bin_limits, y_bin_limits,
-                                mod_func=axes_mod_func, 
-                                mod_func_2=fill_mod_func, floatf=ff, 
-                                add_y_grid_lines=True)
-
-    # Add blank top line
-    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width,
-                                              ccs.fg_ccode, ccs.bg_ccode,
-                                              insert_pos=0)
+    # plot (including axes) as a list of strings.
+    plot_lines, fig_width = utils.fill_plot(xy_bins, bins_info, x_bin_limits,
+                                            y_bin_limits, ccs, ms, 
+                                            get_ccode_and_marker, ff,
+                                            add_y_grid_lines=True)
 
 
     #
