@@ -23,7 +23,7 @@ from sup import (
     maxmin2dmode, maxmin1dmode, avg1dmode, avg2dmode, hist1dmode, hist2dmode, 
     post1dmode, post2dmode, graph1dmode, graph2dmode
     )
-from sup.utils import SupRuntimeError
+from sup.utils import SupRuntimeError, error_prefix
 import sup.defaults as defaults
 
 
@@ -38,8 +38,6 @@ def main():
 
     """
     
-    error_prefix = "sup runtime error: "
-
     # Get the script name
     prog_name = os.path.basename(sys.argv[0])
 

@@ -6,6 +6,9 @@ from scipy.stats import chi2
 from io import StringIO 
 import sup.defaults as defaults
 
+
+error_prefix = "sup runtime error: "
+
 class SupRuntimeError(Exception):
     """Exceptions class for sup runtime errors"""
     pass
@@ -394,6 +397,10 @@ def read_input_file(input_file, dset_indices, read_slice, delimiter=' '):
         dsets, dset_names = read_input_file_hdf5(input_file, dset_indices,
                                                  read_slice)
 
+    # _Anders
+    l0 = len(dsets[0])
+    print("DEBUG: ", l0) 
+
     return dsets, dset_names    
 
 
@@ -428,9 +435,17 @@ def read_input_file_txt(input_file, dset_indices, read_slice, delimiter):
     if delimiter.strip() == "":
         delimiter = None
 
-    dsets = list(np.genfromtxt(input_file, usecols=dset_indices,
-                                names=dset_names, unpack=True, comments="#", 
-                                delimiter=delimiter))
+    dsets = []
+    try:
+        dsets = list(np.genfromtxt(input_file, usecols=dset_indices,
+                                    names=dset_names, unpack=True, comments="#", 
+                                    delimiter=delimiter))
+    except ValueError as e:
+        print("{} Encountered a problem when reading the input file {}.\n"
+              "Are there values missing in the file?".format(error_prefix, input_file))
+        print()
+        raise e
+
     if len(dset_indices) == 1:
         dsets = [dsets]
 
