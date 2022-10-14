@@ -397,10 +397,6 @@ def read_input_file(input_file, dset_indices, read_slice, delimiter=' '):
         dsets, dset_names = read_input_file_hdf5(input_file, dset_indices,
                                                  read_slice)
 
-    # _Anders
-    l0 = len(dsets[0])
-    print("DEBUG: ", l0) 
-
     return dsets, dset_names    
 
 
