@@ -319,6 +319,7 @@ def get_dataset_names_hdf5(hdf5_file_object):
             result.append(name)
 
     hdf5_file_object.visititems(get_datasets)
+
     return result
 
 
@@ -378,6 +379,27 @@ def check_file_type(input_file):
     return file_type
 
 
+def check_dset_indices(dset_indices, all_dset_names, input_file):
+    """Check that the requested datasets were found in the input file
+
+    Args:
+        dset_indices (list): The dataset indices given by the user.
+
+        all_dset_names (list): Names of all datasets found in the input file.
+
+        input_file (string): The input file path.
+    """
+
+    n_sets = len(all_dset_names)
+
+    for dset_index in dset_indices:
+        if dset_index >= n_sets:
+            raise SupRuntimeError(
+                "Cannot use dataset index {}. Valid dataset indices for the "
+                "file {} are 0 to {}.".format(dset_index, input_file, n_sets-1)
+            )
+
+
 def read_input_file(input_file, dset_indices, read_slice, delimiter=' '):
     dsets = []
     dset_names = []
@@ -410,9 +432,21 @@ def read_input_file_hdf5(input_file, dset_indices, read_slice):
 
     all_dset_names = get_dataset_names_hdf5(f)
 
+    if len(all_dset_names) == 0:
+        raise SupRuntimeError("No datasets found in {}.".format(input_file))
+
+    check_dset_indices(dset_indices, all_dset_names, input_file)
+
     dset_names = [all_dset_names[dset_index] for dset_index in dset_indices]
 
-    dsets = [np.array(f[dset_name])[read_slice] for dset_name in dset_names]
+    try:
+        dsets = [np.array(f[dset_name])[read_slice] for dset_name in dset_names]
+    except Exception as e:
+        print("{} Encountered an unexpected problem when reading the "
+              " input file {}. Perhaps there are values missing in the file? "
+              "Full error message below.".format(error_prefix, input_file))
+        print()
+        raise e
 
     f.close()
 
@@ -426,19 +460,24 @@ def read_input_file_txt(input_file, dset_indices, read_slice, delimiter):
 
     all_dset_names = get_dataset_names_txt(input_file)
 
+    if len(all_dset_names) == 0:
+        raise SupRuntimeError("No datasets found in {}.".format(input_file))
+
+    check_dset_indices(dset_indices, all_dset_names, input_file)
+    
     dset_names = [all_dset_names[dset_index] for dset_index in dset_indices]
     
     if delimiter.strip() == "":
         delimiter = None
 
-    dsets = []
     try:
         dsets = list(np.genfromtxt(input_file, usecols=dset_indices,
                                     names=dset_names, unpack=True, comments="#", 
                                     delimiter=delimiter))
     except ValueError as e:
-        print("{} Encountered an unexpected problem when reading the input file {}. "
-              "Perhaps there are values missing in the file? Full error message below.".format(error_prefix, input_file))
+        print("{} Encountered an unexpected problem when reading the "
+              "input file {}. Perhaps there are values missing in the file? "
+              "Full error message below.".format(error_prefix, input_file))
         print()
         raise e
 
