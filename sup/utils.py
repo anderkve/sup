@@ -14,9 +14,29 @@ class SupRuntimeError(Exception):
     pass
 
 
+
 def prettify(input_string, fg_ccode, bg_ccode, bold=True, reset=True):
-    # example: "\u001b[48;5;" + str(bg_ccode) + ";38;5;" + str(fg_ccode) + 
+    """Add pretty formatting for the input string.
+
+    Args:
+        input_string (string): The input string.
+
+        fg_ccode (int): Foreground color code.
+
+        bg_ccode (int): Background color code.
+        
+        bold (bool): Use bold text?
+
+        reset (bool): Reset format at the end of the string?
+
+    Returns:
+        result (string): The formatted string
+
+    """
+
+    # Example: "\u001b[48;5;" + str(bg_ccode) + ";38;5;" + str(fg_ccode) + 
     #          "m" + input_string + "\u001b[0m"
+
     result = "\u001b" 
     result += "[" 
     result += "48;5;" +str(bg_ccode) + ";"
@@ -30,8 +50,30 @@ def prettify(input_string, fg_ccode, bg_ccode, bold=True, reset=True):
     return result
 
 
+
 def insert_line(new_line, new_line_width, old_lines_list, old_width, fg_ccode,
                 bg_ccode, insert_pos=None):
+    """Insert a new formatted line (string) in an existing list of lines.
+
+    Args:
+        new_line (string): The new line
+
+        new_line_width (int): The length of the new line without any formatting.
+
+        old_lines_list (list): The collection of existing lines.
+
+        old_width (int): Length of the longest (unformatted) existing line.
+
+        fg_ccode (int): Foreground color code.
+
+        bg_ccode (int): Background color code.
+        
+        insert_pos (int): List index where new_line should be inserted.
+
+    Returns:
+        result_lines_list (list): The new collection of lines.
+
+    """
 
     # If no insert position is given, append the line to the end of the list
     if insert_pos is None:
@@ -55,12 +97,29 @@ def insert_line(new_line, new_line_width, old_lines_list, old_width, fg_ccode,
     return result_lines_list, result_width
 
 
+
 def add_left_padding(plot_lines, fg_ccode, bg_ccode, left_padding=defaults.left_padding):
+    """Add blank spaces on the left-hand side of the given lines.
+
+    Args:
+        plot_lines (list): The collection of lines.
+
+        fg_ccode (int): Foreground color code.
+
+        bg_ccode (int): Background color code.
+        
+        left_padding (int): The number of spaces to add.
+
+    Returns:
+        plot_lines (list): The new collection of lines.
+
+    """
 
     for i,line in enumerate(plot_lines):
         plot_lines[i] = prettify(left_padding, fg_ccode, bg_ccode) + line
 
     return plot_lines
+
 
 
 def fill_missing_bg(lines_1, width_1, lines_2, width_2, bg_ccode):
@@ -73,6 +132,7 @@ def fill_missing_bg(lines_1, width_1, lines_2, width_2, bg_ccode):
             lines_1[i] += prettify(" " * int(abs(width_diff)), bg_ccode,
                                    bg_ccode)
     return lines_1, lines_2
+
 
 
 def generate_legend(legend_entries, mod_func, sep="  ", internal_sep=" ",
@@ -93,6 +153,7 @@ def generate_legend(legend_entries, mod_func, sep="  ", internal_sep=" ",
         legend_width += len(txt) + len(sep)
 
     return legend, legend_width
+
 
 
 def generate_colorbar_2(plot_lines, fig_width, ff,
@@ -146,12 +207,14 @@ def generate_colorbar_2(plot_lines, fig_width, ff,
     return plot_lines, fig_width
 
 
+
 def generate_colorbar(plot_lines, fig_width, ff,
                       ccs, color_z_lims):
 
     return generate_colorbar_2(plot_lines, fig_width, ff, ccs.ccodes, 
                                color_z_lims, ccs.fg_ccode, ccs.bg_ccode, 
                                ccs.empty_bin_ccode)
+
 
 
 def generate_info_text(ff2, x_label, x_range, x_bin_width=None,
@@ -263,6 +326,7 @@ def generate_info_text(ff2, x_label, x_range, x_bin_width=None,
 
 
 
+
 def add_info_text(plot_lines, fig_width, fg_ccode, bg_ccode,
                   ff2, x_label, x_range, x_bin_width=None,
                   y_label=None, y_range=None, y_bin_width=None,
@@ -311,6 +375,7 @@ def add_info_text(plot_lines, fig_width, fg_ccode, bg_ccode,
     return plot_lines, fig_width
 
 
+
 def get_dataset_names_hdf5(hdf5_file_object):
     import h5py
     result = []
@@ -321,6 +386,7 @@ def get_dataset_names_hdf5(hdf5_file_object):
     hdf5_file_object.visititems(get_datasets)
 
     return result
+
 
 
 def get_dataset_names_txt(txt_file_name):
@@ -357,6 +423,7 @@ def get_dataset_names_txt(txt_file_name):
     return result
 
 
+
 def check_file_type(input_file):
     """Determine file type based on file extension
 
@@ -377,6 +444,7 @@ def check_file_type(input_file):
         file_type = "hdf5"
 
     return file_type
+
 
 
 def check_dset_indices(dset_indices, all_dset_names, input_file):
@@ -400,6 +468,7 @@ def check_dset_indices(dset_indices, all_dset_names, input_file):
             )
 
 
+
 def read_input_file(input_file, dset_indices, read_slice, delimiter=' '):
     dsets = []
     dset_names = []
@@ -420,6 +489,7 @@ def read_input_file(input_file, dset_indices, read_slice, delimiter=' '):
                                                  read_slice)
 
     return dsets, dset_names    
+
 
 
 
@@ -451,6 +521,7 @@ def read_input_file_hdf5(input_file, dset_indices, read_slice):
     f.close()
 
     return dsets, dset_names    
+
 
 
 
@@ -488,6 +559,7 @@ def read_input_file_txt(input_file, dset_indices, read_slice, delimiter):
 
 
 
+
 def get_filters(input_file, filter_indices, read_slice, delimiter=' '):
     filter_dsets = []
     filter_names = []
@@ -511,6 +583,7 @@ def get_filters(input_file, filter_indices, read_slice, delimiter=' '):
     return filter_dsets, filter_names
 
 
+
 def get_filters_hdf5(input_file, filter_indices, read_slice=slice(0,-1,1)):
     import h5py
     filter_dsets = []
@@ -529,6 +602,7 @@ def get_filters_hdf5(input_file, filter_indices, read_slice=slice(0,-1,1)):
     f.close()
 
     return filter_dsets, filter_names
+
 
 
 def get_filters_txt(input_file, filter_indices, read_slice, delimiter=' '):
@@ -553,6 +627,7 @@ def get_filters_txt(input_file, filter_indices, read_slice, delimiter=' '):
     return filter_dsets, filter_names
 
 
+
 def apply_filters(datasets, filters):
 
     for filter_dset in filters:
@@ -569,6 +644,7 @@ def apply_filters(datasets, filters):
         raise SupRuntimeError("No data points left after applying filters.")
 
     return filtered_datasets
+
 
 
 
@@ -698,6 +774,7 @@ def get_bin_tuples_maxmin_1d(x_data, y_data, xy_bins, x_range, y_range, s_data,
         return result_dict, x_bin_limits, y_bin_limits
 
 
+
 def get_bin_tuples_maxmin(x_data, y_data, z_data, xy_bins, x_range, y_range,
                           s_data, s_type):
 
@@ -790,6 +867,7 @@ def get_bin_tuples_maxmin(x_data, y_data, z_data, xy_bins, x_range, y_range,
                                     bins_dict[bin_key]["data_indices"][0])
 
     return result_dict, x_bin_limits, y_bin_limits
+
 
 
 def get_bin_tuples_avg_1d(x_data, y_data, xy_bins, x_range, y_range,
@@ -899,6 +977,7 @@ def get_bin_tuples_avg_1d(x_data, y_data, xy_bins, x_range, y_range,
     return result_dict, x_bin_limits, y_bin_limits
 
 
+
 def get_bin_tuples_avg(x_data, y_data, z_data, xy_bins, x_range, y_range):
 
     assert len(x_data) == len(y_data)
@@ -968,6 +1047,7 @@ def get_bin_tuples_avg(x_data, y_data, z_data, xy_bins, x_range, y_range):
                                     avg_z_val)
 
     return result_dict, x_bin_limits, y_bin_limits
+
 
 
 def add_axes(lines, fig_width, xy_bins, x_bin_limits, y_bin_limits, ccs,
@@ -1093,6 +1173,7 @@ def add_axes(lines, fig_width, xy_bins, x_bin_limits, y_bin_limits, ccs,
     return lines, fig_width
 
 
+
 def get_cl_included_bins_1d(confidence_levels, y_func_data, dx):
 
     included_bins = []
@@ -1129,6 +1210,7 @@ def get_cl_included_bins_1d(confidence_levels, y_func_data, dx):
         included_bins.append(inc_bins)
 
     return included_bins
+
 
 
 def get_cr_included_bins_1d(credible_regions, bins_content, dx):
@@ -1168,6 +1250,7 @@ def get_cr_included_bins_1d(credible_regions, bins_content, dx):
         included_bins.append(inc_bins)
 
     return included_bins
+
 
 
 def get_ranges_from_included_bins(included_bins, bin_limits):
@@ -1229,6 +1312,7 @@ def get_ranges_from_included_bins(included_bins, bin_limits):
     return result_bin_indices, result_positions
 
 
+
 def get_bar_str(ranges_pos, bin_limits):
 
     n_bins = len(bin_limits) - 1 
@@ -1280,6 +1364,7 @@ def get_bar_str(ranges_pos, bin_limits):
     return bar_str
 
 
+
 def generate_credible_region_bars(credible_regions, bins_content, 
                                   bin_limits, ff2):
 
@@ -1301,6 +1386,7 @@ def generate_credible_region_bars(credible_regions, bins_content,
         cr_bar_lines.append(bar_str)
 
     return cr_bar_lines
+
 
 
 def generate_confidence_level_bars(confidence_levels, y_func_data,
@@ -1326,6 +1412,7 @@ def generate_confidence_level_bars(confidence_levels, y_func_data,
     return cl_bar_lines
 
 
+
 def check_weights(w_data, w_name=""):
     
     extra_info = ""
@@ -1341,6 +1428,7 @@ def check_weights(w_data, w_name=""):
                               "Check the weights data set. " + extra_info)
 
     return 
+
 
 
 def fill_plot(xy_bins, bins_info, x_bin_limits, y_bin_limits, ccs, ms, 
