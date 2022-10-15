@@ -499,7 +499,7 @@ examples:
                     raise SupRuntimeError("N_SECONDS must be greater than 0")
 
     except SupRuntimeError as e:
-        print(error_prefix + "{0}".format(e))
+        print("{} {}".format(error_prefix, e))
         return 1
 
 
@@ -543,11 +543,11 @@ examples:
             args.func(args)
 
     except SupRuntimeError as e:
-        print(error_prefix + "{0}".format(e))
+        print("{} {}".format(error_prefix, e))
         return 1
 
     except BaseException as e:
-        print(error_prefix + "Unexpected error:")
+        print("{} Unexpected error:".format(error_prefix))
         print()
         raise e
 

@@ -7,7 +7,7 @@ from io import StringIO
 import sup.defaults as defaults
 
 
-error_prefix = "sup runtime error: "
+error_prefix = "sup error:"
 
 class SupRuntimeError(Exception):
     """Exceptions class for sup runtime errors"""
@@ -437,8 +437,8 @@ def read_input_file_txt(input_file, dset_indices, read_slice, delimiter):
                                     names=dset_names, unpack=True, comments="#", 
                                     delimiter=delimiter))
     except ValueError as e:
-        print("{} Encountered a problem when reading the input file {}.\n"
-              "Are there values missing in the file?".format(error_prefix, input_file))
+        print("{} Encountered an unexpected problem when reading the input file {}. "
+              "Perhaps there are values missing in the file? Full error message below.".format(error_prefix, input_file))
         print()
         raise e
 
