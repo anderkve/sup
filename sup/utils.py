@@ -122,19 +122,6 @@ def add_left_padding(plot_lines, fg_ccode, bg_ccode, left_padding=defaults.left_
 
 
 
-def fill_missing_bg(lines_1, width_1, lines_2, width_2, bg_ccode):
-    width_diff = width_1 - width_2
-    if width_diff > 0:
-        for i,line in enumerate(lines_2):
-            lines_2[i] += prettify(" " * width_diff, bg_ccode, bg_ccode)
-    elif width_diff < 0:
-        for i,line in enumerate(lines_1):
-            lines_1[i] += prettify(" " * int(abs(width_diff)), bg_ccode,
-                                   bg_ccode)
-    return lines_1, lines_2
-
-
-
 def generate_legend(legend_entries, mod_func, sep="  ", internal_sep=" ",
                     left_padding=" "):
 
