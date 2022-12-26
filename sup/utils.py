@@ -168,9 +168,33 @@ def generate_legend(legend_entries, bg_ccode, sep="  ", internal_sep=" ",
 
 
 
-def generate_colorbar_2(plot_lines, fig_width, ff,
-                        ccodes, color_z_lims,
-                        fg_ccode, bg_ccode, empty_bin_ccode):
+def generate_colorbar(plot_lines, fig_width, ff, ccs, color_z_lims):
+    """Generate a color bar.
+
+    Args:
+        plot_lines (list of strings): The collection of lines.
+
+        fig_width (int): The width of the figure.
+
+        ff (string): Format string for floats.
+
+        ccs (CCodeSettings): The color code settings.
+
+        color_z_lims (list of floats): The z values that mark the boundaries 
+            between neighboring colors.
+
+    Returns:
+        plot_lines (list of strings): The new collection of lines.
+
+        fig_width (int): The new width of figure.
+
+    """
+
+    ccodes = ccs.ccodes
+    fg_ccode = ccs.fg_ccode
+    bg_ccode = ccs.bg_ccode
+    empty_bin_ccode = ccs.empty_bin_ccode
+
     # Colorbar
     cb_entries = []
     cb_entries.append(("", fg_ccode, "", fg_ccode))
@@ -214,14 +238,6 @@ def generate_colorbar_2(plot_lines, fig_width, ff,
 
     return plot_lines, fig_width
 
-
-
-def generate_colorbar(plot_lines, fig_width, ff,
-                      ccs, color_z_lims):
-
-    return generate_colorbar_2(plot_lines, fig_width, ff, ccs.ccodes, 
-                               color_z_lims, ccs.fg_ccode, ccs.bg_ccode, 
-                               ccs.empty_bin_ccode)
 
 
 
