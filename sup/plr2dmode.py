@@ -191,8 +191,6 @@ def run(args):
     # Add legend
     #
 
-    legend_mod_func = lambda input_str, input_fg_ccode : utils.prettify(
-        input_str, input_fg_ccode, ccs.bg_ccode, bold=True)
     legend_entries = []
 
     # legend_entries.append(("", ccs.fg_ccode, "", ccs.fg_ccode))
@@ -207,7 +205,7 @@ def run(args):
                            ccs.fg_ccode))
     
     legend, legend_width = utils.generate_legend(legend_entries,
-                                                 legend_mod_func,
+                                                 ccs.bg_ccode,
                                                  sep="  ")
 
     plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width, 

@@ -240,8 +240,6 @@ def run(args):
     # Add colorbar, legend, etc
     #
         
-    legend_mod_func = lambda input_str, input_fg_ccode : utils.prettify(
-        input_str, input_fg_ccode, ccs.bg_ccode, bold=True)
     legend_entries = []
 
     # legend_entries.append(("", fg_ccode, "", fg_ccode))
@@ -251,7 +249,7 @@ def run(args):
                                cred_reg_str, ccs.fg_ccode))
     
     legend, legend_width = utils.generate_legend(legend_entries, 
-                                                 legend_mod_func, sep="  ")
+                                                 ccs.bg_ccode, sep="  ")
 
     plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width,
                                               ccs.fg_ccode, ccs.bg_ccode)

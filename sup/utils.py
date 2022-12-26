@@ -122,8 +122,33 @@ def add_left_padding(plot_lines, fg_ccode, bg_ccode, left_padding=defaults.left_
 
 
 
-def generate_legend(legend_entries, mod_func, sep="  ", internal_sep=" ",
+def generate_legend(legend_entries, bg_ccode, sep="  ", internal_sep=" ",
                     left_padding=" "):
+    """Generate a plot legend line.
+
+    Args:
+        legend_entries (list of tuples): A list with one tuple for each
+        entry in the legend. Each tuple is of the form (marker, marker_ccode, 
+        txt, txt_ccode)
+
+        bg_ccode (int): Background color code.
+
+        sep (string): String used to separate legend entries.
+
+        internal_sep (string): String used to separate the marker and the text
+            in a legend entry.
+
+        left_padding (string): Whitespace string used for left padding.
+
+    Returns:
+        legend (string): The constructed legend line.
+
+        legend_width (int): The width of the legend line
+
+    """
+
+    mod_func = lambda input_str, input_fg_ccode : prettify(
+        input_str, input_fg_ccode, bg_ccode, bold=True)
 
     legend = mod_func(left_padding, 0)
     legend_width = len(left_padding)
@@ -146,11 +171,7 @@ def generate_legend(legend_entries, mod_func, sep="  ", internal_sep=" ",
 def generate_colorbar_2(plot_lines, fig_width, ff,
                         ccodes, color_z_lims,
                         fg_ccode, bg_ccode, empty_bin_ccode):
-
-    legend_mod_func = lambda input_str, input_fg_ccode : prettify(
-        input_str, input_fg_ccode, bg_ccode, bold=True)
-
-    # - colorbar
+    # Colorbar
     cb_entries = []
     cb_entries.append(("", fg_ccode, "", fg_ccode))
     n_color_lims = len(color_z_lims)
@@ -164,7 +185,7 @@ def generate_colorbar_2(plot_lines, fig_width, ff,
         else:
             cb_entries.append(("|", bar_ccode, "", fg_ccode))
 
-    cb_line, cb_width = generate_legend(cb_entries, legend_mod_func, sep=" ",
+    cb_line, cb_width = generate_legend(cb_entries, bg_ccode, sep=" ",
                                         internal_sep="")
 
     plot_lines, fig_width = insert_line("", 0, plot_lines, fig_width, fg_ccode,
@@ -172,7 +193,7 @@ def generate_colorbar_2(plot_lines, fig_width, ff,
     plot_lines, fig_width = insert_line(cb_line, cb_width, plot_lines,
                                         fig_width, fg_ccode, bg_ccode)
 
-    # - numbers below the colorbar
+    # Numbers below the colorbar
     cb_nums_entries = []
     for i in range(0, n_color_lims):
         txt = ff.format(color_z_lims[i])
@@ -185,7 +206,7 @@ def generate_colorbar_2(plot_lines, fig_width, ff,
             cb_nums_entries.append(("", fg_ccode, " " * gap_length, fg_ccode))
 
     cb_nums_line, cb_nums_width = generate_legend(cb_nums_entries,
-                                                  legend_mod_func,
+                                                  bg_ccode,
                                                   sep="", internal_sep="")
 
     plot_lines, fig_width = insert_line(cb_nums_line, cb_nums_width, plot_lines,

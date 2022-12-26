@@ -235,9 +235,6 @@ def run(args):
 
 
     # max bin legend
-    legend_mod_func = lambda input_str, input_fg_ccode : utils.prettify(
-        input_str, input_fg_ccode, ccs.bg_ccode, bold=True)
-
     maxbin_content = -np.inf
     maxbin_x_index = 0
     maxbin_y_index = 0
@@ -266,7 +263,7 @@ def run(args):
     legend_maxbin_entries = []
     legend_maxbin_entries.append(("", ccs.fg_ccode, maxbin_str, ccs.fg_ccode))
     legend_maxbin, legend_maxbin_width = utils.generate_legend(
-        legend_maxbin_entries, legend_mod_func, sep="  ", internal_sep=" ")
+        legend_maxbin_entries, ccs.bg_ccode, sep="  ", internal_sep=" ")
 
     plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width,
                                               ccs.fg_ccode, ccs.bg_ccode)
