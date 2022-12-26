@@ -19,11 +19,11 @@ Attributes:
 
     bg_ccode_bb (int): The default background color code for black background.
 
-    fg_ccode_bb (int): The default forground color code for black background.
+    fg_ccode_bb (int): The default foreground color code for black background.
 
     bg_ccode_wb (int): The default background color code for white background.
 
-    fg_ccode_wb (int): The default forground color code for white background.
+    fg_ccode_wb (int): The default foreground color code for white background.
 
     regular_marker (string): The default marker used to fill plots.
 

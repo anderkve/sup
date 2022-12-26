@@ -3,8 +3,63 @@ import numpy as np
 import sup.defaults as defaults
 
 class CCodeSettings:
+    """A class to contain color codes settings.
+
+    For the attributes below, all the dictionaries have four entries, 
+    corresponding to the four possible combinations of black/white 
+    background and color/grayscale plot. The four dictionary keys are 
+    "color_bb", "color_wb", "grayscale_bb" and "grayscale_wb".
+
+    Attributes:
+        bg_ccodes (dict of str: int): Background color codes.
+
+        fg_ccodes (dict of str: int): Foreground color codes.
+
+        empty_bin_ccodes (dict of str: int): Color codes for empyt bins.
+
+        fill_bin_ccodes (dict of str: int): Color codes for "fill bins".
+
+        max_bin_ccodes (dict of str: int): Color codes for the bin(s)
+            with the maximum z value.
+
+        graph_ccodes (dict of str: int): Color codes for 1d graphs.
+
+        bar_ccodes_lists (dict of lists of ints): Lists of color codes
+            for drawing horizontal bars (e.g. CR/CI bars) below plots. 
+
+        cmaps (dict of lists of ints): Color maps in the form of lists
+            of color codes.
+
+        bg_ccode (int): Current background color code.
+
+        fg_ccode (int): Current foreground color code.
+
+        empty_bin_ccode (int): Current color code for empty bins.
+
+        fill_bin_ccode (int): Current color code for fill bins.
+
+        max_bin_ccode (int): Current color code for the max-z bin.
+
+        graph_ccode (int): Current color code for 1d graphs.
+
+        bar_ccodes (list of ints): Current color codes for horizontal 
+            bars below plots.
+
+        ccodes (list of ints): Current color map.  
+
+        use_white_bg (bool): Draw plot on a white bakground?
+
+        use_grayscale (bool): Draw plot in grayscale?
+
+        use_n_colors (int): Current number of color map colors to use.
+
+    Methods:
+        update(): Make sure the current settings are consistent.
+
+    """
 
     def __init__(self):
+        """Constructor."""
 
         self.bg_ccodes = {
             "color_bb" : defaults.bg_ccode_bb,
@@ -62,7 +117,6 @@ class CCodeSettings:
             "grayscale_wb" : defaults.cmap_grayscale_wb,
         }
 
-        # Set active settings
         self.bg_ccode = None
         self.fg_ccode = None
         self.empty_bin_ccode = None 
@@ -70,9 +124,7 @@ class CCodeSettings:
         self.max_bin_ccode = None
         self.graph_ccode = None
         self.bar_ccodes = None
-
         self.ccodes = None
-
         self.use_white_bg = False
         self.use_grayscale = False
         self.use_n_colors = len(self.cmaps["color_bb"])
@@ -82,6 +134,8 @@ class CCodeSettings:
 
 
     def update(self):
+        """Make sure the current settings are consistent."""  
+
         use_setting = ""
         if not self.use_white_bg and not self.use_grayscale:
             use_setting = "color_bb"
