@@ -60,7 +60,7 @@ def insert_line(new_line, new_line_width, old_lines_list, old_width, fg_ccode,
 
         new_line_width (int): The length of the new line without any formatting.
 
-        old_lines_list (list): The collection of existing lines.
+        old_lines_list (list of strings): The collection of existing lines.
 
         old_width (int): Length of the longest (unformatted) existing line.
 
@@ -71,7 +71,7 @@ def insert_line(new_line, new_line_width, old_lines_list, old_width, fg_ccode,
         insert_pos (int): List index where new_line should be inserted.
 
     Returns:
-        result_lines_list (list): The new collection of lines.
+        result_lines_list (list of strings): The new collection of lines.
 
     """
 
@@ -102,7 +102,7 @@ def add_left_padding(plot_lines, fg_ccode, bg_ccode, left_padding=defaults.left_
     """Add blank spaces on the left-hand side of the given lines.
 
     Args:
-        plot_lines (list): The collection of lines.
+        plot_lines (list of strings): The collection of lines.
 
         fg_ccode (int): Foreground color code.
 
@@ -111,7 +111,7 @@ def add_left_padding(plot_lines, fg_ccode, bg_ccode, left_padding=defaults.left_
         left_padding (int): The number of spaces to add.
 
     Returns:
-        plot_lines (list): The new collection of lines.
+        plot_lines (list of strings): The new collection of lines.
 
     """
 
@@ -252,6 +252,69 @@ def generate_info_text(ff2, x_label, x_range, x_bin_width=None,
                        filter_names=[],
                        mode_name=None,
                        left_padding=defaults.left_padding + " "):
+    """Generate the info text printed below the plot. 
+
+    Args:
+        ff2 (string): Format string for floats.
+
+        x_label (string): X axis label
+
+        x_range (tuple of floats): X axis range.
+
+        x_bin_width (float): X axis bin width.
+
+        y_label (string): Y axis label
+
+        y_range (tuple of floats): Y axis range.
+
+        y_bin_width (float): Y axis bin width.
+
+        z_label (string): Z axis label
+
+        z_range (tuple of floats): Z axis range.
+
+        x_transf_expr (string): Python expression used to transform the x axis
+            data before plotting. 
+
+        y_transf_expr (string): Python expression used to transform the y axis
+            data before plotting. 
+
+        z_transf_expr (string): Python expression used to transform the z axis
+            data before plotting. 
+
+        y_normalized_hist (bool): Is the 1D histogram normalized?
+
+        z_normalized_hist (bool): Is the 2D histogram normalized?
+
+        s_label (string): Label for the dataset used for sorting. 
+
+        s_type (string): Sort type. Can be "min" or "max".
+
+        s_transf_expr (string): Python expression used to transform the dataset 
+            used for sorting.
+
+        w_label (string): Label for the dataset used as weights.
+
+        w_transf_expr (string): Python expression used to transform the dataset 
+            used as weights.
+
+        capped_z (bool): Is the z axis data capped?
+
+        capped_label (string): Label used to describe the capped data.
+
+        cap_val (float): The z axis cap value.
+
+        filter_names (list of strings): Names of datasets used as filters.
+
+        mode_name (string): Name of the plot mode.
+
+        left_padding (string): Whitespace string used for left padding.
+
+    Returns:
+        info_lines (list of strings): The info text as a list of strings.
+
+    """
+
 
     info_lines = []
     info_lines.append(left_padding)
@@ -475,9 +538,10 @@ def check_dset_indices(dset_indices, all_dset_names, input_file):
     """Check that the requested datasets were found in the input file
 
     Args:
-        dset_indices (list): The dataset indices given by the user.
+        dset_indices (list of ints): The dataset indices given by the user.
 
-        all_dset_names (list): Names of all datasets found in the input file.
+        all_dset_names (list of strings): Names of all datasets found in the
+            input file.
 
         input_file (string): The input file path.
     """
