@@ -565,6 +565,27 @@ def check_dset_indices(input_file, dset_indices, all_dset_names):
 
 
 
+def check_dset_lengths(dsets, dset_names):
+    """Check that the given datasets are of equal length.
+
+    Args:
+        dsets (list of numpy.arrays): The datasets to check.
+
+        dset_names (list of strings): The dataset names.
+
+    """
+
+    dset0_length = len(dsets[0])
+    for i, dset in enumerate(dsets):
+        if len(dset) != dset0_length:
+            raise SupRuntimeError(
+                "Detected datasets of different lenght. The dataset {} has "
+                "length {} while the dataset {} has length {}.".format(
+                    dset_names[0], dset0_length, dset_names[i], len(dsets[i]))
+            )
+
+
+
 def read_input_file(input_file, dset_indices, read_slice, delimiter=' '):
     """Read datasets from an input file.
 
@@ -604,6 +625,8 @@ def read_input_file(input_file, dset_indices, read_slice, delimiter=' '):
         print()
         dsets, dset_names = read_input_file_hdf5(input_file, dset_indices,
                                                  read_slice)
+
+    check_dset_lengths(dsets, dset_names)
 
     return dsets, dset_names    
 
@@ -753,6 +776,8 @@ def get_filters(input_file, filter_indices, read_slice, delimiter=' '):
                                                       filter_indices, 
                                                       read_slice)        
 
+    check_dset_lengths(filter_dsets, filter_names)
+
     return filter_dsets, filter_names
 
 
@@ -849,14 +874,16 @@ def apply_filters(datasets, filters):
 
     """
 
-    for filter_dset in filters:
-        assert len(filters[0]) == len(filter_dset)
-
     joint_filter = np.array([np.all(l) for l in zip(*filters)], dtype=np.bool)
 
     filtered_datasets = []
     for dset in datasets:
-        assert len(dset) == len(joint_filter)
+        if len(dset) != len(joint_filter):
+            raise SupRuntimeError(
+                "Attempted to apply a combined filter dataset of length {} to "
+                "a dataset of length {}.".format(len(joint_filter), len(dset))
+            )
+
         filtered_datasets.append(dset[joint_filter])
 
     if len(filtered_datasets[0]) == 0:
@@ -872,7 +899,6 @@ def get_bin_tuples_maxmin_1d(x_data, y_data, xy_bins, x_range, y_range, s_data,
                              split_marker=False, return_function_data=False,
                              fill_y_val=np.nan):
 
-    assert s_type in ["min", "max"]
     assert len(x_data) == len(y_data)
     data_length = len(x_data)
 
