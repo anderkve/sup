@@ -237,8 +237,8 @@ def run(args, mode):
     dx = x_bin_limits[1] - x_bin_limits[0]
 
     plot_lines, fig_width = utils.add_info_text(
-        plot_lines, fig_width, ccs.fg_ccode, ccs.bg_ccode, ff2,
-        x_label, x_range, x_bin_width=dx,
+        plot_lines, fig_width, ccs.fg_ccode, ccs.bg_ccode, ff=ff2,
+        x_label=x_label, x_range=x_range, x_bin_width=dx,
         y_label=y_label, y_range=y_range, 
         s_label=s_label, s_type=s_type,
         x_transf_expr=x_transf_expr, y_transf_expr=y_transf_expr,

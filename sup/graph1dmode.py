@@ -156,8 +156,9 @@ def run(args):
     #
 
     plot_lines, fig_width = utils.add_info_text(
-        plot_lines, fig_width, ccs.fg_ccode, ccs.bg_ccode, ff2, 
-        x_label, x_range, y_label=y_label, y_range=y_range, mode_name="graph")
+        plot_lines, fig_width, ccs.fg_ccode, ccs.bg_ccode, ff=ff2, 
+        x_label=x_label, x_range=x_range, y_label=y_label, y_range=y_range,
+        mode_name="graph")
 
 
     #

@@ -98,7 +98,8 @@ def insert_line(new_line, new_line_width, old_lines_list, old_width, fg_ccode,
 
 
 
-def add_left_padding(plot_lines, fg_ccode, bg_ccode, left_padding=defaults.left_padding):
+def add_left_padding(plot_lines, fg_ccode, bg_ccode, 
+                     left_padding=defaults.left_padding):
     """Add blank spaces on the left-hand side of the given lines.
 
     Args:
@@ -186,7 +187,7 @@ def generate_colorbar(plot_lines, fig_width, ff, ccs, color_z_lims):
     Returns:
         plot_lines (list of strings): The new collection of lines.
 
-        fig_width (int): The new width of figure.
+        fig_width (int): The new width of the figure.
 
     """
 
@@ -241,7 +242,8 @@ def generate_colorbar(plot_lines, fig_width, ff, ccs, color_z_lims):
 
 
 
-def generate_info_text(ff2, x_label, x_range, x_bin_width=None,
+def generate_info_text(ff=defaults.ff2, 
+                       x_label=None, x_range=None, x_bin_width=None,
                        y_label=None, y_range=None, y_bin_width=None,
                        z_label=None, z_range=None, 
                        x_transf_expr="", y_transf_expr="", z_transf_expr="", 
@@ -255,7 +257,7 @@ def generate_info_text(ff2, x_label, x_range, x_bin_width=None,
     """Generate the info text printed below the plot. 
 
     Args:
-        ff2 (string): Format string for floats.
+        ff (string): Format string for floats.
 
         x_label (string): X axis label
 
@@ -328,11 +330,11 @@ def generate_info_text(ff2, x_label, x_range, x_bin_width=None,
         info_lines.append(line)
     if x_bin_width is not None:
         line = left_padding
-        line += "  - bin width: {}".format(ff2.format(x_bin_width))
+        line += "  - bin width: {}".format(ff.format(x_bin_width))
         info_lines.append(line)
     line = left_padding 
-    line += "  - range: [{}, {}]".format(ff2.format(x_range[0]),
-                                         ff2.format(x_range[1])) 
+    line += "  - range: [{}, {}]".format(ff.format(x_range[0]),
+                                         ff.format(x_range[1])) 
     info_lines.append(line)
         
 
@@ -349,12 +351,12 @@ def generate_info_text(ff2, x_label, x_range, x_bin_width=None,
             info_lines.append(line)
         if y_bin_width is not None:
             line = left_padding
-            line += "  - bin width: {}".format(ff2.format(y_bin_width))
+            line += "  - bin width: {}".format(ff.format(y_bin_width))
             info_lines.append(line)
         if y_range is not None:
             line = left_padding
-            line += "  - range: [{}, {}]".format(ff2.format(y_range[0]),
-                                                 ff2.format(y_range[1]))
+            line += "  - range: [{}, {}]".format(ff.format(y_range[0]),
+                                                 ff.format(y_range[1]))
             info_lines.append(line)
 
     if z_label is not None:
@@ -370,8 +372,8 @@ def generate_info_text(ff2, x_label, x_range, x_bin_width=None,
             info_lines.append(line)
         if z_range is not None:
             line = left_padding
-            line += "  - range: [{}, {}]".format(ff2.format(z_range[0]),
-                                                 ff2.format(z_range[1]))
+            line += "  - range: [{}, {}]".format(ff.format(z_range[0]),
+                                                 ff.format(z_range[1]))
             info_lines.append(line)
 
     if (s_label is not None) and (s_type is not None):
@@ -395,7 +397,7 @@ def generate_info_text(ff2, x_label, x_range, x_bin_width=None,
     if capped_z:
         line = left_padding
         line += "capped: {} dataset capped at {}".format(capped_label,
-                                                         ff2.format(cap_val))
+                                                         ff.format(cap_val))
         info_lines.append(line)
 
     for f_name in filter_names:
@@ -414,44 +416,29 @@ def generate_info_text(ff2, x_label, x_range, x_bin_width=None,
 
 
 
-def add_info_text(plot_lines, fig_width, fg_ccode, bg_ccode,
-                  ff2, x_label, x_range, x_bin_width=None,
-                  y_label=None, y_range=None, y_bin_width=None,
-                  z_label=None, z_range=None, 
-                  x_transf_expr="", y_transf_expr="", z_transf_expr="", 
-                  y_normalized_hist=False, z_normalized_hist=False,
-                  s_label=None, s_type=None, s_transf_expr="", 
-                  w_label=None, w_transf_expr="",
-                  capped_z=False, capped_label="z-axis", cap_val=1e99,
-                  filter_names=[],
-                  mode_name=None,
-                  left_padding=defaults.left_padding + " "):
+def add_info_text(plot_lines, fig_width, fg_ccode, bg_ccode, **kwargs):
+    """Add info text below the plot.
 
-    info_lines = generate_info_text(ff2, 
-                                    x_label,
-                                    x_range, 
-                                    x_bin_width=x_bin_width,
-                                    y_label=y_label, 
-                                    y_range=y_range, 
-                                    y_bin_width=y_bin_width,
-                                    z_label=z_label,
-                                    z_range=z_range, 
-                                    x_transf_expr=x_transf_expr, 
-                                    y_transf_expr=y_transf_expr,
-                                    z_transf_expr=z_transf_expr,
-                                    y_normalized_hist=y_normalized_hist,
-                                    z_normalized_hist=z_normalized_hist,
-                                    s_label=s_label,
-                                    s_type=s_type, 
-                                    s_transf_expr=s_transf_expr,
-                                    w_label=w_label,
-                                    w_transf_expr=w_transf_expr,
-                                    capped_z=capped_z,
-                                    capped_label=capped_label,
-                                    cap_val=cap_val,
-                                    filter_names=filter_names,
-                                    mode_name=mode_name,
-                                    left_padding=left_padding)
+    Args:
+        plot_lines (list of strings): The collection of lines.
+
+        fig_width (int): The width of the figure.
+
+        fg_ccode (int): Forground color code.
+
+        bg_ccode (int): Background color code.
+
+        **kwargs: Collection of keyword arguments passed on to the function
+            utils.generate_info_text.
+
+    Returns:
+        plot_lines (list of strings): The new collection of lines.
+
+        fig_width (int): The new width of the figure.
+
+    """
+
+    info_lines = generate_info_text(**kwargs) 
 
     for i,line in enumerate(info_lines):
         pretty_line = prettify(line + "  ", fg_ccode, bg_ccode, bold=False)

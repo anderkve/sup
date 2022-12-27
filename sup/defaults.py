@@ -166,3 +166,5 @@ cmap_grayscale_wb = colors.cmaps_grayscale[1]
 
 n_decimals = 2
 
+ff = "{: ." + str(n_decimals) + "e}"
+ff2 = "{:." + str(n_decimals) + "e}"
