@@ -451,6 +451,16 @@ def add_info_text(plot_lines, fig_width, fg_ccode, bg_ccode, **kwargs):
 
 
 def get_dataset_names_hdf5(hdf5_file_object):
+    """Get the names of all datasets in an HDF5 file.
+
+    Args:
+        hdf5_file_object (h5py.File): The HDF5 file.
+
+    Returns:
+        result (list of strings): The dataset names.
+
+    """
+
     import h5py
     result = []
     def get_datasets(name, obj):
@@ -464,6 +474,16 @@ def get_dataset_names_hdf5(hdf5_file_object):
 
 
 def get_dataset_names_txt(txt_file_name):
+    """Get the names of all datasets in a text file.
+
+    Args:
+        txt_file_name (string): Path to the input text file. 
+
+    Returns:
+        result (list of strings): The dataset names.
+
+    """
+
     result = []
 
     # To avoid reading the entire file just to list the dataset names
@@ -521,16 +541,17 @@ def check_file_type(input_file):
 
 
 
-def check_dset_indices(dset_indices, all_dset_names, input_file):
+def check_dset_indices(input_file, dset_indices, all_dset_names):
     """Check that the requested datasets were found in the input file
 
     Args:
+        input_file (string): The input file path.
+
         dset_indices (list of ints): The dataset indices given by the user.
 
         all_dset_names (list of strings): Names of all datasets found in the
             input file.
 
-        input_file (string): The input file path.
     """
 
     n_sets = len(all_dset_names)
@@ -545,6 +566,27 @@ def check_dset_indices(dset_indices, all_dset_names, input_file):
 
 
 def read_input_file(input_file, dset_indices, read_slice, delimiter=' '):
+    """Read datasets from an input file.
+
+    The input file can either be of text or HDF5 type. 
+
+    Args:
+        input_file (string): The input file path.
+
+        dset_indices (list of ints): The dataset indices given by the user.
+
+        read_slice (slice): The slice to be read for each dataset in use.
+
+        delimiter (string): The delimiter string that separates two entries 
+            in the input file, if it's a text file. 
+
+    Returns:
+        dsets (list of numpy.arrays): The read datasets.
+
+        dset_names (list of strings): The dataset names.
+
+    """
+
     dsets = []
     dset_names = []
 
@@ -569,6 +611,22 @@ def read_input_file(input_file, dset_indices, read_slice, delimiter=' '):
 
 
 def read_input_file_hdf5(input_file, dset_indices, read_slice):
+    """Read datasets from an input HDF5 file.
+
+    Args:
+        input_file (string): The input HDF5 file path.
+
+        dset_indices (list of ints): The dataset indices given by the user.
+
+        read_slice (slice): The slice to be read for each dataset in use.
+
+    Returns:
+        dsets (list of numpy.arrays): The read datasets.
+
+        dset_names (list of strings): The dataset names.
+
+    """
+
     import h5py
     dsets = []
     dset_names = []
@@ -580,7 +638,7 @@ def read_input_file_hdf5(input_file, dset_indices, read_slice):
     if len(all_dset_names) == 0:
         raise SupRuntimeError("No datasets found in {}.".format(input_file))
 
-    check_dset_indices(dset_indices, all_dset_names, input_file)
+    check_dset_indices(input_file, dset_indices, all_dset_names)
 
     dset_names = [all_dset_names[dset_index] for dset_index in dset_indices]
 
@@ -601,6 +659,25 @@ def read_input_file_hdf5(input_file, dset_indices, read_slice):
 
 
 def read_input_file_txt(input_file, dset_indices, read_slice, delimiter):
+    """Read datasets from an input text file.
+
+    Args:
+        input_file (string): The input text file path.
+
+        dset_indices (list of ints): The dataset indices given by the user.
+
+        read_slice (slice): The slice to be read for each dataset in use.
+
+        delimiter (string): The delimiter string that separates two entries 
+            in the input file.
+
+    Returns:
+        dsets (list of numpy.arrays): The read datasets.
+
+        dset_names (list of strings): The dataset names.
+
+    """
+
     dsets = []
     dset_names = []
 
@@ -609,7 +686,7 @@ def read_input_file_txt(input_file, dset_indices, read_slice, delimiter):
     if len(all_dset_names) == 0:
         raise SupRuntimeError("No datasets found in {}.".format(input_file))
 
-    check_dset_indices(dset_indices, all_dset_names, input_file)
+    check_dset_indices(input_file, dset_indices, all_dset_names)
     
     dset_names = [all_dset_names[dset_index] for dset_index in dset_indices]
     
@@ -636,6 +713,27 @@ def read_input_file_txt(input_file, dset_indices, read_slice, delimiter):
 
 
 def get_filters(input_file, filter_indices, read_slice, delimiter=' '):
+    """Get datasets that will be used for filtering (masking).
+
+    The input file can either be of text or HDF5 type. 
+
+    Args:
+        input_file (string): The input file path.
+
+        filter_indices (list of ints): The filter dataset indices.
+
+        read_slice (slice): The slice to be read for each dataset in use.
+
+        delimiter (string): The delimiter string that separates two entries 
+            in the input file, if it is a text file.
+
+    Returns:
+        filter_dsets (list of numpy.arrays): The read filter datasets.
+
+        filter_names (list of strings): The filter dataset names.
+
+    """
+
     filter_dsets = []
     filter_names = []
 
@@ -660,6 +758,22 @@ def get_filters(input_file, filter_indices, read_slice, delimiter=' '):
 
 
 def get_filters_hdf5(input_file, filter_indices, read_slice=slice(0,-1,1)):
+    """Get HDF5 datasets that will be used for filtering (masking).
+
+    Args:
+        input_file (string): The input HDF5 file path.
+
+        filter_indices (list of ints): The filter dataset indices.
+
+        read_slice (slice): The slice to be read for each dataset in use.
+
+    Returns:
+        filter_dsets (list of numpy.arrays): The read filter datasets.
+
+        filter_names (list of strings): The filter dataset names.
+
+    """
+
     import h5py
     filter_dsets = []
     filter_names = []
@@ -681,6 +795,25 @@ def get_filters_hdf5(input_file, filter_indices, read_slice=slice(0,-1,1)):
 
 
 def get_filters_txt(input_file, filter_indices, read_slice, delimiter=' '):
+    """Get text-file datasets that will be used for filtering (masking).
+
+    Args:
+        input_file (string): The input text file path.
+
+        filter_indices (list of ints): The filter dataset indices.
+
+        read_slice (slice): The slice to be read for each dataset in use.
+
+        delimiter (string): The delimiter string that separates two entries 
+            in the input file.
+
+    Returns:
+        filter_dsets (list of numpy.arrays): The read filter datasets.
+
+        filter_names (list of strings): The filter dataset names.
+
+    """
+
     filter_dsets = []
     filter_names = []
 
@@ -704,6 +837,17 @@ def get_filters_txt(input_file, filter_indices, read_slice, delimiter=' '):
 
 
 def apply_filters(datasets, filters):
+    """Apply filters (masks) to datasets.
+
+    Args:
+        datasets (list of numpy.arrays): The datasets to be filtered.
+
+        filters (list of numpy.arrays): The datasets used as filters.
+
+    Returns:
+        filtered_datasets (list of numpy.arrays): The datasets after filtering.
+
+    """
 
     for filter_dset in filters:
         assert len(filters[0]) == len(filter_dset)
