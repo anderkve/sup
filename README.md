@@ -1,4 +1,4 @@
-# sup -- the Simple Unicode Plotter
+# sup — the Simple Unicode Plotter
 
 `sup` is a command-line tool for generating quick 1D and 2D data visualizations directly in your terminal using Unicode characters and ANSI colors. It can plot data from files (text or HDF5) or directly from mathematical functions.
 
