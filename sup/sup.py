@@ -318,23 +318,23 @@ modes:
   sup colors      display the colors available for creating colormaps (for development)
 
 examples:
-  ./sup.py list data.hdf5
+  sup list data.hdf5
 
-  ./sup.py list data.txt --delimiter ","
+  sup list data.txt --delimiter ","
 
-  ./sup.py hist1d data.txt 0 --x-range -10 10 --size 100 20 --y-transf "np.log10(y)" --delimiter ","
+  sup hist1d data.txt 0 --x-range -10 10 --size 100 20 --y-transf "np.log10(y)" --delimiter ","
 
-  ./sup.py hist2d data.txt 0 1 --x-range -10 10 --y-range -10 10 --size 30 30 --delimiter "," --colormap 1
+  sup hist2d data.txt 0 1 --x-range -10 10 --y-range -10 10 --size 30 30 --delimiter "," --colormap 1
 
-  ./sup.py post2d posterior.dat 2 3 --x-range -10 10 --y-range -10 10 --size 30 30 --delimiter " "
+  sup post2d posterior.dat 2 3 --x-range -10 10 --y-range -10 10 --size 30 30 --delimiter " "
 
-  ./sup.py plr2d data.hdf5 0 1 4 --x-range 0 10 --y-range 0 10 --size 20 20
+  sup plr2d data.hdf5 0 1 4 --x-range 0 10 --y-range 0 10 --size 20 20
 
-  ./sup.py plr2d data.hdf5 2 1 4 --x-range 0 10 --y-range 0 20 --size 20 40 --x-transf "np.abs(x)"
+  sup plr2d data.hdf5 2 1 4 --x-range 0 10 --y-range 0 20 --size 20 40 --x-transf "np.abs(x)"
 
-  ./sup.py graph1d "x * np.cos(2 * np.pi * x)" --x-range 0.0 2.0 --y-range -2 2 --size 40 20 --white-bg
+  sup graph1d "x * np.cos(2 * np.pi * x)" --x-range 0.0 2.0 --y-range -2 2 --size 40 20 --white-bg
 
-  ./sup.py graph2d "np.sin(x**2 + y**2) / (x**2 + y**2)" --x-range -5 5 --y-range -5 5 --size 50 50
+  sup graph2d "np.sin(x**2 + y**2) / (x**2 + y**2)" --x-range -5 5 --y-range -5 5 --size 50 50
 
 """
     )

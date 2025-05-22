@@ -4,7 +4,7 @@
 
 ## Features
 
-*   Multiple plotting modes:
+*   Multiple run modes:
     *   `hist1d`, `hist2d`: 1D and 2D histograms.
     *   `max1d`, `max2d`, `min1d`, `min2d`, `avg1d`, `avg2d`: Plotting max, min, or average values.
     *   `post1d`, `post2d`: 1D and 2D posterior probability distributions.
@@ -19,28 +19,20 @@
 
 ## Installation
 
-1.  **Clone the repository (if you haven't already):**
-    ```bash
-    git clone <repository-url>
-    cd <repository-directory>
-    ```
-2.  **Install using pip:**
-    For local development/installation:
-    ```bash
-    pip install .
-    ```
-    This will install the `sup` command and its dependencies.
+Simply install using `pip`:
 
-    (If the package were published to PyPI, you could install it with `pip install sup-plotter`.)
+```terminal
+pip install git+https://github.com/anderkve/sup.git
+```
+
+This will install the `sup` terminal command and its dependencies.
 
 ## Dependencies
 
 *   Python >= 3.6
 *   numpy
 *   scipy
-*   h5py
-
-These dependencies will be automatically installed when you install `sup` using pip.
+*   h5py (if working with HDF5 files)
 
 ## Usage
 
@@ -126,3 +118,4 @@ examples:
 
 ## License
 This project is licensed under the GNU General Public License v3 (GPLv3+). See the file `LICENSE` for details.
+
