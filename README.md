@@ -17,6 +17,18 @@
 *   Color and grayscale output, with optional white background.
 *   Various colormaps for 2D plots.
 
+## Example plots
+
+<img src="./example_plots/sup_post1d.png" alt="1D posterior example" width="601"/> 
+
+<img src="./example_plots/sup_post2d.png" alt="2D posterior example" width="601"/> 
+
+<img src="./example_plots/sup_plr2d.png" alt="2D profile likelihood example" width="601"/> 
+
+<img src="./example_plots/sup_graph1d.png" alt="1D graph example" width="601"/> 
+
+<img src="./example_plots/sup_graph2d.png" alt="1D graph example" width="601"/> 
+
 ## Installation
 
 Simply install using `pip`:
