@@ -18,19 +18,23 @@ class SupRuntimeError(Exception):
 def prettify(input_string, fg_ccode, bg_ccode, bold=True, reset=True):
     """Add pretty formatting for the input string.
 
-    Args:
-        input_string (string): The input string.
+    Parameters
+    ----------
+    input_string : str
+        The input string.
+    fg_ccode : int
+        Foreground color code.
+    bg_ccode : int
+        Background color code.
+    bold : bool, optional
+        Use bold text? Defaults to True.
+    reset : bool, optional
+        Reset format at the end of the string? Defaults to True.
 
-        fg_ccode (int): Foreground color code.
-
-        bg_ccode (int): Background color code.
-        
-        bold (bool): Use bold text?
-
-        reset (bool): Reset format at the end of the string?
-
-    Returns:
-        result (string): The formatted string
+    Returns
+    -------
+    str
+        The formatted string.
 
     """
 
@@ -55,23 +59,30 @@ def insert_line(new_line, new_line_width, old_lines_list, old_width, fg_ccode,
                 bg_ccode, insert_pos=None):
     """Insert a new formatted line (string) in an existing list of lines.
 
-    Args:
-        new_line (string): The new line
+    Parameters
+    ----------
+    new_line : str
+        The new line.
+    new_line_width : int
+        The length of the new line without any formatting.
+    old_lines_list : list of str
+        The collection of existing lines.
+    old_width : int
+        Length of the longest (unformatted) existing line.
+    fg_ccode : int
+        Foreground color code.
+    bg_ccode : int
+        Background color code.
+    insert_pos : int, optional
+        List index where new_line should be inserted. Defaults to None, which
+        appends the line to the end of the list.
 
-        new_line_width (int): The length of the new line without any formatting.
-
-        old_lines_list (list of strings): The collection of existing lines.
-
-        old_width (int): Length of the longest (unformatted) existing line.
-
-        fg_ccode (int): Foreground color code.
-
-        bg_ccode (int): Background color code.
-        
-        insert_pos (int): List index where new_line should be inserted.
-
-    Returns:
-        result_lines_list (list of strings): The new collection of lines.
+    Returns
+    -------
+    tuple
+        A tuple containing:
+            - result_lines_list (list of str): The new collection of lines.
+            - result_width (int): The new width of the longest line.
 
     """
 
@@ -102,17 +113,21 @@ def add_left_padding(plot_lines, fg_ccode, bg_ccode,
                      left_padding=defaults.left_padding):
     """Add blank spaces on the left-hand side of the given lines.
 
-    Args:
-        plot_lines (list of strings): The collection of lines.
+    Parameters
+    ----------
+    plot_lines : list of str
+        The collection of lines.
+    fg_ccode : int
+        Foreground color code.
+    bg_ccode : int
+        Background color code.
+    left_padding : int, optional
+        The number of spaces to add. Defaults to `defaults.left_padding`.
 
-        fg_ccode (int): Foreground color code.
-
-        bg_ccode (int): Background color code.
-        
-        left_padding (int): The number of spaces to add.
-
-    Returns:
-        plot_lines (list of strings): The new collection of lines.
+    Returns
+    -------
+    list of str
+        The new collection of lines with left padding added.
 
     """
 
@@ -127,24 +142,31 @@ def generate_legend(legend_entries, bg_ccode, sep="  ", internal_sep=" ",
                     left_padding=" "):
     """Generate a plot legend line.
 
-    Args:
-        legend_entries (list of tuples): A list with one tuple for each
-        entry in the legend. Each tuple is of the form (marker, marker_ccode, 
-        txt, txt_ccode)
+    Parameters
+    ----------
+    legend_entries : list of tuple
+        A list with one tuple for each entry in the legend. Each tuple
+        is of the form (marker, marker_ccode, txt, txt_ccode).
+        - marker (str): The marker string.
+        - marker_ccode (int): Foreground color code for the marker.
+        - txt (str): The text label for the legend entry.
+        - txt_ccode (int): Foreground color code for the text.
+    bg_ccode : int
+        Background color code.
+    sep : str, optional
+        String used to separate legend entries. Defaults to "  ".
+    internal_sep : str, optional
+        String used to separate the marker and the text in a legend entry.
+        Defaults to " ".
+    left_padding : str, optional
+        Whitespace string used for left padding. Defaults to " ".
 
-        bg_ccode (int): Background color code.
-
-        sep (string): String used to separate legend entries.
-
-        internal_sep (string): String used to separate the marker and the text
-            in a legend entry.
-
-        left_padding (string): Whitespace string used for left padding.
-
-    Returns:
-        legend (string): The constructed legend line.
-
-        legend_width (int): The width of the legend line
+    Returns
+    -------
+    tuple
+        A tuple containing:
+            - legend (str): The constructed legend line.
+            - legend_width (int): The width of the legend line (unformatted length).
 
     """
 
@@ -177,26 +199,33 @@ def generate_colorbar(plot_lines, fig_width, ff, ccs, color_z_lims):
     existing plot lines. It also adjusts the figure width if the
     colorbar is wider than the current figure.
 
-    Args:
-        plot_lines (list of strings): The collection of lines representing the plot
-            onto which the colorbar will be added. Each string is a line of the plot.
-        fig_width (int): The current width of the figure (in characters). This
-            may be updated if the colorbar is wider.
-        ff (string): Format string for floats used to format the numerical labels
-            on the colorbar (e.g., "{:.2f}").
-        ccs (CCodeSettings): An object or dictionary containing color code settings,
-            specifically:
-            - ccs.ccodes: A list of color codes for the color swatches.
-            - ccs.fg_ccode: The foreground color code for text and non-swatch elements.
-            - ccs.bg_ccode: The background color code for the plot area.
-            - ccs.empty_bin_ccode: Color code for elements like separators if needed.
-        color_z_lims (list of floats): A list of float values representing the
-            boundaries for each color in the color bar. These are the numerical
-            values that will be labeled on the colorbar.
+    Parameters
+    ----------
+    plot_lines : list of str
+        The collection of lines representing the plot onto which the colorbar
+        will be added. Each string is a line of the plot.
+    fig_width : int
+        The current width of the figure (in characters). This may be updated
+        if the colorbar is wider.
+    ff : str
+        Format string for floats used to format the numerical labels on the
+        colorbar (e.g., "{:.2f}").
+    ccs : CCodeSettings
+        An object or dictionary containing color code settings, specifically:
+        - ccs.ccodes (list of int): A list of color codes for the color swatches.
+        - ccs.fg_ccode (int): The foreground color code for text and non-swatch elements.
+        - ccs.bg_ccode (int): The background color code for the plot area.
+        - ccs.empty_bin_ccode (int): Color code for elements like separators if needed.
+    color_z_lims : list of float
+        A list of float values representing the boundaries for each color in
+        the color bar. These are the numerical values that will be labeled
+        on the colorbar.
 
-    Returns:
-        tuple:
-            - plot_lines (list of strings): The updated collection of lines with the
+    Returns
+    -------
+    tuple
+        A tuple containing:
+            - plot_lines (list of str): The updated collection of lines with the
               colorbar added.
             - fig_width (int): The potentially updated width of the figure after
               adding the colorbar.
@@ -286,38 +315,65 @@ def generate_info_text(ff=defaults.ff2,
     These strings are intended to be displayed below the main plot area, providing
     context and details about the data shown.
 
-    Args:
-        ff (string, optional): Format string for floating-point numbers.
-            Defaults to `defaults.ff2`.
-        x_label (string, optional): Label for the X-axis.
-        x_range (tuple of floats, optional): Min and max values for the X-axis range.
-        x_bin_width (float, optional): Width of bins along the X-axis (for histograms).
-        y_label (string, optional): Label for the Y-axis.
-        y_range (tuple of floats, optional): Min and max values for the Y-axis range.
-        y_bin_width (float, optional): Width of bins along the Y-axis (for histograms).
-        z_label (string, optional): Label for the Z-axis (e.g., for 2D histograms or color values).
-        z_range (tuple of floats, optional): Min and max values for the Z-axis range.
-        x_transf_expr (string, optional): Python expression string used to transform X-axis data.
-        y_transf_expr (string, optional): Python expression string used to transform Y-axis data.
-        z_transf_expr (string, optional): Python expression string used to transform Z-axis data.
-        y_normalized_hist (bool, optional): True if the 1D histogram on Y-axis is normalized.
-        z_normalized_hist (bool, optional): True if the 2D histogram on Z-axis is normalized.
-        s_label (string, optional): Label for the dataset used for sorting (in max/min modes).
-        s_type (string, optional): Sort type, e.g., "min" or "max".
-        s_transf_expr (string, optional): Python expression string for transforming sorting data.
-        w_label (string, optional): Label for the dataset used as weights.
-        w_transf_expr (string, optional): Python expression string for transforming weights data.
-        capped_z (bool, optional): True if Z-axis data has been capped.
-        capped_label (string, optional): Label describing which data was capped (e.g., "z-axis").
-        cap_val (float, optional): The value at which data was capped.
-        filter_names (list of strings, optional): Names of datasets used as filters.
-        mode_name (string, optional): Name of the plot mode (e.g., "hist1d", "graph2d").
-        left_padding (string, optional): String used for indenting info lines.
-            Defaults to `defaults.left_padding + " "`.
+    Parameters
+    ----------
+    ff : str, optional
+        Format string for floating-point numbers. Defaults to `defaults.ff2`.
+    x_label : str, optional
+        Label for the X-axis.
+    x_range : tuple of float, optional
+        Min and max values for the X-axis range.
+    x_bin_width : float, optional
+        Width of bins along the X-axis (for histograms).
+    y_label : str, optional
+        Label for the Y-axis.
+    y_range : tuple of float, optional
+        Min and max values for the Y-axis range.
+    y_bin_width : float, optional
+        Width of bins along the Y-axis (for histograms).
+    z_label : str, optional
+        Label for the Z-axis (e.g., for 2D histograms or color values).
+    z_range : tuple of float, optional
+        Min and max values for the Z-axis range.
+    x_transf_expr : str, optional
+        Python expression string used to transform X-axis data. Defaults to "".
+    y_transf_expr : str, optional
+        Python expression string used to transform Y-axis data. Defaults to "".
+    z_transf_expr : str, optional
+        Python expression string used to transform Z-axis data. Defaults to "".
+    y_normalized_hist : bool, optional
+        True if the 1D histogram on Y-axis is normalized. Defaults to False.
+    z_normalized_hist : bool, optional
+        True if the 2D histogram on Z-axis is normalized. Defaults to False.
+    s_label : str, optional
+        Label for the dataset used for sorting (in max/min modes).
+    s_type : str, optional
+        Sort type, e.g., "min" or "max".
+    s_transf_expr : str, optional
+        Python expression string for transforming sorting data. Defaults to "".
+    w_label : str, optional
+        Label for the dataset used as weights.
+    w_transf_expr : str, optional
+        Python expression string for transforming weights data. Defaults to "".
+    capped_z : bool, optional
+        True if Z-axis data has been capped. Defaults to False.
+    capped_label : str, optional
+        Label describing which data was capped (e.g., "z-axis"). Defaults to "z-axis".
+    cap_val : float, optional
+        The value at which data was capped. Defaults to 1e99.
+    filter_names : list of str, optional
+        Names of datasets used as filters. Defaults to an empty list.
+    mode_name : str, optional
+        Name of the plot mode (e.g., "hist1d", "graph2d").
+    left_padding : str, optional
+        String used for indenting info lines.
+        Defaults to `defaults.left_padding + " "`.
 
-    Returns:
-        list of strings: A list where each string is a formatted line of the info text.
-                         The list starts and ends with a padding line.
+    Returns
+    -------
+    list of str
+        A list where each string is a formatted line of the info text.
+        The list starts and ends with a padding line.
     """
 
     # Initialize list to hold all info lines. Start with a padding line.
@@ -415,22 +471,26 @@ def generate_info_text(ff=defaults.ff2,
 def add_info_text(plot_lines, fig_width, fg_ccode, bg_ccode, **kwargs):
     """Add info text below the plot.
 
-    Args:
-        plot_lines (list of strings): The collection of lines.
+    Parameters
+    ----------
+    plot_lines : list of str
+        The collection of lines.
+    fig_width : int
+        The width of the figure.
+    fg_ccode : int
+        Foreground color code.
+    bg_ccode : int
+        Background color code.
+    **kwargs
+        Collection of keyword arguments passed on to the function
+        `utils.generate_info_text`.
 
-        fig_width (int): The width of the figure.
-
-        fg_ccode (int): Forground color code.
-
-        bg_ccode (int): Background color code.
-
-        **kwargs: Collection of keyword arguments passed on to the function
-            utils.generate_info_text.
-
-    Returns:
-        plot_lines (list of strings): The new collection of lines.
-
-        fig_width (int): The new width of the figure.
+    Returns
+    -------
+    tuple
+        A tuple containing:
+            - plot_lines (list of str): The new collection of lines.
+            - fig_width (int): The new width of the figure.
 
     """
 
@@ -449,11 +509,15 @@ def add_info_text(plot_lines, fig_width, fg_ccode, bg_ccode, **kwargs):
 def get_dataset_names_hdf5(hdf5_file_object):
     """Get the names of all datasets in an HDF5 file.
 
-    Args:
-        hdf5_file_object (h5py.File): The HDF5 file.
+    Parameters
+    ----------
+    hdf5_file_object : h5py.File
+        The HDF5 file object.
 
-    Returns:
-        result (list of strings): The dataset names.
+    Returns
+    -------
+    list of str
+        The dataset names.
 
     """
 
@@ -472,11 +536,27 @@ def get_dataset_names_hdf5(hdf5_file_object):
 def get_dataset_names_txt(txt_file_name):
     """Get the names of all datasets in a text file.
 
-    Args:
-        txt_file_name (string): Path to the input text file. 
+    The function assumes that the first non-empty line starting with the
+    comment character '#' contains the dataset names (header). If no such
+    line is found, or if the line is malformed, it attempts to infer column
+    names as "dataset0", "dataset1", etc., based on the first data line.
 
-    Returns:
-        result (list of strings): The dataset names.
+    Parameters
+    ----------
+    txt_file_name : str
+        Path to the input text file.
+
+    Returns
+    -------
+    list of str
+        The dataset names.
+
+    Raises
+    ------
+    SupRuntimeError
+        If a valid header line cannot be found and column names cannot be
+        inferred, or if the header line is empty after stripping comments
+        and whitespace.
 
     """
 
@@ -537,13 +617,17 @@ def get_dataset_names_txt(txt_file_name):
 
 
 def check_file_type(input_file):
-    """Determine file type based on file extension
+    """Determine file type based on file extension.
 
-    Args:
-        input_file (string): The input file path.
+    Parameters
+    ----------
+    input_file : str
+        The input file path.
 
-    Returns:
-        file_type (string): The identified file type. Can be "text" or "hdf5".
+    Returns
+    -------
+    str
+        The identified file type. Can be "text" or "hdf5".
 
     """
 
@@ -560,15 +644,22 @@ def check_file_type(input_file):
 
 
 def check_dset_indices(input_file, dset_indices, all_dset_names):
-    """Check that the requested datasets were found in the input file
+    """Check that the requested datasets were found in the input file.
 
-    Args:
-        input_file (string): The input file path.
+    Parameters
+    ----------
+    input_file : str
+        The input file path.
+    dset_indices : list of int
+        The dataset indices given by the user.
+    all_dset_names : list of str
+        Names of all datasets found in the input file.
 
-        dset_indices (list of ints): The dataset indices given by the user.
-
-        all_dset_names (list of strings): Names of all datasets found in the
-            input file.
+    Raises
+    ------
+    SupRuntimeError
+        If any dataset index in `dset_indices` is out of bounds for
+        `all_dset_names`.
 
     """
 
@@ -586,10 +677,17 @@ def check_dset_indices(input_file, dset_indices, all_dset_names):
 def check_dset_lengths(dsets, dset_names):
     """Check that the given datasets are of equal length.
 
-    Args:
-        dsets (list of numpy.arrays): The datasets to check.
+    Parameters
+    ----------
+    dsets : list of numpy.ndarray
+        The datasets to check.
+    dset_names : list of str
+        The dataset names, corresponding to `dsets`.
 
-        dset_names (list of strings): The dataset names.
+    Raises
+    ------
+    SupRuntimeError
+        If datasets in `dsets` have different lengths.
 
     """
 
@@ -607,22 +705,33 @@ def check_dset_lengths(dsets, dset_names):
 def read_input_file(input_file, dset_indices, read_slice, delimiter=' '):
     """Read datasets from an input file.
 
-    The input file can either be of text or HDF5 type. 
+    The input file can either be of text or HDF5 type. The type is
+    determined by `check_file_type`.
 
-    Args:
-        input_file (string): The input file path.
+    Parameters
+    ----------
+    input_file : str
+        The input file path.
+    dset_indices : list of int
+        The dataset indices to read from the file.
+    read_slice : slice
+        The slice to be read for each dataset.
+    delimiter : str, optional
+        The delimiter string that separates entries in the input file,
+        if it's a text file. Defaults to ' '.
 
-        dset_indices (list of ints): The dataset indices given by the user.
+    Returns
+    -------
+    tuple
+        A tuple containing:
+            - dsets (list of numpy.ndarray): The read datasets.
+            - dset_names (list of str): The names of the read datasets.
 
-        read_slice (slice): The slice to be read for each dataset in use.
-
-        delimiter (string): The delimiter string that separates two entries 
-            in the input file, if it's a text file. 
-
-    Returns:
-        dsets (list of numpy.arrays): The read datasets.
-
-        dset_names (list of strings): The dataset names.
+    Raises
+    ------
+    SupRuntimeError
+        If issues occur during file reading or dataset validation (e.g.,
+        datasets have different lengths).
 
     """
 
@@ -654,17 +763,29 @@ def read_input_file(input_file, dset_indices, read_slice, delimiter=' '):
 def read_input_file_hdf5(input_file, dset_indices, read_slice):
     """Read datasets from an input HDF5 file.
 
-    Args:
-        input_file (string): The input HDF5 file path.
+    Parameters
+    ----------
+    input_file : str
+        The input HDF5 file path.
+    dset_indices : list of int
+        The dataset indices (0-based) to read from the HDF5 file.
+    read_slice : slice
+        The slice to apply when reading each dataset.
 
-        dset_indices (list of ints): The dataset indices given by the user.
+    Returns
+    -------
+    tuple
+        A tuple containing:
+            - dsets (list of numpy.ndarray): The list of read datasets.
+            - dset_names (list of str): The list of names for the read datasets.
 
-        read_slice (slice): The slice to be read for each dataset in use.
-
-    Returns:
-        dsets (list of numpy.arrays): The read datasets.
-
-        dset_names (list of strings): The dataset names.
+    Raises
+    ------
+    SupRuntimeError
+        If no datasets are found in the file, if a dataset index is invalid,
+        or if an unexpected error occurs during reading.
+    Exception
+        Propagates exceptions from `h5py` if dataset reading fails.
 
     """
 
@@ -702,20 +823,40 @@ def read_input_file_hdf5(input_file, dset_indices, read_slice):
 def read_input_file_txt(input_file, dset_indices, read_slice, delimiter):
     """Read datasets from an input text file.
 
-    Args:
-        input_file (string): The input text file path.
+    Note: The `read_slice` parameter is not currently used in this function
+    for text files, as `np.genfromtxt` reads all data and then slicing would
+    need to be applied post-read if desired. This might be a point for
+    future improvement if partial reads are necessary.
 
-        dset_indices (list of ints): The dataset indices given by the user.
+    Parameters
+    ----------
+    input_file : str
+        The input text file path.
+    dset_indices : list of int
+        The dataset column indices (0-based) to read from the text file.
+    read_slice : slice
+        The slice to be read for each dataset in use. (Currently not applied
+        for text files by this function).
+    delimiter : str
+        The delimiter string that separates entries in the input file.
+        If `delimiter` consists only of whitespace, it is treated as `None`
+        by `np.genfromtxt` to handle whitespace-separated values correctly.
 
-        read_slice (slice): The slice to be read for each dataset in use.
+    Returns
+    -------
+    tuple
+        A tuple containing:
+            - dsets (list of numpy.ndarray): The list of read datasets.
+            - dset_names (list of str): The list of names for the read datasets.
 
-        delimiter (string): The delimiter string that separates two entries 
-            in the input file.
-
-    Returns:
-        dsets (list of numpy.arrays): The read datasets.
-
-        dset_names (list of strings): The dataset names.
+    Raises
+    ------
+    SupRuntimeError
+        If no datasets (columns) are found in the file, if a dataset index
+        is invalid, or if `np.genfromtxt` encounters a `ValueError` (e.g.,
+        due to missing values or malformed data).
+    ValueError
+        Propagates `ValueError` from `np.genfromtxt` if data conversion issues occur.
 
     """
 
@@ -756,22 +897,38 @@ def read_input_file_txt(input_file, dset_indices, read_slice, delimiter):
 def get_filters(input_file, filter_indices, read_slice, delimiter=' '):
     """Get datasets that will be used for filtering (masking).
 
-    The input file can either be of text or HDF5 type. 
+    The input file can be either text or HDF5 format. This function
+    determines the file type and calls the appropriate helper function
+    (`get_filters_txt` or `get_filters_hdf5`).
 
-    Args:
-        input_file (string): The input file path.
+    Parameters
+    ----------
+    input_file : str
+        The path to the input file.
+    filter_indices : list of int or None
+        A list of integer indices specifying which datasets to read as filters.
+        If None, returns empty lists for datasets and names.
+    read_slice : slice
+        A slice object indicating the portion of each dataset to read.
+    delimiter : str, optional
+        The delimiter used in the input file if it's a text file.
+        Defaults to ' '.
 
-        filter_indices (list of ints): The filter dataset indices.
+    Returns
+    -------
+    tuple
+        A tuple containing:
+            - filter_dsets (list of numpy.ndarray): A list of NumPy arrays,
+              where each array is a filter dataset. Empty if `filter_indices`
+              is None.
+            - filter_names (list of str): A list of names for the filter
+              datasets. Empty if `filter_indices` is None.
 
-        read_slice (slice): The slice to be read for each dataset in use.
-
-        delimiter (string): The delimiter string that separates two entries 
-            in the input file, if it is a text file.
-
-    Returns:
-        filter_dsets (list of numpy.arrays): The read filter datasets.
-
-        filter_names (list of strings): The filter dataset names.
+    Raises
+    ------
+    SupRuntimeError
+        If `check_dset_lengths` fails, indicating filter datasets have
+        inconsistent lengths.
 
     """
 
@@ -803,17 +960,30 @@ def get_filters(input_file, filter_indices, read_slice, delimiter=' '):
 def get_filters_hdf5(input_file, filter_indices, read_slice=slice(0,-1,1)):
     """Get HDF5 datasets that will be used for filtering (masking).
 
-    Args:
-        input_file (string): The input HDF5 file path.
+    Parameters
+    ----------
+    input_file : str
+        The path to the input HDF5 file.
+    filter_indices : list of int or None
+        A list of integer indices specifying which datasets to read as filters.
+        If None, the function will still open the HDF5 file to get all dataset
+        names but will return empty lists for filter datasets and names if
+        `filter_indices` itself is None (though the current implementation
+        implies `filter_indices` would not be None if this function is directly called
+        with the intent to load filters).
+    read_slice : slice, optional
+        A slice object indicating the portion of each dataset to read.
+        Defaults to `slice(0, -1, 1)`, which typically means all elements
+        except the last (this might be an unintentional default depending on
+        use case, common full slice is `slice(None)` or `[:]`).
 
-        filter_indices (list of ints): The filter dataset indices.
-
-        read_slice (slice): The slice to be read for each dataset in use.
-
-    Returns:
-        filter_dsets (list of numpy.arrays): The read filter datasets.
-
-        filter_names (list of strings): The filter dataset names.
+    Returns
+    -------
+    tuple
+        A tuple containing:
+            - filter_dsets (list of numpy.ndarray): A list of NumPy arrays,
+              where each array is a filter dataset.
+            - filter_names (list of str): A list of names for the filter datasets.
 
     """
 
@@ -840,20 +1010,38 @@ def get_filters_hdf5(input_file, filter_indices, read_slice=slice(0,-1,1)):
 def get_filters_txt(input_file, filter_indices, read_slice, delimiter=' '):
     """Get text-file datasets that will be used for filtering (masking).
 
-    Args:
-        input_file (string): The input text file path.
+    Note: The `read_slice` parameter is not currently used in this function
+    for text files, as `np.genfromtxt` reads all data. Slicing would need
+    to be applied post-read if desired for text files.
 
-        filter_indices (list of ints): The filter dataset indices.
+    Parameters
+    ----------
+    input_file : str
+        The path to the input text file.
+    filter_indices : list of int
+        A list of integer indices specifying which columns (datasets) to read
+        as filters.
+    read_slice : slice
+        A slice object indicating the portion of each dataset to read.
+        (Currently not applied for text files by this function).
+    delimiter : str, optional
+        The delimiter used in the input text file. Defaults to ' '.
+        If `delimiter` consists only of whitespace, it is treated as `None`
+        by `np.genfromtxt`.
 
-        read_slice (slice): The slice to be read for each dataset in use.
+    Returns
+    -------
+    tuple
+        A tuple containing:
+            - filter_dsets (list of numpy.ndarray): A list of NumPy arrays,
+              where each array is a filter dataset.
+            - filter_names (list of str): A list of names for the filter datasets.
 
-        delimiter (string): The delimiter string that separates two entries 
-            in the input file.
-
-    Returns:
-        filter_dsets (list of numpy.arrays): The read filter datasets.
-
-        filter_names (list of strings): The filter dataset names.
+    Raises
+    ------
+    SupRuntimeError
+        If `get_dataset_names_txt` or `np.genfromtxt` encounters issues,
+        though specific errors are typically raised by those functions directly.
 
     """
 
@@ -882,13 +1070,25 @@ def get_filters_txt(input_file, filter_indices, read_slice, delimiter=' '):
 def apply_filters(datasets, filters):
     """Apply filters (masks) to datasets.
 
-    Args:
-        datasets (list of numpy.arrays): The datasets to be filtered.
+    Parameters
+    ----------
+    datasets : list of numpy.ndarray
+        The list of datasets (NumPy arrays) to be filtered.
+    filters : list of numpy.ndarray
+        The list of filter datasets (NumPy arrays of boolean type or
+        convertible to boolean). Each filter in this list is combined
+        with an AND operation to create a joint filter.
 
-        filters (list of numpy.arrays): The datasets used as filters.
+    Returns
+    -------
+    list of numpy.ndarray
+        The list of datasets after applying the combined filter.
 
-    Returns:
-        filtered_datasets (list of numpy.arrays): The datasets after filtering.
+    Raises
+    ------
+    SupRuntimeError
+        If a dataset and the joint filter have different lengths, or if
+        applying filters results in an empty dataset.
 
     """
 
@@ -916,7 +1116,72 @@ def get_bin_tuples_maxmin_1d(x_data, y_data, xy_bins, x_range, y_range, s_data,
                              s_type, fill_below=False, fill_z_val=-1, 
                              split_marker=False, return_function_data=False,
                              fill_y_val=np.nan):
+    """Determine representative (x,y,z) tuples for 1D data based on max/min sorting.
 
+    For each x-bin, this function identifies the y-value corresponding to the
+    maximum or minimum value in `s_data` within that x-bin. This is used for
+    visualizing a 1D function or profile where a selection criterion (max/min
+    of `s_data`) determines which y-value to plot.
+
+    Parameters
+    ----------
+    x_data : numpy.ndarray
+        The x-coordinates of the data points.
+    y_data : numpy.ndarray
+        The y-coordinates of the data points.
+    xy_bins : tuple of int
+        A tuple (x_bins, y_bins) specifying the number of bins along the
+        x and y axes.
+    x_range : tuple of float
+        A tuple (x_min, x_max) specifying the range of the x-axis.
+    y_range : tuple of float
+        A tuple (y_min, y_max) specifying the range of the y-axis.
+    s_data : numpy.ndarray
+        The data array used for sorting to select the representative y-value
+        in each x-bin. Must have the same length as `x_data` and `y_data`.
+    s_type : {"min", "max"}
+        The sorting type. "max" selects the y-value where `s_data` is maximal
+        within the x-bin, "min" selects where `s_data` is minimal.
+    fill_below : bool, optional
+        If True, bins below the selected (x,y) point are filled with `fill_z_val`.
+        Defaults to False.
+    fill_z_val : int, optional
+        The value used to fill bins below the selected point if `fill_below` is True.
+        Typically represents a special marker or color index. Defaults to -1.
+    split_marker : bool, optional
+        If True, the z-value in the output tuple is adjusted based on whether
+        the selected y-value is above or below the y-bin center. This can be
+        used to select different plot markers. Defaults to False.
+    return_function_data : bool, optional
+        If True, additionally returns the processed x and y data arrays that
+        represent the selected function line. Defaults to False.
+    fill_y_val : float, optional
+        The value to assign to y-data in x-bins where no data points exist.
+        Defaults to `np.nan`.
+
+    Returns
+    -------
+    result_dict : collections.OrderedDict
+        An ordered dictionary where keys are (x_bin_index, y_bin_index) tuples
+        and values are (x_bin_center, y_bin_center, z_value) tuples.
+        The z_value is typically 1, or adjusted by `split_marker` or `fill_below`.
+    x_bin_limits : numpy.ndarray
+        The calculated bin limits for the x-axis.
+    y_bin_limits : numpy.ndarray
+        The calculated bin limits for the y-axis.
+    new_xdata : numpy.ndarray, optional
+        The x-coordinates of the selected function line. Only returned if
+        `return_function_data` is True.
+    new_ydata : numpy.ndarray, optional
+        The y-coordinates of the selected function line. Only returned if
+        `return_function_data` is True.
+
+    Notes
+    -----
+    - Assumes `x_data` and `y_data` (and `s_data`) are of equal length.
+    - `np.digitize` is used for binning, so care should be taken with edge cases
+      and `right=True` for y-binning.
+    """
     assert len(x_data) == len(y_data)
     data_length = len(x_data)
 
@@ -1040,7 +1305,54 @@ def get_bin_tuples_maxmin_1d(x_data, y_data, xy_bins, x_range, y_range, s_data,
 
 def get_bin_tuples_maxmin(x_data, y_data, z_data, xy_bins, x_range, y_range,
                           s_data, s_type):
+    """Determine representative (x,y,z) tuples based on max/min sorting of s_data.
 
+    For each (x,y) bin, this function identifies the z-value and original data
+    index corresponding to the maximum or minimum value in `s_data` within
+    that bin. This is useful for visualizing 2D data where a third dimension
+    (`s_data`) dictates which point to represent in each bin.
+
+    Parameters
+    ----------
+    x_data : numpy.ndarray
+        The x-coordinates of the data points.
+    y_data : numpy.ndarray
+        The y-coordinates of the data points.
+    z_data : numpy.ndarray
+        The z-values associated with each (x,y) point.
+    xy_bins : tuple of int
+        A tuple (x_bins, y_bins) specifying the number of bins along the
+        x and y axes.
+    x_range : tuple of float
+        A tuple (x_min, x_max) specifying the range of the x-axis.
+    y_range : tuple of float
+        A tuple (y_min, y_max) specifying the range of the y-axis.
+    s_data : numpy.ndarray
+        The data array used for sorting to select the representative z-value
+        in each (x,y)-bin. Must have the same length as `x_data`, `y_data`,
+        and `z_data`.
+    s_type : {"min", "max"}
+        The sorting type. "max" selects the z-value where `s_data` is maximal
+        within the bin, "min" selects where `s_data` is minimal.
+
+    Returns
+    -------
+    result_dict : collections.OrderedDict
+        An ordered dictionary where keys are (x_bin_index, y_bin_index) tuples
+        and values are (x_bin_center, y_bin_center, selected_z_value, data_index)
+        tuples. `data_index` is the index of the selected point in the original
+        input arrays.
+    x_bin_limits : numpy.ndarray
+        The calculated bin limits for the x-axis.
+    y_bin_limits : numpy.ndarray
+        The calculated bin limits for the y-axis.
+
+    Notes
+    -----
+    - Assumes `x_data`, `y_data`, `z_data`, and `s_data` are of equal length.
+    - `s_type` must be either "min" or "max".
+    - `np.digitize` is used for binning.
+    """
     assert s_type in ["min", "max"]
     assert len(x_data) == len(y_data)
     assert len(x_data) == len(z_data)
@@ -1135,7 +1447,55 @@ def get_bin_tuples_maxmin(x_data, y_data, z_data, xy_bins, x_range, y_range,
 
 def get_bin_tuples_avg_1d(x_data, y_data, xy_bins, x_range, y_range,
                           fill_below=False, fill_z_val=-1, split_marker=False):
+    """Determine representative (x,y,z) tuples for 1D data based on averaging y-values.
 
+    For each x-bin, this function calculates the average of y-values falling
+    into that bin. This is used for visualizing a 1D profile or function
+    derived by averaging y-data across x-bins.
+
+    Parameters
+    ----------
+    x_data : numpy.ndarray
+        The x-coordinates of the data points.
+    y_data : numpy.ndarray
+        The y-coordinates of the data points.
+    xy_bins : tuple of int
+        A tuple (x_bins, y_bins) specifying the number of bins along the
+        x and y axes. `y_bins` is used to digitize the resulting average y-values.
+    x_range : tuple of float
+        A tuple (x_min, x_max) specifying the range of the x-axis.
+    y_range : tuple of float
+        A tuple (y_min, y_max) specifying the range of the y-axis for digitizing
+        the average y-values.
+    fill_below : bool, optional
+        If True, bins below the calculated average (x,y) point are filled
+        with `fill_z_val`. Defaults to False.
+    fill_z_val : int, optional
+        The value used to fill bins below the average point if `fill_below` is True.
+        Typically represents a special marker or color index. Defaults to -1.
+    split_marker : bool, optional
+        If True, the z-value in the output tuple is adjusted based on whether
+        the average y-value is above or below the y-bin center. This can be
+        used to select different plot markers. Defaults to False.
+
+    Returns
+    -------
+    result_dict : collections.OrderedDict
+        An ordered dictionary where keys are (x_bin_index, y_bin_index) tuples
+        and values are (x_bin_center, y_bin_center, z_value) tuples.
+        The z_value is typically 1, or adjusted by `split_marker` or `fill_below`.
+    x_bin_limits : numpy.ndarray
+        The calculated bin limits for the x-axis.
+    y_bin_limits : numpy.ndarray
+        The calculated bin limits for the y-axis.
+
+    Notes
+    -----
+    - Assumes `x_data` and `y_data` are of equal length.
+    - If an x-bin is empty, it does not contribute to `new_xdata` or `new_ydata`
+      (the internal averaged arrays), and thus won't appear in `result_dict`
+      unless `fill_below` logic adds entries.
+    """
     assert len(x_data) == len(y_data)
     data_length = len(x_data)
 
@@ -1242,7 +1602,46 @@ def get_bin_tuples_avg_1d(x_data, y_data, xy_bins, x_range, y_range,
 
 
 def get_bin_tuples_avg(x_data, y_data, z_data, xy_bins, x_range, y_range):
+    """Determine representative (x,y,z) tuples based on averaging z-values.
 
+    For each (x,y) bin, this function calculates the average of z-values
+    for all data points falling into that bin. This is useful for creating
+    a 2D heatmap or summary plot where the color or marker represents the
+    average z-value in each bin.
+
+    Parameters
+    ----------
+    x_data : numpy.ndarray
+        The x-coordinates of the data points.
+    y_data : numpy.ndarray
+        The y-coordinates of the data points.
+    z_data : numpy.ndarray
+        The z-values associated with each (x,y) point. These are averaged
+        within each bin.
+    xy_bins : tuple of int
+        A tuple (x_bins, y_bins) specifying the number of bins along the
+        x and y axes.
+    x_range : tuple of float
+        A tuple (x_min, x_max) specifying the range of the x-axis.
+    y_range : tuple of float
+        A tuple (y_min, y_max) specifying the range of the y-axis.
+
+    Returns
+    -------
+    result_dict : collections.OrderedDict
+        An ordered dictionary where keys are (x_bin_index, y_bin_index) tuples
+        and values are (x_bin_center, y_bin_center, average_z_value) tuples.
+        Only bins with at least one data point are included.
+    x_bin_limits : numpy.ndarray
+        The calculated bin limits for the x-axis.
+    y_bin_limits : numpy.ndarray
+        The calculated bin limits for the y-axis.
+
+    Notes
+    -----
+    - Assumes `x_data`, `y_data`, and `z_data` are of equal length.
+    - `np.digitize` is used for binning.
+    """
     assert len(x_data) == len(y_data)
     assert len(x_data) == len(z_data)
     data_length = len(x_data)
@@ -1322,34 +1721,46 @@ def add_axes(lines, fig_width, xy_bins, x_bin_limits, y_bin_limits, ccs,
     It calculates appropriate tick positions and formats them based on provided limits
     and a float formatting string.
 
-    Args:
-        lines (list of strings): The existing plot lines (rows of the plot).
-            This list will be modified in-place by prepending/appending axis elements.
-        fig_width (int): The current width of the figure. This might be used for
-            alignment but the function primarily calculates its own required widths.
-        xy_bins (tuple of int): A tuple (x_bins, y_bins) representing the number
-            of bins in the x and y dimensions of the plot grid.
-        x_bin_limits (numpy.ndarray): An array of values representing the boundaries
-            of the x-bins. Used for labeling x-axis ticks.
-        y_bin_limits (numpy.ndarray): An array of values representing the boundaries
-            of the y-bins. Used for labeling y-axis ticks.
-        ccs (CCodeSettings): Color code settings object. Must have attributes like
-            `fg_ccode` (foreground), `bg_ccode` (background), and
-            `empty_bin_ccode` (for grid lines/alternative ticks).
-        floatf (string, optional): Format string for float numbers on axis labels.
-            Defaults to "{: .1e}".
-        add_y_grid_lines (bool, optional): If True, adds horizontal grid lines
-            at y-tick positions. Defaults to False.
-        add_blank_top_line (bool, optional): Though present in signature, this
-            argument is not directly used in the current implementation logic for
-            adding a blank top line (a top line is added regardless).
+    Parameters
+    ----------
+    lines : list of str
+        The existing plot lines (rows of the plot). This list will be modified
+        by prepending/appending axis elements.
+    fig_width : int
+        The current width of the figure. This is used for alignment and is
+        returned, though not recalculated if labels extend beyond it.
+    xy_bins : tuple of int
+        A tuple (x_bins, y_bins) representing the number of bins in the x and
+        y dimensions of the plot grid.
+    x_bin_limits : numpy.ndarray
+        An array of values representing the boundaries of the x-bins. Used for
+        labeling x-axis ticks.
+    y_bin_limits : numpy.ndarray
+        An array of values representing the boundaries of the y-bins. Used for
+        labeling y-axis ticks.
+    ccs : CCodeSettings
+        An object or dictionary containing color code settings, specifically:
+        - ccs.fg_ccode (int): Foreground color for axis lines and text.
+        - ccs.bg_ccode (int): Background color for the plot area.
+        - ccs.empty_bin_ccode (int): Color for grid lines or alternate ticks.
+    floatf : str, optional
+        Format string for float numbers on axis labels. Defaults to "{: .1e}".
+    add_y_grid_lines : bool, optional
+        If True, adds horizontal grid lines at y-tick positions. Defaults to False.
+    add_blank_top_line : bool, optional
+        If True, a blank line is added at the top of the plot lines.
+        Defaults to True. Note: The current implementation adds a top border line
+        regardless of this parameter, but this parameter might be intended for
+        an additional truly blank line.
 
-    Returns:
-        tuple:
-            - lines (list of strings): The modified list of plot lines including axes.
-            - fig_width (int): The original fig_width is returned. Note that
-              this function does not recalculate or update fig_width based on
-              added axes labels that might extend beyond the original width.
+    Returns
+    -------
+    tuple
+        A tuple containing:
+            - lines (list of str): The modified list of plot lines including axes.
+            - fig_width (int): The original `fig_width`. This function does not
+              recalculate or update `fig_width` if added axis labels extend
+              beyond this width.
     """
 
     # mod_func is a helper to apply standard foreground/background color and bold style.
@@ -1485,11 +1896,50 @@ def add_axes(lines, fig_width, xy_bins, x_bin_limits, y_bin_limits, ccs,
 
 
 def get_cl_included_bins_1d(confidence_levels, y_func_data, dx):
+    """Determine which bins are included within specified confidence levels (CL).
 
+    This function is typically used for 1D profile likelihoods or similar
+    functions where `y_func_data` represents normalized likelihood values (or
+    L/L_max), and the goal is to find regions (sets of bins) corresponding
+    to certain confidence levels.
+
+    Parameters
+    ----------
+    confidence_levels : list of float
+        A list of confidence levels (e.g., [68.0, 95.0]) for which to
+        determine the included bins. Values should be percentages (0-100).
+    y_func_data : numpy.ndarray
+        A 1D array of y-values, typically normalized likelihoods (L/L_max),
+        where the maximum non-NaN value is assumed to be 1.0.
+    dx : float
+        The width of each bin. While present in the signature, this parameter
+        is not used in the current implementation of this function. It might
+        be a remnant or intended for future use related to probability density.
+
+    Returns
+    -------
+    list of list of int
+        A list of lists, where each inner list contains the integer indices
+        of the bins included for the corresponding confidence level in
+        `confidence_levels`.
+
+    Notes
+    -----
+    - The function assumes that the maximum of `y_func_data` (excluding NaNs) is 1.0.
+    - The threshold for including a bin is calculated using the chi-squared
+      distribution with one degree of freedom (chi2.ppf(cl_percentage, df=1)),
+      transformed to a likelihood ratio threshold: exp(-0.5 * chi2_value).
+    - Bins with NaN values in `y_func_data` are excluded.
+    """
     included_bins = []
 
     # Check assumption that the max (non-NaN) element is 1.0
-    assert np.max(y_func_data[np.invert(np.isnan(y_func_data))]) == 1.0
+    # Using np.nanmax to handle potential NaNs gracefully
+    max_y_val = np.nanmax(y_func_data)
+    if not np.isclose(max_y_val, 1.0):
+        # This assertion might be too strict if y_func_data isn't perfectly normalized.
+        # Consider logging a warning or adjusting the logic if y_func_data can deviate slightly.
+        assert np.isclose(max_y_val, 1.0), "Max of y_func_data (excluding NaNs) is not close to 1.0"
 
     indices = list(range(len(y_func_data)))
 
@@ -1524,7 +1974,47 @@ def get_cl_included_bins_1d(confidence_levels, y_func_data, dx):
 
 
 def get_cr_included_bins_1d(credible_regions, bins_content, dx):
+    """Determine which bins are included within specified credible regions (CR).
 
+    This function is typically used for 1D histograms or probability distributions
+    where `bins_content` represents the probability or count in each bin.
+    It identifies the smallest set of bins whose cumulative probability (or sum
+    of content) meets or exceeds each specified credible region percentage,
+    starting from the bins with the highest content.
+
+    Parameters
+    ----------
+    credible_regions : list of float
+        A list of credible region percentages (e.g., [68.0, 95.0]) for which
+        to determine the included bins. Values should be percentages (0-100).
+    bins_content : numpy.ndarray
+        A 1D array where each element represents the content (e.g., probability,
+        count) of the corresponding bin.
+    dx : float
+        The width of each bin. This is used to calculate the contribution of
+        each bin to the cumulative sum, effectively `bin_content * dx`.
+        The sum is then compared against `cr / 100.0` if `bins_content`
+        represents a density, or `cr` if `bins_content` is already scaled
+        (the current code multiplies by `dx * 100`, so `bins_content` should
+        likely be a density for `cr_sum` to be a percentage).
+
+    Returns
+    -------
+    list of list of int
+        A list of lists, where each inner list contains the integer indices
+        of the bins included for the corresponding credible region in
+        `credible_regions`. The bins are typically sorted by content before
+        accumulation.
+
+    Notes
+    -----
+    - The function sorts bins by their content in descending order.
+    - It iteratively adds bins to the included set until the cumulative sum
+      (scaled by `dx * 100`) exceeds the target credible region percentage.
+    - A refinement step is included to check if adding the current bin makes
+      the sum closer to the target CR than not adding it, which helps in
+      selecting the most compact region.
+    """
     included_bins = []
 
     # ordering for sorting from high to low bin content
@@ -1564,57 +2054,79 @@ def get_cr_included_bins_1d(credible_regions, bins_content, dx):
 
 
 def get_ranges_from_included_bins(included_bins, bin_limits):
+    """Convert lists of included bin indices into contiguous range(s).
 
+    For each list of bin indices (representing, e.g., a confidence or
+    credible region), this function identifies contiguous blocks of bins
+    and represents them as (start_index, end_index) for bin indices and
+    (start_position, end_position) for actual coordinate values based on
+    `bin_limits`.
+
+    Parameters
+    ----------
+    included_bins : list of list of int
+        A list where each inner list contains sorted integer indices of bins
+        that are part of a particular region (e.g., a specific CL or CR).
+    bin_limits : numpy.ndarray
+        A 1D array of bin edge coordinates. `bin_limits[i]` is the lower edge
+        of bin `i`, and `bin_limits[i+1]` is the upper edge.
+
+    Returns
+    -------
+    tuple of (list of list of tuple, list of list of tuple)
+        A tuple containing two lists:
+        - result_bin_indices (list of list of tuple of int):
+          For each input list of included bins, this contains a list of
+          (start_bin_index, end_bin_index + 1) tuples representing the
+          contiguous ranges of bin indices.
+        - result_positions (list of list of tuple of float):
+          For each input list of included bins, this contains a list of
+          (start_position, end_position) tuples representing the contiguous
+          ranges in terms of coordinate values from `bin_limits`.
+
+    Notes
+    -----
+    - Each inner list in `included_bins` is expected to be sorted in ascending order.
+    - The `end_bin_index` in `result_bin_indices` is exclusive (i.e., `range(start, end)`).
+    - The `end_position` in `result_positions` corresponds to `bin_limits[end_bin_index + 1]`.
+    """
     result_bin_indices = []
     result_positions = []
     for inc_bins_list in included_bins:
 
-        # print("START new CR: inc_bins_list: ", inc_bins_list)
+        # print("START new CR: inc_bins_list: ", inc_bins_list) # Debugging print
         ranges_bin_indices = []
         ranges_positions = []
+
+        if not inc_bins_list: # Handle empty list of included bins
+            result_bin_indices.append(ranges_bin_indices)
+            result_positions.append(ranges_positions)
+            continue
 
         inc_bins_list.sort()
 
         inside = False
         begin_bi = 0
-        end_bi = 0
+        # end_bi = 0 # Not strictly needed to initialize here
         n_bins = len(inc_bins_list)
 
-        for i,bi in enumerate(inc_bins_list):
-            # print("i: ", i, "   bi: ", bi, "  inside: ", inside)
-            if inside:
-                # print(" - inc_bins_list[i+1] = ", inc_bins_list[i+1])
-                if i == n_bins-1:
-                    end_bi = bi+1
-                    ranges_bin_indices.append((begin_bi, end_bi))
-                    ranges_positions.append((bin_limits[begin_bi],
-                                             bin_limits[end_bi]))
-                    inside = False
-                    continue
-
-                else:
-                    if inc_bins_list[i+1] == bi+1:
-                        # print(" - found next!")
-                        continue
-                    else:
-                        # print(" - did not find next -- closing range")
-                        end_bi = bi + 1
-                        ranges_bin_indices.append((begin_bi, end_bi))
-                        ranges_positions.append((bin_limits[begin_bi],
-                                                 bin_limits[end_bi]))
-                        inside = False
-                        # continue
-            # not inside
-            else:
+        for i, bi in enumerate(inc_bins_list):
+            # print("i: ", i, "   bi: ", bi, "  inside: ", inside) # Debugging print
+            if not inside:
                 begin_bi = bi
                 inside = True
-                if ((i < n_bins-1 and inc_bins_list[i+1] != bi+1) or 
-                    i == n_bins-1):
-                    end_bi = bi+1
-                    ranges_bin_indices.append((begin_bi, end_bi))
-                    ranges_positions.append((bin_limits[begin_bi],
-                                             bin_limits[end_bi]))
-                    inside = False
+
+            # Check if current bin `bi` is the last in `inc_bins_list` or
+            # if the next bin in `inc_bins_list` is not contiguous with `bi`.
+            if (i == n_bins - 1) or (inc_bins_list[i+1] != bi + 1):
+                end_bi = bi + 1 # Current bin `bi` is the last in this contiguous range.
+                                # end_bi is exclusive for range, so bi + 1.
+                ranges_bin_indices.append((begin_bi, end_bi))
+                ranges_positions.append((bin_limits[begin_bi], bin_limits[end_bi]))
+                inside = False
+            # If still inside a contiguous range, continue to the next bin.
+            # else: # This 'else' is implicit if the 'if' condition above is not met.
+                # print(" - found next!") # Debugging print: means inc_bins_list[i+1] == bi + 1
 
         result_bin_indices.append(ranges_bin_indices)
         result_positions.append(ranges_positions)
@@ -1624,8 +2136,30 @@ def get_ranges_from_included_bins(included_bins, bin_limits):
 
 
 def get_bar_str(ranges_pos, bin_limits):
+    """Generate a string representation of a bar for confidence/credible regions.
 
-    n_bins = len(bin_limits) - 1 
+    This function creates a text-based bar string (e.g., "  ├─────┤   ")
+    that visually represents one or more contiguous ranges on a binned axis.
+    It's used to draw the horizontal bars for confidence or credible intervals
+    below a plot.
+
+    Parameters
+    ----------
+    ranges_pos : list of tuple of float
+        A list of tuples, where each tuple `(start_pos, end_pos)` defines
+        a contiguous range in terms of coordinate values.
+    bin_limits : numpy.ndarray
+        A 1D array of bin edge coordinates that define the overall axis.
+        Used to determine the bin indices corresponding to `start_pos`
+        and `end_pos`.
+
+    Returns
+    -------
+    str
+        A string representing the bar, composed of spaces, and line-drawing
+        characters (e.g., '├', '─', '┤', '╶', '╴').
+    """
+    n_bins = len(bin_limits) - 1
     bar_str = "   "
     prev_end_index = 0
     
@@ -1675,9 +2209,37 @@ def get_bar_str(ranges_pos, bin_limits):
 
 
 
-def generate_credible_region_bars(credible_regions, bins_content, 
+def generate_credible_region_bars(credible_regions, bins_content,
                                   bin_limits, ff2):
+    """Generate a list of strings, each representing a credible region bar.
 
+    For each specified credible region percentage, this function calculates
+    the included bins (using `get_cr_included_bins_1d` and
+    `get_ranges_from_included_bins`), generates a bar string representation
+    (using `get_bar_str`), and appends the CR percentage as a label.
+
+    Parameters
+    ----------
+    credible_regions : list of float
+        A list of credible region percentages (e.g., [68.0, 95.0]) for which
+        to generate bar strings.
+    bins_content : numpy.ndarray
+        A 1D array representing the content (e.g., probability mass or density)
+        of each bin. Passed to `get_cr_included_bins_1d`.
+    bin_limits : numpy.ndarray
+        A 1D array of bin edge coordinates. Passed to
+        `get_ranges_from_included_bins` and `get_bar_str`.
+    ff2 : str
+        Format string used for formatting the credible region percentage in the
+        label (e.g., "{:.1f}% CR"). Note: The current implementation uses
+        "{:.12g}% CR" directly, so `ff2` is effectively unused here.
+
+    Returns
+    -------
+    list of str
+        A list of strings, where each string is a formatted bar representing
+        a credible region, complete with a label.
+    """
     cr_bar_lines = []
 
     dx = bin_limits[1] - bin_limits[0]
@@ -1701,7 +2263,35 @@ def generate_credible_region_bars(credible_regions, bins_content,
 
 def generate_confidence_level_bars(confidence_levels, y_func_data,
                                    bin_limits, ff2):
+    """Generate a list of strings, each representing a confidence level bar.
 
+    For each specified confidence level percentage, this function calculates
+    the included bins (using `get_cl_included_bins_1d` and
+    `get_ranges_from_included_bins`), generates a bar string representation
+    (using `get_bar_str`), and appends the CL percentage as a label.
+
+    Parameters
+    ----------
+    confidence_levels : list of float
+        A list of confidence level percentages (e.g., [68.0, 95.0]) for which
+        to generate bar strings.
+    y_func_data : numpy.ndarray
+        A 1D array of y-values, typically normalized likelihoods (L/L_max).
+        Passed to `get_cl_included_bins_1d`.
+    bin_limits : numpy.ndarray
+        A 1D array of bin edge coordinates. Passed to
+        `get_ranges_from_included_bins` and `get_bar_str`.
+    ff2 : str
+        Format string used for formatting the confidence level percentage in the
+        label (e.g., "{:.1f}% CI"). Note: The current implementation uses
+        "{:.12g}% CI" directly, so `ff2` is effectively unused here.
+
+    Returns
+    -------
+    list of str
+        A list of strings, where each string is a formatted bar representing
+        a confidence level, complete with a label.
+    """
     cl_bar_lines = []
 
     dx = bin_limits[1] - bin_limits[0]
@@ -1724,10 +2314,35 @@ def generate_confidence_level_bars(confidence_levels, y_func_data,
 
 
 def check_weights(w_data, w_name=""):
-    
+    """Validate the weights data array.
+
+    Checks if the weights data array `w_data` is valid for use in weighted
+    calculations. Specifically, it ensures that no weights are negative and
+    that not all weights are zero or less.
+
+    Parameters
+    ----------
+    w_data : numpy.ndarray
+        A NumPy array containing the weights.
+    w_name : str, optional
+        An optional name for the weights dataset, used in error messages for
+        better context. Defaults to "".
+
+    Raises
+    ------
+    SupRuntimeError
+        If `w_data` contains any negative values, or if all values in `w_data`
+        are less than or equal to zero.
+
+    Returns
+    -------
+    None
+        This function does not return a value but raises an error if
+        validation fails.
+    """
     extra_info = ""
     if w_name != "":
-        extra_info = "The current dataset for weights is {}.".format(w_name) 
+        extra_info = "The current dataset for weights is {}.".format(w_name)
 
     if np.any(w_data < 0.0):
         raise SupRuntimeError("Negative weights are not allowed. "
@@ -1741,9 +2356,53 @@ def check_weights(w_data, w_name=""):
 
 
 
-def fill_plot(xy_bins, bins_info, x_bin_limits, y_bin_limits, ccs, ms, 
+def fill_plot(xy_bins, bins_info, x_bin_limits, y_bin_limits, ccs, ms,
               get_ccode_and_marker, ff, add_y_grid_lines=True):
+    """Construct the main plot area, including data points and axes.
 
+    This function generates the lines representing the plot grid, populates it
+    with markers based on `bins_info`, and then adds axes, ticks, and labels.
+
+    Parameters
+    ----------
+    xy_bins : tuple of int
+        A tuple (x_bins, y_bins) specifying the number of bins (grid cells)
+        in the x and y dimensions.
+    bins_info : dict
+        A dictionary where keys are (xi, yi) tuples representing bin indices,
+        and values contain information needed by `get_ccode_and_marker` to
+        determine the marker and color for that bin.
+    x_bin_limits : numpy.ndarray
+        An array of values representing the boundaries of the x-bins.
+        Passed to `add_axes`.
+    y_bin_limits : numpy.ndarray
+        An array of values representing the boundaries of the y-bins.
+        Passed to `add_axes`.
+    ccs : CCodeSettings
+        An object or dictionary containing color code settings, used for
+        empty bins, markers, and axes. Must have attributes like `fg_ccode`,
+        `bg_ccode`, `empty_bin_ccode`.
+    ms : MarkerSettings
+        An object or dictionary containing marker settings, primarily
+        `ms.empty_bin_marker` for empty bins.
+    get_ccode_and_marker : function
+        A callback function `get_ccode_and_marker(bin_key)` that takes a
+        bin key `(xi, yi)` and returns a `(ccode, marker)` tuple for that bin.
+    ff : str
+        Format string for float numbers on axis labels. Passed to `add_axes`.
+    add_y_grid_lines : bool, optional
+        If True, adds horizontal grid lines at y-tick positions when calling
+        `add_axes`. Defaults to True.
+
+    Returns
+    -------
+    tuple
+        A tuple containing:
+            - plot_lines (list of str): A list of strings, where each string
+              is a fully formatted line of the plot including data and axes.
+            - fig_width (int): The calculated width of the figure, including
+              plot area and axis labels.
+    """
     plot_lines = []
     for yi in range(xy_bins[1]):
 
