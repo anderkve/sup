@@ -3,117 +3,117 @@
 
 echo
 echo
-echo "./sup.py graph1d \"x * np.cos(2 * np.pi * x)\" --x-range 0.0 2.0 --y-range -2 2 -sz 40 20 -wb"
-./sup.py graph1d "x * np.cos(2 * np.pi * x)" --x-range 0.0 2.0 --y-range -2 2 -sz 40 20 -wb
+echo "sup graph1d \"x * np.cos(2 * np.pi * x)\" --x-range 0.0 2.0 --y-range -2 2 -sz 40 20 -wb"
+sup graph1d "x * np.cos(2 * np.pi * x)" --x-range 0.0 2.0 --y-range -2 2 -sz 40 20 -wb
 echo
-echo "./sup.py graph1d \"x * np.cos(2 * np.pi * x)\" --x-range 0.0 2.0 --y-range -2 2 -sz 40 20"
-./sup.py graph1d "x * np.cos(2 * np.pi * x)" --x-range 0.0 2.0 --y-range -2 2 -sz 40 20
+echo "sup graph1d \"x * np.cos(2 * np.pi * x)\" --x-range 0.0 2.0 --y-range -2 2 -sz 40 20"
+sup graph1d "x * np.cos(2 * np.pi * x)" --x-range 0.0 2.0 --y-range -2 2 -sz 40 20
 
 echo
 echo
-echo "./sup.py hist1d posterior.dat 0 -sz 40 20 -wb"
-./sup.py hist1d posterior.dat 0 -sz 40 20 -wb
+echo "sup hist1d posterior.dat 0 -sz 40 20 -wb"
+sup hist1d posterior.dat 0 -sz 40 20 -wb
 echo
-echo "./sup.py hist1d posterior.dat 0 -sz 40 20"
-./sup.py hist1d posterior.dat 0 -sz 40 20
+echo "sup hist1d posterior.dat 0 -sz 40 20"
+sup hist1d posterior.dat 0 -sz 40 20
 
 echo
 echo
-echo "./sup.py post1d posterior.dat 0 -sz 40 20 -wb"
-./sup.py post1d posterior.dat 0 -sz 40 20 -wb
+echo "sup post1d posterior.dat 0 -sz 40 20 -wb"
+sup post1d posterior.dat 0 -sz 40 20 -wb
 echo
-echo "./sup.py post1d posterior.dat 0 -sz 40 20"
-./sup.py post1d posterior.dat 0 -sz 40 20
+echo "sup post1d posterior.dat 0 -sz 40 20"
+sup post1d posterior.dat 0 -sz 40 20
 
 echo
 echo
-echo "./sup.py avg1d posterior.dat 0 1 -sz 40 20 -wb"
-./sup.py avg1d posterior.dat 0 1 -sz 40 20 -wb
+echo "sup avg1d posterior.dat 0 1 -sz 40 20 -wb"
+sup avg1d posterior.dat 0 1 -sz 40 20 -wb
 echo
-echo "./sup.py avg1d posterior.dat 0 1 -sz 40 20"
-./sup.py avg1d posterior.dat 0 1 -sz 40 20
+echo "sup avg1d posterior.dat 0 1 -sz 40 20"
+sup avg1d posterior.dat 0 1 -sz 40 20
 
 echo
 echo
-echo "./sup.py max1d posterior.dat 0 1 -sz 40 20 -wb"
-./sup.py max1d posterior.dat 0 1 -sz 40 20 -wb
+echo "sup max1d posterior.dat 0 1 -sz 40 20 -wb"
+sup max1d posterior.dat 0 1 -sz 40 20 -wb
 echo
-echo "./sup.py max1d posterior.dat 0 1 -sz 40 20"
-./sup.py max1d posterior.dat 0 1 -sz 40 20
+echo "sup max1d posterior.dat 0 1 -sz 40 20"
+sup max1d posterior.dat 0 1 -sz 40 20
 
 echo
 echo
-echo "./sup.py min1d posterior.dat 0 1 -sz 40 20 -wb"
-./sup.py min1d posterior.dat 0 1 -sz 40 20 -wb
+echo "sup min1d posterior.dat 0 1 -sz 40 20 -wb"
+sup min1d posterior.dat 0 1 -sz 40 20 -wb
 echo
-echo "./sup.py min1d posterior.dat 0 1 -sz 40 20"
-./sup.py min1d posterior.dat 0 1 -sz 40 20
+echo "sup min1d posterior.dat 0 1 -sz 40 20"
+sup min1d posterior.dat 0 1 -sz 40 20
 
 echo
 echo
-echo "./sup.py plr1d posterior.dat 0 1 -sz 40 20 -wb"
-./sup.py plr1d posterior.dat 0 1 -sz 40 20 -wb
+echo "sup plr1d posterior.dat 0 1 -sz 40 20 -wb"
+sup plr1d posterior.dat 0 1 -sz 40 20 -wb
 echo
-echo "./sup.py plr1d posterior.dat 0 1 -sz 40 20"
-./sup.py plr1d posterior.dat 0 1 -sz 40 20
+echo "sup plr1d posterior.dat 0 1 -sz 40 20"
+sup plr1d posterior.dat 0 1 -sz 40 20
 
 
 # Test 2d modes
 
 echo
 echo
-echo "./sup.py graph2d \"np.sin(x**2 + y**2) / (x**2 + y**2)\" --x-range -5 5 --y-range -5 5 -sz 40 40 -wb"
-./sup.py graph2d "np.sin(x**2 + y**2) / (x**2 + y**2)" --x-range -5 5 --y-range -5 5 -sz 40 40 -wb
+echo "sup graph2d \"np.sin(x**2 + y**2) / (x**2 + y**2)\" --x-range -5 5 --y-range -5 5 -sz 40 40 -wb"
+sup graph2d "np.sin(x**2 + y**2) / (x**2 + y**2)" --x-range -5 5 --y-range -5 5 -sz 40 40 -wb
 echo
-echo "./sup.py graph2d \"np.sin(x**2 + y**2) / (x**2 + y**2)\" --x-range -5 5 --y-range -5 5 -sz 40 40"
-./sup.py graph2d "np.sin(x**2 + y**2) / (x**2 + y**2)" --x-range -5 5 --y-range -5 5 -sz 40 40
+echo "sup graph2d \"np.sin(x**2 + y**2) / (x**2 + y**2)\" --x-range -5 5 --y-range -5 5 -sz 40 40"
+sup graph2d "np.sin(x**2 + y**2) / (x**2 + y**2)" --x-range -5 5 --y-range -5 5 -sz 40 40
 
 echo
 echo
-echo "./sup.py hist2d posterior.dat 0 1 -sz 40 40 -wb"
-./sup.py hist2d posterior.dat 0 1 -sz 40 40 -wb
+echo "sup hist2d posterior.dat 0 1 -sz 40 40 -wb"
+sup hist2d posterior.dat 0 1 -sz 40 40 -wb
 echo
-echo "./sup.py hist2d posterior.dat 0 1 -sz 40 40"
-./sup.py hist2d posterior.dat 0 1 -sz 40 40
+echo "sup hist2d posterior.dat 0 1 -sz 40 40"
+sup hist2d posterior.dat 0 1 -sz 40 40
 
 echo
 echo
-echo "./sup.py post2d posterior.dat 0 1 -sz 40 40 -wb"
-./sup.py post2d posterior.dat 0 1 -sz 40 40 -wb
+echo "sup post2d posterior.dat 0 1 -sz 40 40 -wb"
+sup post2d posterior.dat 0 1 -sz 40 40 -wb
 echo
-echo "./sup.py post2d posterior.dat 0 1 -sz 40 40"
-./sup.py post2d posterior.dat 0 1 -sz 40 40
+echo "sup post2d posterior.dat 0 1 -sz 40 40"
+sup post2d posterior.dat 0 1 -sz 40 40
 
 echo
 echo
-echo "./sup.py avg2d posterior.dat 0 1 2 -sz 40 40 -wb"
-./sup.py avg2d posterior.dat 0 1 2 -sz 40 40 -wb
+echo "sup avg2d posterior.dat 0 1 2 -sz 40 40 -wb"
+sup avg2d posterior.dat 0 1 2 -sz 40 40 -wb
 echo
-echo "./sup.py avg2d posterior.dat 0 1 2 -sz 40 40"
-./sup.py avg2d posterior.dat 0 1 2 -sz 40 40
+echo "sup avg2d posterior.dat 0 1 2 -sz 40 40"
+sup avg2d posterior.dat 0 1 2 -sz 40 40
 
 echo
 echo
-echo "./sup.py max2d posterior.dat 0 1 2 -sz 40 40 -wb"
-./sup.py max2d posterior.dat 0 1 2 -sz 40 40 -wb
+echo "sup max2d posterior.dat 0 1 2 -sz 40 40 -wb"
+sup max2d posterior.dat 0 1 2 -sz 40 40 -wb
 echo
-echo "./sup.py max2d posterior.dat 0 1 2 -sz 40 40"
-./sup.py max2d posterior.dat 0 1 2 -sz 40 40
+echo "sup max2d posterior.dat 0 1 2 -sz 40 40"
+sup max2d posterior.dat 0 1 2 -sz 40 40
 
 echo
 echo
-echo "./sup.py min2d posterior.dat 0 1 2 -sz 40 40 -wb"
-./sup.py min2d posterior.dat 0 1 2 -sz 40 40 -wb
+echo "sup min2d posterior.dat 0 1 2 -sz 40 40 -wb"
+sup min2d posterior.dat 0 1 2 -sz 40 40 -wb
 echo
-echo "./sup.py min2d posterior.dat 0 1 2 -sz 40 40"
-./sup.py min2d posterior.dat 0 1 2 -sz 40 40
+echo "sup min2d posterior.dat 0 1 2 -sz 40 40"
+sup min2d posterior.dat 0 1 2 -sz 40 40
 
 echo
 echo
-echo "./sup.py plr2d posterior.dat 0 1 8 -sz 40 40 -wb"
-./sup.py plr2d posterior.dat 0 1 8 -sz 40 40 -wb
+echo "sup plr2d posterior.dat 0 1 8 -sz 40 40 -wb"
+sup plr2d posterior.dat 0 1 8 -sz 40 40 -wb
 echo
-echo "./sup.py plr2d posterior.dat 0 1 8 -sz 40 40"
-./sup.py plr2d posterior.dat 0 1 8 -sz 40 40
+echo "sup plr2d posterior.dat 0 1 8 -sz 40 40"
+sup plr2d posterior.dat 0 1 8 -sz 40 40
 
 

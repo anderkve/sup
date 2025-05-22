@@ -123,9 +123,6 @@ examples:
   sup graph2d "np.sin(x**2 + y**2) / (x**2 + y**2)" --x-range -5 5 --y-range -5 5 --size 50 50
 ```
 
-## Development
-
-The main script is `sup.py`, and the core plotting logic and modes are within the `sup/` directory. Tests can be run using the `runtests.sh` script (note: this script uses `./sup.py` directly, so you might need to adjust paths or run it as `python sup.py` if you haven't installed the package globally).
 
 ## License
-This project is licensed under the MIT License. (Assuming MIT, update if different)
+This project is licensed under the GNU General Public License v3 (GPLv3+). See the file `LICENSE` for details.
