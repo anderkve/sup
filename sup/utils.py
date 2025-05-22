@@ -170,25 +170,36 @@ def generate_legend(legend_entries, bg_ccode, sep="  ", internal_sep=" ",
 
 
 def generate_colorbar(plot_lines, fig_width, ff, ccs, color_z_lims):
-    """Generate a color bar.
+    """Generate a color bar and add it to the plot_lines.
+
+    This function constructs a color bar legend, including the color
+    swatches and corresponding numerical labels, and appends it to the
+    existing plot lines. It also adjusts the figure width if the
+    colorbar is wider than the current figure.
 
     Args:
-        plot_lines (list of strings): The collection of lines.
-
-        fig_width (int): The width of the figure.
-
-        ff (string): Format string for floats.
-
-        ccs (CCodeSettings): The color code settings.
-
-        color_z_lims (list of floats): The z values that mark the boundaries 
-            between neighboring colors.
+        plot_lines (list of strings): The collection of lines representing the plot
+            onto which the colorbar will be added. Each string is a line of the plot.
+        fig_width (int): The current width of the figure (in characters). This
+            may be updated if the colorbar is wider.
+        ff (string): Format string for floats used to format the numerical labels
+            on the colorbar (e.g., "{:.2f}").
+        ccs (CCodeSettings): An object or dictionary containing color code settings,
+            specifically:
+            - ccs.ccodes: A list of color codes for the color swatches.
+            - ccs.fg_ccode: The foreground color code for text and non-swatch elements.
+            - ccs.bg_ccode: The background color code for the plot area.
+            - ccs.empty_bin_ccode: Color code for elements like separators if needed.
+        color_z_lims (list of floats): A list of float values representing the
+            boundaries for each color in the color bar. These are the numerical
+            values that will be labeled on the colorbar.
 
     Returns:
-        plot_lines (list of strings): The new collection of lines.
-
-        fig_width (int): The new width of the figure.
-
+        tuple:
+            - plot_lines (list of strings): The updated collection of lines with the
+              colorbar added.
+            - fig_width (int): The potentially updated width of the figure after
+              adding the colorbar.
     """
 
     ccodes = ccs.ccodes
@@ -196,44 +207,58 @@ def generate_colorbar(plot_lines, fig_width, ff, ccs, color_z_lims):
     bg_ccode = ccs.bg_ccode
     empty_bin_ccode = ccs.empty_bin_ccode
 
-    # Colorbar
+    # Construct entries for the colorbar display.
+    # Each entry is a tuple: (marker, marker_ccode, text, text_ccode)
+    # The first entry is empty, acting as a spacer or start point.
     cb_entries = []
-    cb_entries.append(("", fg_ccode, "", fg_ccode))
+    cb_entries.append(("", fg_ccode, "", fg_ccode)) # Initial empty entry for alignment/padding.
     n_color_lims = len(color_z_lims)
+
+    # Loop through color limits to create color swatches and separators.
     for i in range(0, n_color_lims):
-        bar_ccode = fg_ccode
+        bar_ccode = fg_ccode # Default color for separator.
         if i % 2 == 1:
             bar_ccode = empty_bin_ccode
 
+        # Add a color swatch (■■■■■■) and its preceding separator (|).
+        # The last limit doesn't get a swatch after it, just a final separator.
         if i < (n_color_lims - 1):
-            cb_entries.append(("|", bar_ccode, 6*"■", ccodes[i]))
+            cb_entries.append(("|", bar_ccode, 6*"■", ccodes[i])) # Separator, then color swatch.
         else:
-            cb_entries.append(("|", bar_ccode, "", fg_ccode))
+            cb_entries.append(("|", bar_ccode, "", fg_ccode)) # Final separator.
 
+    # Generate the colorbar line string using the helper function generate_legend.
     cb_line, cb_width = generate_legend(cb_entries, bg_ccode, sep=" ",
                                         internal_sep="")
 
+    # Insert a blank line before the colorbar for spacing.
     plot_lines, fig_width = insert_line("", 0, plot_lines, fig_width, fg_ccode,
                                         bg_ccode)
+    # Insert the generated colorbar line into the plot_lines.
     plot_lines, fig_width = insert_line(cb_line, cb_width, plot_lines,
                                         fig_width, fg_ccode, bg_ccode)
 
-    # Numbers below the colorbar
+    # Construct entries for the numerical labels below the colorbar.
     cb_nums_entries = []
     for i in range(0, n_color_lims):
-        txt = ff.format(color_z_lims[i])
+        txt = ff.format(color_z_lims[i]) # Format the numerical limit.
+        # Add the formatted number for even indices.
         if i % 2 == 0:
             cb_nums_entries.append(("", fg_ccode, txt, fg_ccode))
+        # For odd indices, add spacing to align numbers under swatch boundaries.
+        # This creates gaps between numbers if they are too close.
         else:
             gap_length = 8
-            if len(txt) > gap_length:
-                gap_length = gap_length - (len(txt) - gap_length) 
+            if len(txt) > gap_length: # Adjust gap if text is too long.
+                gap_length = gap_length - (len(txt) - gap_length)
             cb_nums_entries.append(("", fg_ccode, " " * gap_length, fg_ccode))
 
+    # Generate the line string for colorbar numbers.
     cb_nums_line, cb_nums_width = generate_legend(cb_nums_entries,
                                                   bg_ccode,
                                                   sep="", internal_sep="")
 
+    # Insert the colorbar numbers line into plot_lines.
     plot_lines, fig_width = insert_line(cb_nums_line, cb_nums_width, plot_lines,
                                         fig_width, fg_ccode, bg_ccode)
 
@@ -254,161 +279,132 @@ def generate_info_text(ff=defaults.ff2,
                        filter_names=[],
                        mode_name=None,
                        left_padding=defaults.left_padding + " "):
-    """Generate the info text printed below the plot. 
+    """Generate the info text printed below the plot.
+
+    This function compiles various pieces of information about the plot
+    (axes, transformations, filters, etc.) into a list of formatted strings.
+    These strings are intended to be displayed below the main plot area, providing
+    context and details about the data shown.
 
     Args:
-        ff (string): Format string for floats.
-
-        x_label (string): X axis label
-
-        x_range (tuple of floats): X axis range.
-
-        x_bin_width (float): X axis bin width.
-
-        y_label (string): Y axis label
-
-        y_range (tuple of floats): Y axis range.
-
-        y_bin_width (float): Y axis bin width.
-
-        z_label (string): Z axis label
-
-        z_range (tuple of floats): Z axis range.
-
-        x_transf_expr (string): Python expression used to transform the x axis
-            data before plotting. 
-
-        y_transf_expr (string): Python expression used to transform the y axis
-            data before plotting. 
-
-        z_transf_expr (string): Python expression used to transform the z axis
-            data before plotting. 
-
-        y_normalized_hist (bool): Is the 1D histogram normalized?
-
-        z_normalized_hist (bool): Is the 2D histogram normalized?
-
-        s_label (string): Label for the dataset used for sorting. 
-
-        s_type (string): Sort type. Can be "min" or "max".
-
-        s_transf_expr (string): Python expression used to transform the dataset 
-            used for sorting.
-
-        w_label (string): Label for the dataset used as weights.
-
-        w_transf_expr (string): Python expression used to transform the dataset 
-            used as weights.
-
-        capped_z (bool): Is the z axis data capped?
-
-        capped_label (string): Label used to describe the capped data.
-
-        cap_val (float): The z axis cap value.
-
-        filter_names (list of strings): Names of datasets used as filters.
-
-        mode_name (string): Name of the plot mode.
-
-        left_padding (string): Whitespace string used for left padding.
+        ff (string, optional): Format string for floating-point numbers.
+            Defaults to `defaults.ff2`.
+        x_label (string, optional): Label for the X-axis.
+        x_range (tuple of floats, optional): Min and max values for the X-axis range.
+        x_bin_width (float, optional): Width of bins along the X-axis (for histograms).
+        y_label (string, optional): Label for the Y-axis.
+        y_range (tuple of floats, optional): Min and max values for the Y-axis range.
+        y_bin_width (float, optional): Width of bins along the Y-axis (for histograms).
+        z_label (string, optional): Label for the Z-axis (e.g., for 2D histograms or color values).
+        z_range (tuple of floats, optional): Min and max values for the Z-axis range.
+        x_transf_expr (string, optional): Python expression string used to transform X-axis data.
+        y_transf_expr (string, optional): Python expression string used to transform Y-axis data.
+        z_transf_expr (string, optional): Python expression string used to transform Z-axis data.
+        y_normalized_hist (bool, optional): True if the 1D histogram on Y-axis is normalized.
+        z_normalized_hist (bool, optional): True if the 2D histogram on Z-axis is normalized.
+        s_label (string, optional): Label for the dataset used for sorting (in max/min modes).
+        s_type (string, optional): Sort type, e.g., "min" or "max".
+        s_transf_expr (string, optional): Python expression string for transforming sorting data.
+        w_label (string, optional): Label for the dataset used as weights.
+        w_transf_expr (string, optional): Python expression string for transforming weights data.
+        capped_z (bool, optional): True if Z-axis data has been capped.
+        capped_label (string, optional): Label describing which data was capped (e.g., "z-axis").
+        cap_val (float, optional): The value at which data was capped.
+        filter_names (list of strings, optional): Names of datasets used as filters.
+        mode_name (string, optional): Name of the plot mode (e.g., "hist1d", "graph2d").
+        left_padding (string, optional): String used for indenting info lines.
+            Defaults to `defaults.left_padding + " "`.
 
     Returns:
-        info_lines (list of strings): The info text as a list of strings.
-
+        list of strings: A list where each string is a formatted line of the info text.
+                         The list starts and ends with a padding line.
     """
 
-
+    # Initialize list to hold all info lines. Start with a padding line.
     info_lines = []
     info_lines.append(left_padding)
 
-    line = left_padding
-    line += "x-axis: {}".format(x_label)
+    # X-axis information
+    line = left_padding + "x-axis: {}".format(x_label)
     info_lines.append(line)
-    if x_transf_expr != "":
-        line = left_padding
-        line += "  - transf.: {}".format(x_transf_expr)
+    if x_transf_expr != "": # Add transformation expression if provided.
+        line = left_padding + "  - transf.: {}".format(x_transf_expr)
         info_lines.append(line)
-    if x_bin_width is not None:
-        line = left_padding
-        line += "  - bin width: {}".format(ff.format(x_bin_width))
+    if x_bin_width is not None: # Add bin width if provided (histograms).
+        line = left_padding + "  - bin width: {}".format(ff.format(x_bin_width))
         info_lines.append(line)
-    line = left_padding 
-    line += "  - range: [{}, {}]".format(ff.format(x_range[0]),
-                                         ff.format(x_range[1])) 
-    info_lines.append(line)
-        
+    if x_range is not None: # Add range information.
+        line = left_padding + "  - range: [{}, {}]".format(ff.format(x_range[0]),
+                                             ff.format(x_range[1]))
+        info_lines.append(line)
 
+    # Y-axis information (if y_label is provided)
     if y_label is not None:
-        line = left_padding
-        line += "y-axis: {}".format(y_label)
+        line = left_padding + "y-axis: {}".format(y_label)
         info_lines.append(line)
-        if y_transf_expr != "":
-            line = left_padding 
-            line += "  - transf.: {}".format(y_transf_expr)
+        if y_transf_expr != "": # Add Y-axis transformation.
+            line = left_padding + "  - transf.: {}".format(y_transf_expr)
             info_lines.append(line)
-        if y_normalized_hist:
+        if y_normalized_hist: # Indicate if Y-axis histogram is normalized.
             line = left_padding + "  - normalized"
             info_lines.append(line)
-        if y_bin_width is not None:
-            line = left_padding
-            line += "  - bin width: {}".format(ff.format(y_bin_width))
+        if y_bin_width is not None: # Add Y-axis bin width.
+            line = left_padding + "  - bin width: {}".format(ff.format(y_bin_width))
             info_lines.append(line)
-        if y_range is not None:
-            line = left_padding
-            line += "  - range: [{}, {}]".format(ff.format(y_range[0]),
-                                                 ff.format(y_range[1]))
+        if y_range is not None: # Add Y-axis range.
+            line = left_padding + "  - range: [{}, {}]".format(ff.format(y_range[0]),
+                                                     ff.format(y_range[1]))
             info_lines.append(line)
 
+    # Z-axis information (if z_label is provided)
     if z_label is not None:
-        line = left_padding
-        line += "z-axis: {}".format(z_label)
+        line = left_padding + "z-axis: {}".format(z_label)
         info_lines.append(line)
-        if z_transf_expr != "":
-            line = left_padding
-            line += "  - transf.: {}".format(z_transf_expr)
+        if z_transf_expr != "": # Add Z-axis transformation.
+            line = left_padding + "  - transf.: {}".format(z_transf_expr)
             info_lines.append(line)
-        if z_normalized_hist:
+        if z_normalized_hist: # Indicate if Z-axis histogram is normalized.
             line = left_padding + "  - normalized"
             info_lines.append(line)
-        if z_range is not None:
-            line = left_padding
-            line += "  - range: [{}, {}]".format(ff.format(z_range[0]),
-                                                 ff.format(z_range[1]))
+        if z_range is not None: # Add Z-axis range.
+            line = left_padding + "  - range: [{}, {}]".format(ff.format(z_range[0]),
+                                                     ff.format(z_range[1]))
             info_lines.append(line)
 
+    # Sorting information (if s_label and s_type are provided)
     if (s_label is not None) and (s_type is not None):
-        line = left_padding
-        line += "sort: {} [{}]".format(s_label, s_type)
+        line = left_padding + "sort: {} [{}]".format(s_label, s_type)
         info_lines.append(line)
-        if s_transf_expr != "":
-            line = left_padding
-            line += "  - transf.: {}".format(s_transf_expr)
+        if s_transf_expr != "": # Add sorting data transformation.
+            line = left_padding + "  - transf.: {}".format(s_transf_expr)
             info_lines.append(line)
 
+    # Weights information (if w_label is provided)
     if w_label is not None:
-        line = left_padding
-        line += "weights: {}".format(w_label)
+        line = left_padding + "weights: {}".format(w_label)
         info_lines.append(line)
-        if w_transf_expr != "":
-            line = left_padding
-            line += "  - transf.: {}".format(w_transf_expr)
+        if w_transf_expr != "": # Add weights data transformation.
+            line = left_padding + "  - transf.: {}".format(w_transf_expr)
             info_lines.append(line)
 
+    # Capping information (if capped_z is True)
     if capped_z:
-        line = left_padding
-        line += "capped: {} dataset capped at {}".format(capped_label,
-                                                         ff.format(cap_val))
+        line = left_padding + "capped: {} dataset capped at {}".format(capped_label,
+                                                             ff.format(cap_val))
         info_lines.append(line)
 
+    # Filter information (loop through all filter_names)
     for f_name in filter_names:
         line = left_padding + "filter: {}".format(f_name)
         info_lines.append(line)
 
+    # Plot mode information (if mode_name is provided)
     if mode_name is not None:
-        info_lines.append(left_padding)
+        info_lines.append(left_padding) # Add a padding line before mode info.
         line = left_padding + "plot type: {}".format(mode_name)
         info_lines.append(line)
 
+    # Add a final padding line at the end of the info block.
     info_lines.append(left_padding)
 
     return info_lines
@@ -494,6 +490,8 @@ def get_dataset_names_txt(txt_file_name):
 
     # Let's find the first non-empty comment line, which we require 
     # should contain the column names.
+    # This function assumes that the first non-empty line starting with
+    # the comment character '#' contains the dataset names (header).
     firstline = ''
     with open(txt_file_name) as f:
         templine = ''
@@ -507,8 +505,28 @@ def get_dataset_names_txt(txt_file_name):
     # If firstline is not a header with column names, we have to create
     # a list of names based on the number of columns we detect from firstline.
     if not firstline.startswith(comments):
+        # If the firstline does not start with the comment character,
+        # it might be a data line or a malformed header.
+        # We'll try to infer column count if it's not empty.
+        if not firstline:
+            raise SupRuntimeError(
+                f"{error_prefix} Could not find a valid header line (non-empty, starting with '{comments}') "
+                f"in file {txt_file_name}. The first non-empty line found was empty or missing."
+            )
         n_cols = len(firstline.replace(',', ' ').split())
+        if n_cols == 0:
+            raise SupRuntimeError(
+                f"{error_prefix} Could not parse column names from the first non-empty line in {txt_file_name}. "
+                f"The line was: '{firstline}'. It does not start with '{comments}' and no columns could be inferred."
+            )
         use_names = ['dataset' + str(i) for i in range(n_cols)]
+    elif not firstline.lstrip(comments).strip():
+        # The line starts with a comment but is empty otherwise.
+        raise SupRuntimeError(
+            f"{error_prefix} The header line (starting with '{comments}') in file {txt_file_name} "
+            f"is empty after stripping the comment character and whitespace: '{firstline}'"
+        )
+
 
     stringIO_file = StringIO(firstline)
     dsets = np.genfromtxt(stringIO_file, names=use_names, comments=comments)
@@ -1297,123 +1315,170 @@ def get_bin_tuples_avg(x_data, y_data, z_data, xy_bins, x_range, y_range):
 
 def add_axes(lines, fig_width, xy_bins, x_bin_limits, y_bin_limits, ccs,
              floatf="{: .1e}", add_y_grid_lines=False, add_blank_top_line=True):
+    """Adds formatted X and Y axes, ticks, and labels to a list of plot lines.
 
+    This function takes a list of strings (each representing a line of a text-based plot)
+    and modifies it by appending axis lines, tick marks, and numerical labels.
+    It calculates appropriate tick positions and formats them based on provided limits
+    and a float formatting string.
+
+    Args:
+        lines (list of strings): The existing plot lines (rows of the plot).
+            This list will be modified in-place by prepending/appending axis elements.
+        fig_width (int): The current width of the figure. This might be used for
+            alignment but the function primarily calculates its own required widths.
+        xy_bins (tuple of int): A tuple (x_bins, y_bins) representing the number
+            of bins in the x and y dimensions of the plot grid.
+        x_bin_limits (numpy.ndarray): An array of values representing the boundaries
+            of the x-bins. Used for labeling x-axis ticks.
+        y_bin_limits (numpy.ndarray): An array of values representing the boundaries
+            of the y-bins. Used for labeling y-axis ticks.
+        ccs (CCodeSettings): Color code settings object. Must have attributes like
+            `fg_ccode` (foreground), `bg_ccode` (background), and
+            `empty_bin_ccode` (for grid lines/alternative ticks).
+        floatf (string, optional): Format string for float numbers on axis labels.
+            Defaults to "{: .1e}".
+        add_y_grid_lines (bool, optional): If True, adds horizontal grid lines
+            at y-tick positions. Defaults to False.
+        add_blank_top_line (bool, optional): Though present in signature, this
+            argument is not directly used in the current implementation logic for
+            adding a blank top line (a top line is added regardless).
+
+    Returns:
+        tuple:
+            - lines (list of strings): The modified list of plot lines including axes.
+            - fig_width (int): The original fig_width is returned. Note that
+              this function does not recalculate or update fig_width based on
+              added axes labels that might extend beyond the original width.
+    """
+
+    # mod_func is a helper to apply standard foreground/background color and bold style.
     mod_func = lambda input_str : prettify(input_str, ccs.fg_ccode,
                                            ccs.bg_ccode, bold=True)
-
+    # mod_func_2 is for elements like grid lines, using 'empty_bin_ccode'.
     mod_func_2 = lambda input_str : prettify(input_str, ccs.empty_bin_ccode,
                                              ccs.bg_ccode, bold=True)
 
-    # if mod_func is None:
-    #     mod_func = lambda x : x
-
+    # Determine X-axis tick positions.
+    # Aim for a reasonable number of ticks that are not too crowded.
     x_tick_indicies = []
     tick_spacing = 0
+    # tick_width is the character width of a formatted number, used for spacing.
     tick_width = len("{}".format(floatf.format(0.0)))
-    for n_ticks in range(2,100):
+    for n_ticks in range(2,100): # Try increasing number of ticks.
         new_indicies = [
             int(i) for i in np.floor(np.linspace(0, xy_bins[0], n_ticks))
         ]
+        # Calculate spacing between ticks in terms of characters (2 chars per bin).
         tick_spacing = (new_indicies[1] - new_indicies[0]) * 2
         if tick_spacing < tick_width + 1:
             break
         x_tick_indicies = new_indicies
     n_x_ticks = len(x_tick_indicies)
 
-
+    # Determine Y-axis tick positions.
+    # Similar logic to x-axis, trying to balance clarity and number of ticks.
+    # max_y_ticks aims for roughly one tick every other y-bin.
     max_y_ticks = int(np.ceil(xy_bins[1] / 2.))
+    # min_y_ticks ensures a minimum number of y-ticks for very tall plots.
     min_y_ticks = int(np.floor(xy_bins[1] / 10.) + 3)
     yx_bins_ratio = float(xy_bins[1]) / xy_bins[0]
-    n_y_ticks = min(max_y_ticks, int(np.ceil(n_x_ticks * yx_bins_ratio))) 
-    n_y_ticks = max(n_y_ticks, min_y_ticks) 
+    # Scale number of y-ticks based on x-ticks and aspect ratio.
+    n_y_ticks = min(max_y_ticks, int(np.ceil(n_x_ticks * yx_bins_ratio)))
+    n_y_ticks = max(n_y_ticks, min_y_ticks) # Ensure minimum number of y-ticks.
     y_tick_indicies = [
         int(i) for i in np.floor(np.linspace(0, xy_bins[1], n_y_ticks))
     ]
 
-    # Reverse the list of indices, since we're printing the plot from top down
+    # Reverse y_tick_indicies because plot lines are typically indexed
+    # from top (highest y-value or y-bin index) to bottom.
     y_tick_indicies = y_tick_indicies[::-1]
 
 
-    #
-    # Add axis lines
-    #
-
+    # Add axis lines to the plot.
+    # Prepend a top border line for the plot area.
     top_line = mod_func(" " + "  " * xy_bins[0] + "_")
     lines = [top_line] + lines
+    # Add vertical line segments for the Y-axis and tick marks.
     for i in range(len(lines)):
-        if i == 0:
+        if i == 0: # Skip the very top border line.
             continue
-        if i in y_tick_indicies:
-            lines[i] = lines[i] + mod_func("│\u0332")
+        if i in y_tick_indicies: # If this line corresponds to a Y-tick index.
+            lines[i] = lines[i] + mod_func("│\u0332") # Add tick mark "│̲".
         else:
-            lines[i] += mod_func("│")
+            lines[i] += mod_func("│") # Add plain axis line segment "│".
 
-    # x axis:
-    x_axis = " "
+    # Construct the X-axis line with tick marks.
+    x_axis = " " # Initial padding for x-axis.
     for i in range(n_x_ticks):
-        if i == 0:
+        if i == 0: # First tick.
             x_axis += "┼─"
-        elif i == (n_x_ticks-1):
+        elif i == (n_x_ticks-1): # Last tick.
             x_axis += "┼"
             break
-        else:
+        else: # Intermediate ticks.
             x_axis += "┼─"
+        # Calculate number of dashes "─" needed to reach the next tick.
         bin_diff = x_tick_indicies[i+1] - x_tick_indicies[i]
-        x_axis += "─" * (bin_diff * 2 - 2)
-    x_axis = mod_func(x_axis)
-    lines.append(x_axis)
+        x_axis += "─" * (bin_diff * 2 - 2) # 2 chars per bin, minus existing "┼─".
+    x_axis = mod_func(x_axis) # Apply formatting
+    lines.append(x_axis) # Append the x-axis line to the plot.
 
     #
-    # Add x and y ticks
+    # Add x and y tick labels
     #
 
-    # y ticks
+    # Prepare Y-tick labels.
     y_tick_labels = []
     for i in y_tick_indicies:
+        # y_bin_limits are typically ascending, [::-1] reverses for top-down plot.
         label = "{}".format(floatf.format(y_bin_limits[::-1][i]))
         y_tick_labels.append(label)
 
-
+    # Add Y-tick labels to the lines, and optional grid lines.
     if add_y_grid_lines:
         for i, tick_index in enumerate(y_tick_indicies):
-            # top line
-            if tick_index == y_tick_indicies[-1]:
+            # If it's the tick for the top-most data line (last in y_tick_indicies due to reverse).
+            if tick_index == y_tick_indicies[-1]: # This was y_tick_indicies[0] before reversal of y_tick_indicies, now it's the "bottom" of y-axis visually
                 new_line = mod_func_2(" " + " _" * xy_bins[0]) + mod_func("_")
                 lines[tick_index] = new_line
-            # other lines
             else:
+                # Replace empty bin markers with grid line segments.
                 new_line = lines[tick_index].replace("  ", mod_func_2(" _"))
                 lines[tick_index] = new_line
 
-            # Add y tick
-            lines[tick_index] += mod_func("" + y_tick_labels[i] + "   ")
-    else:
+            # Append the Y-tick label.
+            lines[tick_index] += mod_func("" + y_tick_labels[i] + "   ") # Add padding after label.
+    else: # No grid lines, just add labels.
         for i, tick_index in enumerate(y_tick_indicies):
             lines[tick_index] += mod_func("" + y_tick_labels[i] + "   ")
 
-
+    # Ensure all lines have consistent padding on the right for labels,
+    # even if they don't have a Y-tick label themselves.
     for i,line in enumerate(lines):
-        if i in y_tick_indicies:
+        if i in y_tick_indicies: # Already handled if it's a tick line.
             pass
-        else:
+        else: # Add padding to align with labeled lines.
             lines[i] += mod_func("" + " "*tick_width + "   ")
 
-    # x ticks
+    # Prepare X-tick labels.
     x_tick_labels = []
     for i in x_tick_indicies:
         label = "{}".format(floatf.format(x_bin_limits[i]))
         x_tick_labels.append(label)
-    x_ticks = ""
+    x_ticks_line = ""
     for i in range(n_x_ticks):
         tick_label = x_tick_labels[i]
-        x_ticks += tick_label
-        if i == (n_x_ticks-1):
+        x_ticks_line += tick_label
+        if i == (n_x_ticks-1): # Last label.
             break
+        # Calculate spacing to the next label.
         bin_diff = x_tick_indicies[i+1] - x_tick_indicies[i]
-        x_ticks += " " * ((bin_diff * 2) - len(tick_label))
+        # (bin_diff * 2) is char width to next tick mark. Subtract label length for space.
+        x_ticks_line += " " * ((bin_diff * 2) - len(tick_label))
 
-    x_ticks = mod_func(x_ticks + "     ")
-    lines.append(x_ticks)
+    x_ticks_line = mod_func(x_ticks_line + "     ") # Apply formatting and add trailing padding.
+    lines.append(x_ticks_line) # Append the X-tick labels line.
 
     return lines, fig_width
 
