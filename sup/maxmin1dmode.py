@@ -15,9 +15,35 @@ from sup.markersettings import MarkerSettings
 
 
 def run_max(args):
+    """Calls the main 'run' function to plot maximum y-values per x-bin.
+
+    This is a wrapper function that calls the main `run` function of
+    `maxmin1dmode` with the mode explicitly set to "max". It's used to
+    generate a 1D graph of the maximum y-value for each x-bin.
+
+    Args:
+        args (argparse.Namespace): The parsed command-line arguments,
+            which are passed through to the main `run` function.
+
+    Returns:
+        None
+    """
     run(args, "max")
 
 def run_min(args):
+    """Calls the main 'run' function to plot minimum y-values per x-bin.
+
+    This is a wrapper function that calls the main `run` function of
+    `maxmin1dmode` with the mode explicitly set to "min". It's used to
+    generate a 1D graph of the minimum y-value for each x-bin.
+
+    Args:
+        args (argparse.Namespace): The parsed command-line arguments,
+            which are passed through to the main `run` function.
+
+    Returns:
+        None
+    """
     run(args, "min")
 
 def run(args, mode):
@@ -144,6 +170,25 @@ def run(args, mode):
     # Define a function that returns the color code and marker for any bin 
     # coordinate xiyi in the plot
     def get_ccode_and_marker(xiyi):
+        """Determines the color code and marker for a plot bin.
+
+        The determination is based on the bin's `z_val` (obtained from
+        `bins_info`). This value indicates if the bin is empty (0),
+        or if the line representing the max/min y-value for the
+        corresponding x-bin passes through the lower half (1) or
+        upper half (2) of this y-bin.
+
+        This function relies on `bins_info`, `ccs` (CCodeSettings), and
+        `ms` (MarkerSettings) from the outer scope.
+
+        Args:
+            xiyi (tuple): The (x_bin_index, y_bin_index) coordinates
+                of the bin.
+
+        Returns:
+            tuple: A tuple `(ccode, marker)` where `ccode` is the color
+                code (int) and `marker` is the string for the plot marker.
+        """
 
         z_val = bins_info[xiyi][2]
 

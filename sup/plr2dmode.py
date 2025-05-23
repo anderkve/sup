@@ -152,6 +152,29 @@ def run(args):
     # Define a function that returns the color code and marker for any bin 
     # coordinate xiyi in the plot
     def get_ccode_and_marker(xiyi):
+        """Determines the color code and marker for a 2D PLR plot bin.
+
+        The `z_val` (likelihood ratio from `bins_info`) is used with
+        `color_z_lims` (derived from confidence levels) to select a
+        color from `ccs.ccodes`. If `z_val` is 1.0 (best-fit point),
+        and `use_capped_loglike` is False and `highlight_maxlike_point`
+        is True, it uses `ccs.max_bin_ccode` and `ms.special_marker`.
+        Otherwise, it uses `ms.regular_marker` and the color determined
+        by `color_z_lims`.
+
+        This function relies on `bins_info`, `color_z_lims`,
+        `use_capped_loglike`, `highlight_maxlike_point`,
+        `ccs` (CCodeSettings), and `ms` (MarkerSettings) from the
+        outer scope.
+
+        Args:
+            xiyi (tuple): The (x_bin_index, y_bin_index) coordinates
+                of the bin.
+
+        Returns:
+            tuple: `(ccode, marker)` where `ccode` is the color code (int)
+                and `marker` is the string for the plot marker.
+        """
 
         z_val = bins_info[xiyi][2]
         z_norm = z_val

@@ -157,6 +157,26 @@ def run(args):
     # Define a function that returns the color code and marker for any bin 
     # coordinate xiyi in the plot
     def get_ccode_and_marker(xiyi):
+        """Determines the color code and marker for a histogram bin.
+
+        The `z_val` from `bins_info` indicates if the bin is empty (0),
+        part of the histogram bar top (1 for lower half, 2 for upper
+        half of the bin), or part of the filled area below the bar top (-1).
+        This value is used to select the appropriate color code from `ccs`
+        and marker string from `ms`.
+
+        This function relies on `bins_info`, `ccs` (CCodeSettings), and
+        `ms` (MarkerSettings) from the outer scope.
+
+        Args:
+            xiyi (tuple): The (x_bin_index, y_bin_index) coordinates
+                of the bin.
+
+        Returns:
+            tuple: `(ccode, marker)` where `ccode` is the color code (int)
+                and `marker` is the string for the plot marker (e.g.,
+                empty, bar top, or fill).
+        """
 
         z_val = bins_info[xiyi][2]
 
