@@ -3,6 +3,9 @@
 
 `sup` is a command-line tool for generating quick 1D and 2D data visualizations directly in the terminal using Unicode characters and ANSI colors. It can plot data from files (text or HDF5) or directly from mathematical functions.
 
+<img src="./example_plots/sup_post1d.png" alt="1D posterior example" height="230"/>  <img src="./example_plots/sup_plr1d.png" alt="1D profile likelihood example" height="230"/> <img src="./example_plots/sup_graph1d.png" alt="1D graph example" height="230"/> 
+<img src="./example_plots/sup_post2d.png" alt="2D posterior example" height="375"/>  <img src="./example_plots/sup_plr2d.png" alt="2D profile likelihood example" height="375"/> <img src="./example_plots/sup_graph2d.png" alt="2D graph example" height="375"/> 
+
 
 ## But why?
 
@@ -23,27 +26,6 @@ I often find while doing terminal-based work (e.g. running scientific computatio
 *   Customizable plot size, ranges, transformations (e.g., log scale).
 *   Color and grayscale output, with optional white background.
 *   Various colormaps for 2D plots.
-
-## Some example plots
-- **1D posterior** 
-
-  <img src="./example_plots/sup_post1d.png" alt="1D posterior example" width="601"/> 
-
-- **2D posterior**
-
-  <img src="./example_plots/sup_post2d.png" alt="2D posterior example" width="601"/> 
-
-- **2D profile likelihood**
-
-  <img src="./example_plots/sup_plr2d.png" alt="2D profile likelihood example" width="601"/> 
-
-- **1D graph**
-
-  <img src="./example_plots/sup_graph1d.png" alt="1D graph example" width="601"/> 
-
-- **2D graph**
-
-  <img src="./example_plots/sup_graph2d.png" alt="2D graph example" width="601"/> 
 
 ## Installation
 
