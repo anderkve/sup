@@ -85,7 +85,7 @@ sup list data.txt --delimiter ","
 ```bash
 sup hist1d posterior.dat 0 -sz 40 20 -wb
 ```
-(The `posterior.dat` file is included in this repository for testing.)
+(The `posterior.dat` file is included in the `tests` directory of this repository.)
 
 **Plot a 1D function `y = x * cos(2*pi*x)`:**
 ```bash

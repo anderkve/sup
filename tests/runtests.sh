@@ -52,10 +52,10 @@ sup min1d posterior.dat 0 1 -sz 40 20
 echo
 echo
 echo "sup plr1d posterior.dat 0 1 -sz 40 20 -wb"
-sup plr1d posterior.dat 0 1 -sz 40 20 -wb
+sup plr1d posterior.dat 0 8 -sz 40 20 -wb
 echo
 echo "sup plr1d posterior.dat 0 1 -sz 40 20"
-sup plr1d posterior.dat 0 1 -sz 40 20
+sup plr1d posterior.dat 0 8 -sz 40 20
 
 
 # Test 2d modes
