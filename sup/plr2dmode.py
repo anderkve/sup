@@ -8,8 +8,10 @@ L(x,y)/L_max(x,y), across the (x,y) plane.
 """
 
 import numpy as np
+from scipy.stats import chi2
 import sup.defaults as defaults
 import sup.utils as utils
+import sup.colors as colors
 from sup.ccodesettings import CCodeSettings
 from sup.markersettings import MarkerSettings
 
@@ -51,11 +53,24 @@ def run(args):
     if args.cap_loglike_val is not None:
         use_capped_loglike = True
 
-    color_z_lims = [0.0, 0.003, 0.046, 0.317]
+    confidence_levels = args.confidence_levels
+    if not confidence_levels:
+        confidence_levels = [68.3, 95.45, 99.73]
+    confidence_levels_sorted = sorted(confidence_levels)
+
+    color_z_lims = [0.0]
+    for cl in confidence_levels_sorted[::-1]:
+        pp = cl * 0.01
+        chi2_val = chi2.ppf(pp, df=2)
+        llhratio_thres = np.exp(-0.5 * chi2_val)
+        color_z_lims.append(llhratio_thres)
 
     ccs = CCodeSettings()
-    ccs.cmaps["color_bb"] = [236, 19, 45, 226]
-    ccs.cmaps["color_wb"] = [248, 19, 45, 220]
+    
+    # ccs.cmaps["color_bb"] = [236, 19, 45, 226]
+    # ccs.cmaps["color_wb"] = [248, 19, 45, 220]
+    ccs.cmaps["color_bb"] = colors.cmaps[args.cmap_index]
+    ccs.cmaps["color_wb"] = colors.cmaps[args.cmap_index]
     ccs.cmaps["grayscale_bb"] = [233, 237, 242, 231]
     ccs.cmaps["grayscale_wb"] = [254, 250, 243, 232]
     ccs.use_white_bg = args.use_white_bg
@@ -106,11 +121,6 @@ def run(args):
     if not y_range:
         y_range = [np.min(y_data), np.max(y_data)]
 
-    # if not z_min:
-    #     z_min = np.min(z_data)
-    # if not z_max:
-    #     z_max = np.max(z_data)
-
     # Cap loglike?
     if use_capped_loglike:
         loglike_data = np.minimum(loglike_data, args.cap_loglike_val)
@@ -124,10 +134,6 @@ def run(args):
     likelihood_ratio = np.exp(loglike_data) / np.exp(loglike_max)
 
     z_data = likelihood_ratio
-    # z_min = np.min(z_data)
-    # z_max = np.max(z_data)
-    # z_range = [z_min, z_max]
-
     s_data = z_data  # sort according to likelihood_ratio
 
 
@@ -197,12 +203,11 @@ def run(args):
     if (not use_capped_loglike) and highlight_maxlike_point:
         legend_entries.append((ms.special_marker.strip(), ccs.max_bin_ccode, 
                                "best-fit", ccs.fg_ccode))
-    legend_entries.append((ms.regular_marker.strip(), ccs.ccodes[-1], "1σ",
-                           ccs.fg_ccode))
-    legend_entries.append((ms.regular_marker.strip(), ccs.ccodes[-2], "2σ",
-                           ccs.fg_ccode))
-    legend_entries.append((ms.regular_marker.strip(), ccs.ccodes[-3], "3σ",
-                           ccs.fg_ccode))
+
+    for i,cl in enumerate(confidence_levels_sorted):
+        use_cc_index = -(i + 1)
+        legend_entries.append((ms.regular_marker.strip(), ccs.ccodes[use_cc_index], f"{cl}% CL",
+                               ccs.fg_ccode))
     
     legend, legend_width = utils.generate_legend(legend_entries,
                                                  ccs.bg_ccode,

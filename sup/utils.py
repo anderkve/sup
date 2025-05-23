@@ -1898,9 +1898,9 @@ def add_axes(lines, fig_width, xy_bins, x_bin_limits, y_bin_limits, ccs,
 def get_cl_included_bins_1d(confidence_levels, y_func_data, dx):
     """Determine which bins are included within specified confidence levels (CL).
 
-    This function is typically used for 1D profile likelihoods or similar
-    functions where `y_func_data` represents normalized likelihood values (or
-    L/L_max), and the goal is to find regions (sets of bins) corresponding
+    This function is used for 1D profile likelihoods functions where 
+    `y_func_data` represents normalized likelihood values (or L/L_max), 
+    and the goal is to find regions (sets of bins) corresponding
     to certain confidence levels.
 
     Parameters
@@ -1909,8 +1909,8 @@ def get_cl_included_bins_1d(confidence_levels, y_func_data, dx):
         A list of confidence levels (e.g., [68.0, 95.0]) for which to
         determine the included bins. Values should be percentages (0-100).
     y_func_data : numpy.ndarray
-        A 1D array of y-values, typically normalized likelihoods (L/L_max),
-        where the maximum non-NaN value is assumed to be 1.0.
+        A 1D array of normalized likelihoods (L/L_max), where the 
+        maximum non-NaN value is assumed to be 1.0.
     dx : float
         The width of each bin. While present in the signature, this parameter
         is not used in the current implementation of this function. It might

@@ -158,8 +158,13 @@ class CCodeSettings:
 
         n_colors_current = len(self.ccodes)
         new_ccodes = []
-        for i in np.round(np.linspace(0, n_colors_current - 1, self.use_n_colors)).astype(int):
-            new_ccodes.append(self.ccodes[i])
+
+        if self.use_n_colors < n_colors_current:
+            for i in np.round(np.linspace(0, n_colors_current - 1, self.use_n_colors)).astype(int):
+                new_ccodes.append(self.ccodes[i])
+        else:
+            new_ccodes = [self.ccodes[i%n_colors_current] for i in range(self.use_n_colors)]
+
         self.ccodes = new_ccodes
         self.use_n_colors = len(self.ccodes)
 
