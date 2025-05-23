@@ -51,7 +51,7 @@ Once installed, you can use the `sup` command from your terminal.
 **General syntax:**
 `sup <mode> [options...]`
 
-Run `sup --help` to see all available modes and options.
+Run `sup --help` to see all available modes and options. To see all the options for a specific run mode, do `sup <mode> --help`.
 
 ### Examples
 
