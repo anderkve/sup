@@ -35,7 +35,7 @@ Simply install using `pip`:
 pip install git+https://github.com/anderkve/sup.git
 ```
 
-This will install the `sup` terminal command and its dependencies.
+This will install the `sup` terminal command.
 
 ## Dependencies
 
@@ -54,8 +54,6 @@ Once installed, you can use the `sup` command from your terminal.
 Run `sup --help` to see all available modes and options.
 
 ### Examples
-
-Here are a few examples based on the tool's capabilities:
 
 **List datasets in a file:**
 ```bash
