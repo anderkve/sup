@@ -9,7 +9,7 @@
 
 ## But why?
 
-I often find while doing terminal-based work (e.g. running scientific computations on HPC clusters) that I want to quickly check or monitor the content of some data file — for instance check different 1D and 2D histograms/posteriors and profile likelihood maps. So I wrote `sup` as a lightweight tool for displaying rough versions of such plots directly in the terminal, to minimize the disruption to my ongoing workflow. 
+I often find while doing terminal-based work (e.g. running scientific computations on HPC clusters) that I want to quickly check or monitor the content of some data file — for instance check different 1D and 2D histograms/posteriors and profile likelihood maps. So I wrote `sup` as a lightweight tool for displaying rough versions of such plots directly in the terminal, to minimize the disruption to my ongoing workflow.
 
 
 ## Features
