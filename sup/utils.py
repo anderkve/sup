@@ -524,6 +524,26 @@ def get_dataset_names_hdf5(hdf5_file_object):
     import h5py
     result = []
     def get_datasets(name, obj):
+        """Callback function for h5py.File.visititems to find datasets.
+
+        This function is designed to be used as a callable for the
+        `visititems` method of an `h5py.File` object. It checks if the
+        visited HDF5 item `obj` is a dataset. If it is, the item's
+        `name` is appended to the `result` list, which is defined in
+        the enclosing scope of `get_dataset_names_hdf5`.
+
+        This function relies on the `result` list from the outer scope
+        and the `h5py` library.
+
+        Args:
+            name (str): The name of the HDF5 item being visited.
+            obj (h5py.HLObject): The HDF5 item object itself.
+                Expected to be an instance of `h5py._hl.dataset.Dataset`
+                if it's a dataset.
+
+        Returns:
+            None: This function modifies the `result` list in place.
+        """
         if type(obj) is h5py._hl.dataset.Dataset:
             result.append(name)
 

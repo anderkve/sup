@@ -187,6 +187,25 @@ def run(args):
     # Define a function that returns the color code and marker for any bin 
     # coordinate xiyi in the plot
     def get_ccode_and_marker(xiyi):
+        """Determines the color code and marker for a 2D histogram bin.
+
+        It normalizes the bin's `z_val` (content/height from `bins_info`)
+        using `z_min` and `z_max`. The normalized value is then used with
+        `color_z_lims` to select a color from `ccs.ccodes`. The marker
+        is always `ms.regular_marker`.
+
+        This function relies on `bins_info`, `z_min`, `z_max`,
+        `color_z_lims`, `ccs` (CCodeSettings), and `ms` (MarkerSettings)
+        from the outer scope.
+
+        Args:
+            xiyi (tuple): The (x_bin_index, y_bin_index) coordinates
+                of the bin.
+
+        Returns:
+            tuple: `(ccode, marker)` where `ccode` is the color code (int)
+                and `marker` is `ms.regular_marker`.
+        """
 
         z_val = bins_info[xiyi][2]
         z_norm = 0.0

@@ -16,9 +16,35 @@ from sup.markersettings import MarkerSettings
 
 
 def run_max(args):
+    """Calls the main 'run' function to plot maximum z-values per (x,y)-bin.
+
+    This is a wrapper function that calls the main `run` function of
+    `maxmin2dmode` with the mode explicitly set to "max". It's used to
+    generate a 2D map of the maximum z-value for each (x,y)-bin.
+
+    Args:
+        args (argparse.Namespace): The parsed command-line arguments,
+            which are passed through to the main `run` function.
+
+    Returns:
+        None
+    """
     run(args, "max")
 
 def run_min(args):
+    """Calls the main 'run' function to plot minimum z-values per (x,y)-bin.
+
+    This is a wrapper function that calls the main `run` function of
+    `maxmin2dmode` with the mode explicitly set to "min". It's used to
+    generate a 2D map of the minimum z-value for each (x,y)-bin.
+
+    Args:
+        args (argparse.Namespace): The parsed command-line arguments,
+            which are passed through to the main `run` function.
+
+    Returns:
+        None
+    """
     run(args, "min")
 
 def run(args, mode):
@@ -164,6 +190,29 @@ def run(args, mode):
     # Define a function that returns the color code and marker for any bin 
     # coordinate xiyi in the plot
     def get_ccode_and_marker(xiyi):
+        """Determines the color code and marker for a 2D plot bin.
+
+        It normalizes the bin's `z_val` (selected max/min value from
+        `bins_info`) using `z_min` and `z_max`. This normalized value,
+        along with `color_z_lims`, selects a color from `ccs.ccodes`.
+        If the point corresponds to the overall maximum (when `s_type`
+        is "max") or minimum (when `s_type` is "min") s-value, and
+        `highlight_maxmin_point` is True, it uses a special marker
+        (`ms.special_marker`) and color (`ccs.max_bin_ccode`). Otherwise,
+        it uses `ms.regular_marker`.
+
+        This function relies on `bins_info`, `z_min`, `z_max`, `s_type`,
+        `highlight_maxmin_point`, `color_z_lims`, `ccs` (CCodeSettings),
+        and `ms` (MarkerSettings) from the outer scope.
+
+        Args:
+            xiyi (tuple): The (x_bin_index, y_bin_index) coordinates
+                of the bin.
+
+        Returns:
+            tuple: `(ccode, marker)` where `ccode` is the color code (int)
+                and `marker` is the string for the plot marker.
+        """
 
         z_val = bins_info[xiyi][2]
         z_norm = 0.0

@@ -120,6 +120,26 @@ def run(args):
     # Define a function that returns the color code and marker for any bin 
     # coordinate xiyi in the plot
     def get_ccode_and_marker(xiyi):
+        """Determines the color code and marker for a plot bin.
+
+        The function value f(x,y) for the bin center (`z_val`, obtained
+        from `bins_info`) is used to select a color from `ccs.ccodes`.
+        The selection is based on where `z_val` falls within the
+        intervals defined by `color_z_lims`. The marker is always
+        `ms.regular_marker`.
+
+        This function relies on `bins_info`, `color_z_lims`,
+        `ccs` (CCodeSettings), and `ms` (MarkerSettings) from the
+        outer scope.
+
+        Args:
+            xiyi (tuple): The (x_bin_index, y_bin_index) coordinates
+                of the bin.
+
+        Returns:
+            tuple: A tuple `(ccode, marker)` where `ccode` is the color
+                code (int) and `marker` is `ms.regular_marker`.
+        """
 
         z_val = bins_info[xiyi][2]
 
