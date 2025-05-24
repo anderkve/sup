@@ -171,6 +171,11 @@ def run(args, mode):
         s_data[maxmin_index]
     )
 
+    # Cap z data at upper range limit
+    extend_cbar_up = False
+    if np.max(z_data) > z_max:
+        z_data[z_data > z_max] = z_max
+        extend_cbar_up = True
 
     # Set color limits
     color_z_lims = list(np.linspace(z_min, z_max, len(ccs.ccodes)+1))
@@ -269,7 +274,8 @@ def run(args, mode):
     #
 
     plot_lines, fig_width = utils.generate_colorbar(plot_lines, fig_width, ff,
-                                                    ccs, color_z_lims) 
+                                                    ccs, color_z_lims,
+                                                    extend_up=extend_cbar_up) 
 
     # max/min legend
     point_str = ""

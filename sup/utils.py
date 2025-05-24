@@ -191,7 +191,7 @@ def generate_legend(legend_entries, bg_ccode, sep="  ", internal_sep=" ",
 
 
 
-def generate_colorbar(plot_lines, fig_width, ff, ccs, color_z_lims):
+def generate_colorbar(plot_lines, fig_width, ff, ccs, color_z_lims, extend_up=False):
     """Generate a color bar and add it to the plot_lines.
 
     This function constructs a color bar legend, including the color
@@ -220,6 +220,8 @@ def generate_colorbar(plot_lines, fig_width, ff, ccs, color_z_lims):
         A list of float values representing the boundaries for each color in
         the color bar. These are the numerical values that will be labeled
         on the colorbar.
+    extend_up : bool
+        Add right arrow at the rightmost colorswatch and skip the last numerical label
 
     Returns
     -------
@@ -254,7 +256,11 @@ def generate_colorbar(plot_lines, fig_width, ff, ccs, color_z_lims):
         if i < (n_color_lims - 1):
             cb_entries.append(("|", bar_ccode, 6*"■", ccodes[i])) # Separator, then color swatch.
         else:
-            cb_entries.append(("|", bar_ccode, "", fg_ccode)) # Final separator.
+            if extend_up:
+                cb_entries.append(("|", bar_ccode, "▶", ccodes[n_color_lims - 2]))
+            else:
+                cb_entries.append(("|", bar_ccode, "", fg_ccode)) # Final separator.
+
 
     # Generate the colorbar line string using the helper function generate_legend.
     cb_line, cb_width = generate_legend(cb_entries, bg_ccode, sep=" ",
@@ -281,6 +287,7 @@ def generate_colorbar(plot_lines, fig_width, ff, ccs, color_z_lims):
             if len(txt) > gap_length: # Adjust gap if text is too long.
                 gap_length = gap_length - (len(txt) - gap_length)
             cb_nums_entries.append(("", fg_ccode, " " * gap_length, fg_ccode))
+
 
     # Generate the line string for colorbar numbers.
     cb_nums_line, cb_nums_width = generate_legend(cb_nums_entries,

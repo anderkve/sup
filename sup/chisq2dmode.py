@@ -33,8 +33,8 @@ def run(args):
     input_file = args.input_file
     x_index = args.x_index
     y_index = args.y_index
-    loglike_index = args.loglike_index
-    s_index = args.loglike_index
+    chisq_index = args.chisq_index
+    s_index = args.chisq_index
     s_type = "min"
 
     filter_indices = args.filter_indices
@@ -49,32 +49,24 @@ def run(args):
     if not xy_bins:
         xy_bins = defaults.xy_bins
     
-    use_capped_loglike = False
-    if args.cap_loglike_val is not None:
-        use_capped_loglike = True
-
-    # Confidence levels removed for chisq2dmode
-    # color_z_lims will be redefined later based on delta_chi2_data range
-
     ccs = CCodeSettings()
-    # Default n_colors for delta chi-square map, can be made configurable later
-    ccs.use_n_colors = args.n_colors if args.n_colors is not None else 5 
     
-    # ccs.cmaps["color_bb"] = [236, 19, 45, 226]
-    # ccs.cmaps["color_wb"] = [248, 19, 45, 220]
     ccs.cmaps["color_bb"] = colors.cmaps[args.cmap_index]
     ccs.cmaps["color_wb"] = colors.cmaps[args.cmap_index]
     ccs.cmaps["grayscale_bb"] = [233, 237, 242, 231]
     ccs.cmaps["grayscale_wb"] = [254, 250, 243, 232]
     ccs.use_white_bg = args.use_white_bg
     ccs.use_grayscale = args.use_grayscale
-    # ccs.use_n_colors is set above
+    ccs.use_n_colors = args.n_colors
     ccs.update()
+
+    if args.reverse_colormap:
+        ccs.ccodes = ccs.ccodes[::-1]
 
     ms = MarkerSettings()
     ms.empty_bin_marker = defaults.empty_bin_marker_2d
 
-    highlight_maxlike_point = not(args.no_star)
+    highlight_minchisq_point = not(args.no_star)
 
     n_decimals = args.n_decimals
     ff = "{: ." + str(n_decimals) + "e}"
@@ -86,10 +78,10 @@ def run(args):
     #
 
     dsets, dset_names = utils.read_input_file(
-        input_file, [x_index, y_index, loglike_index, s_index], read_slice, 
+        input_file, [x_index, y_index, chisq_index, s_index], read_slice, 
         delimiter=args.delimiter)
-    x_data, y_data, loglike_data, s_data = dsets
-    x_name, y_name, loglike_name, s_name = dset_names
+    x_data, y_data, chisq_data, s_data = dsets
+    x_name, y_name, chisq_name, s_name = dset_names
 
     filter_datasets, filter_names = utils.get_filters(input_file, 
                                                       filter_indices, 
@@ -97,8 +89,8 @@ def run(args):
                                                       delimiter=args.delimiter)
 
     if use_filters:
-        x_data, y_data, loglike_data, s_data = utils.apply_filters(
-            [x_data, y_data, loglike_data, s_data], filter_datasets)
+        x_data, y_data, chisq_data, s_data = utils.apply_filters(
+            [x_data, y_data, chisq_data, s_data], filter_datasets)
 
     x_transf_expr = args.x_transf_expr
     y_transf_expr = args.y_transf_expr
@@ -114,42 +106,26 @@ def run(args):
     if not y_range:
         y_range = [np.min(y_data), np.max(y_data)]
 
-    # Cap loglike?
-    if use_capped_loglike:
-        loglike_data = np.minimum(loglike_data, args.cap_loglike_val)
-
 
     #
     # Create delta chi-square dataset
     #
 
-    chi2_data = -2 * loglike_data
-    delta_chi2_data = chi2_data - np.min(chi2_data)
-    z_data = delta_chi2_data
-    s_data = z_data  # sort according to delta_chi2_data
+    delta_chisq_data = chisq_data - np.min(chisq_data)
+    z_data = delta_chisq_data
+    s_data = z_data  # sort according to delta_chisq_data
 
-    # Define color_z_lims based on z_data (delta_chi2_data) range
-    if args.z_range:
-        actual_z_min, actual_z_max = args.z_range
-    else:
-        actual_z_min, actual_z_max = 0.0, np.max(z_data) if np.any(z_data) else 0.0
+    # Get z max and min
+    z_min, z_max = args.z_range
 
-    if actual_z_max == actual_z_min: # Avoid division by zero if all values are the same
-        # if max is 0, all lims are 0. if max is N, all lims are N.
-        color_z_lims = np.full(ccs.use_n_colors, actual_z_min)
-    else:
-        # Create n_colors thresholds. Values >= lims[i] and < lims[i+1] get color i
-        # The last color ccs.ccodes[-1] is for values >= color_z_lims[-1] up to actual_z_max
-        color_z_lims = np.linspace(actual_z_min, actual_z_max, ccs.use_n_colors + 1) 
-        # We need n_colors+1 points to define n_colors bins/intervals.
-        # The logic in get_ccode_and_marker will use these as lower bounds of intervals.
-        # So, color_z_lims[0] is the start of the first interval.
-        # color_z_lims[-1] is effectively actual_z_max for the top interval.
-        # Let's adjust to have N thresholds for N colors, where ccs.ccodes[i] applies if z_val >= color_z_lims[i]
-        # and z_val < color_z_lims[i+1] (conceptually).
-        # The loop in get_ccode_and_marker iterates and picks the highest index i for which z_val >= color_z_lims[i].
-        # So, we need n_colors distinct lower boundaries.
-        color_z_lims = np.linspace(actual_z_min, actual_z_max, ccs.use_n_colors, endpoint=False)
+    # Cap z data at upper range limit
+    extend_cbar_up = False
+    if np.max(z_data) > z_max:
+        z_data[z_data > z_max] = z_max
+        extend_cbar_up = True
+
+    # Set color limits
+    color_z_lims = list(np.linspace(z_min, z_max, len(ccs.ccodes)+1))
 
 
     #
@@ -170,16 +146,15 @@ def run(args):
         """Determines the color code and marker for a 2D delta chi-square plot bin.
 
         The `z_val` (minimum delta chi-square in the bin from `bins_info`) is used.
-        If `z_val` corresponds to the minimum possible delta chi-square (typically 0.0, or `actual_z_min`),
-        and `highlight_maxlike_point` is True (and loglike not capped),
-        it uses `ccs.max_bin_ccode` and `ms.special_marker`.
+        If `z_val` corresponds to the minimum possible delta chi-square (typically 0.0, or `z_min`),
+        and `highlight_minchisq_point` is True, it uses `ccs.max_bin_ccode` and `ms.special_marker`.
         Otherwise, `z_val` is compared against `color_z_lims` (derived from the
-        range of `delta_chi2_data` or `args.z_range`) to select a color from `ccs.ccodes`,
+        range of `delta_chisq_data` or `args.z_range`) to select a color from `ccs.ccodes`,
         and `ms.regular_marker` is used.
 
-        This function relies on `bins_info`, `color_z_lims`, `actual_z_min`,
-        `use_capped_loglike`, `highlight_maxlike_point`,
-        `ccs` (CCodeSettings), and `ms` (MarkerSettings) from the outer scope.
+        This function relies on `bins_info`, `color_z_lims`, `z_min`,
+        `highlight_minchisq_point`, `ccs` (CCodeSettings), and `ms` (MarkerSettings) 
+        from the outer scope.
 
         Args:
             xiyi (tuple): The (x_bin_index, y_bin_index) coordinates
@@ -193,9 +168,9 @@ def run(args):
         z_val = bins_info[xiyi][2]
 
         # Set marker and color code
-        is_best_fit_point = (z_val == actual_z_min)
+        is_best_fit_point = (z_val == z_min)
 
-        if is_best_fit_point and highlight_maxlike_point and not use_capped_loglike:
+        if is_best_fit_point and highlight_minchisq_point:
             ccode = ccs.max_bin_ccode
             marker = ms.special_marker
         else:
@@ -208,11 +183,11 @@ def run(args):
             selected_idx = 0
             # Iterate up to the second to last limit.
             # If z_val is below color_z_lims[0], it gets ccs.ccodes[0].
-            # This handles cases where z_val might be less than actual_z_min due to args.z_range.
+            # This handles cases where z_val might be less than z_min due to args.z_range.
             if len(color_z_lims) == 1: # Only one limit, so only one color
                  selected_idx = 0
             elif z_val < color_z_lims[0] :
-                 selected_idx = 0 # Should not happen if actual_z_min is the first limit and z_val >= actual_z_min
+                 selected_idx = 0 # Should not happen if z_min is the first limit and z_val >= z_min
             else:
                 for j, lim_val in enumerate(color_z_lims):
                     if z_val >= lim_val:
@@ -220,6 +195,10 @@ def run(args):
                     else:
                         # z_val is less than current lim_val, so it belonged to previous segment
                         break 
+            if selected_idx >= ccs.use_n_colors:
+                selected_idx = ccs.use_n_colors - 1
+
+            # print(f"DEBUG: xiyi: {xiyi}  selected_idx: {selected_idx}  ccs.ccodes: {ccs.ccodes}")
             ccode = ccs.ccodes[selected_idx]
 
         return ccode, marker
@@ -239,24 +218,21 @@ def run(args):
 
     legend_entries = []
 
-    # legend_entries.append(("", ccs.fg_ccode, "", ccs.fg_ccode))
-    if (not use_capped_loglike) and highlight_maxlike_point:
+    if highlight_minchisq_point:
         legend_entries.append((ms.special_marker.strip(), ccs.max_bin_ccode,
                                "best-fit (min chi^2)", ccs.fg_ccode))
 
     # Legend entries for delta chi-square ranges could be added here if desired,
-    # similar to hist2dmode's legend. For now, only best-fit is shown.
-    # Example:
+    # similar to hist2dmode's legend. Example
     # if len(color_z_lims) > 1:
     #     for i in range(ccs.use_n_colors):
     #         lower_bound = color_z_lims[i]
-    #         upper_bound_str = f"{color_z_lims[i+1]}" if i < ccs.use_n_colors - 1 else f"{actual_z_max}"
+    #         upper_bound_str = f"{color_z_lims[i+1]}" if i < ccs.use_n_colors - 1 else f"{z_max}"
     #         legend_entries.append((ms.regular_marker.strip(), ccs.ccodes[i],
     #                                f"[{lower_bound:.1f}, {upper_bound_str})", ccs.fg_ccode))
     # else: # Single color case
     #    legend_entries.append((ms.regular_marker.strip(), ccs.ccodes[0],
     #                            f"~{color_z_lims[0]:.1f}", ccs.fg_ccode))
-
 
     legend, legend_width = utils.generate_legend(legend_entries,
                                                  ccs.bg_ccode,
@@ -267,6 +243,15 @@ def run(args):
     plot_lines, fig_width = utils.insert_line(legend, legend_width, plot_lines,
                                               fig_width, ccs.fg_ccode,
                                               ccs.bg_ccode)
+
+
+    #
+    # Add colorbar
+    #
+
+    plot_lines, fig_width = utils.generate_colorbar(plot_lines, fig_width, ff,
+                                                    ccs, color_z_lims, 
+                                                    extend_up=extend_cbar_up)
 
 
     #
@@ -298,8 +283,6 @@ def run(args):
         y_label=y_label, y_range=y_range, y_bin_width=dy,
         s_label=s_label, s_type=s_type,
         x_transf_expr=x_transf_expr, y_transf_expr=y_transf_expr,
-        capped_z=use_capped_loglike, capped_label="ln(L)",
-        cap_val=args.cap_loglike_val,
         filter_names=filter_names,
         mode_name="delta chi-square, chi^2 - chi^2_min")
 

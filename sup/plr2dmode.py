@@ -78,6 +78,9 @@ def run(args):
     ccs.use_n_colors = len(color_z_lims)
     ccs.update()
 
+    if args.reverse_colormap:
+        ccs.ccodes = ccs.ccodes[::-1]
+
     ms = MarkerSettings()
     ms.empty_bin_marker = defaults.empty_bin_marker_2d
 
