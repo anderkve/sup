@@ -110,12 +110,16 @@ def run(args):
     # Get z max and minimum
     z_min, z_max = z_range
 
-    # Cap z data at upper range limit
+    # Cap z data at range limits
     extend_cbar_up = False
     if np.max(z_data) > z_max:
         z_data[z_data > z_max] = z_max
         extend_cbar_up = True
-        
+    extend_cbar_down = False
+    if np.min(z_data) < z_min:
+        z_data[z_data < z_min] = z_min
+        extend_cbar_down = True
+
     # Set color limits
     color_z_lims = list(np.linspace(z_min, z_max, len(ccs.ccodes)+1))
 
@@ -194,7 +198,8 @@ def run(args):
 
     plot_lines, fig_width = utils.generate_colorbar(plot_lines, fig_width, ff,
                                                     ccs, color_z_lims,
-                                                    extend_up=extend_cbar_up)
+                                                    extend_up=extend_cbar_up,
+                                                    extend_down=extend_cbar_down)
 
 
     #

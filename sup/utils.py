@@ -191,7 +191,8 @@ def generate_legend(legend_entries, bg_ccode, sep="  ", internal_sep=" ",
 
 
 
-def generate_colorbar(plot_lines, fig_width, ff, ccs, color_z_lims, extend_up=False):
+def generate_colorbar(plot_lines, fig_width, ff, ccs, color_z_lims, 
+                      extend_up=False, extend_down=False):
     """Generate a color bar and add it to the plot_lines.
 
     This function constructs a color bar legend, including the color
@@ -221,7 +222,9 @@ def generate_colorbar(plot_lines, fig_width, ff, ccs, color_z_lims, extend_up=Fa
         the color bar. These are the numerical values that will be labeled
         on the colorbar.
     extend_up : bool
-        Add right arrow at the rightmost colorswatch and skip the last numerical label
+        Add right arrow after the rightmost colorswatch.
+    extend_up : bool
+        Add left arrow before the leftmost colorswatch.
 
     Returns
     -------
@@ -251,6 +254,10 @@ def generate_colorbar(plot_lines, fig_width, ff, ccs, color_z_lims, extend_up=Fa
         if i % 2 == 1:
             bar_ccode = empty_bin_ccode
 
+        # Start the colorbar with a left arrow?
+        if (i == 0) and (extend_down):
+            cb_entries.append(("◀", ccodes[i], "", fg_ccode))
+
         # Add a color swatch (■■■■■■) and its preceding separator (|).
         # The last limit doesn't get a swatch after it, just a final separator.
         if i < (n_color_lims - 1):
@@ -275,6 +282,8 @@ def generate_colorbar(plot_lines, fig_width, ff, ccs, color_z_lims, extend_up=Fa
 
     # Construct entries for the numerical labels below the colorbar.
     cb_nums_entries = []
+    if extend_down:
+        cb_nums_entries.append(("  ", fg_ccode, "", fg_ccode))
     for i in range(0, n_color_lims):
         txt = ff.format(color_z_lims[i]) # Format the numerical limit.
         # Add the formatted number for even indices.
