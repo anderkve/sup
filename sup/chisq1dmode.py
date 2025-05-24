@@ -31,9 +31,19 @@ def run(args):
     input_file = args.input_file
     x_index = args.x_index
     # y_index = args.y_index
-    loglike_index = args.loglike_index
-    s_index = args.loglike_index
+    chisq_index = args.chisq_index
+    s_index = args.chisq_index
     s_type = "min"
+
+    confidence_levels = args.confidence_levels
+    if not confidence_levels:
+        confidence_levels = [68.3, 95.45]
+
+    confidence_levels = np.array(confidence_levels)
+    if np.any(confidence_levels>100.0):
+        raise SupRuntimeError("Can't use a confidence level of more than 100%.")
+    elif np.any(confidence_levels<=0.0):
+        raise SupRuntimeError("Can't use a confidence level of <= 0%.")
 
     filter_indices = args.filter_indices
     use_filters = bool(filter_indices is not None)
@@ -47,15 +57,11 @@ def run(args):
     if not xy_bins:
         xy_bins = defaults.xy_bins
     
-    use_capped_loglike = False
-    if args.cap_loglike_val is not None:
-        use_capped_loglike = True
-
     ccs = CCodeSettings()
     ccs.graph_ccodes["grayscale_bb"] = 231
     ccs.graph_ccodes["grayscale_wb"] = 232
-    ccs.graph_ccodes["color_bb"] = 1
-    ccs.graph_ccodes["color_wb"] = 9
+    ccs.graph_ccodes["color_bb"] = 57 # 2
+    ccs.graph_ccodes["color_wb"] = 57 # 2
     ccs.bar_ccodes_lists["grayscale_bb"] = [243, 240]
     ccs.bar_ccodes_lists["grayscale_wb"] = [243, 240]
     ccs.bar_ccodes_lists["color_bb"] = [3,11]
@@ -77,11 +83,11 @@ def run(args):
     #
 
     dsets, dset_names = utils.read_input_file(input_file,
-                                              [x_index, loglike_index, s_index],
+                                              [x_index, chisq_index, s_index],
                                               read_slice, 
                                               delimiter=args.delimiter)
-    x_data, loglike_data, s_data = dsets
-    x_name, loglike_name, s_name = dset_names
+    x_data, chisq_data, s_data = dsets
+    x_name, chisq_name, s_name = dset_names
 
     filter_datasets, filter_names = utils.get_filters(input_file,
                                                       filter_indices,
@@ -89,8 +95,8 @@ def run(args):
                                                       delimiter=args.delimiter)
 
     if use_filters:
-        x_data, loglike_data, s_data = utils.apply_filters(
-            [x_data, loglike_data, s_data], filter_datasets)
+        x_data, chisq_data, s_data = utils.apply_filters(
+            [x_data, chisq_data, s_data], filter_datasets)
 
     x_transf_expr = args.x_transf_expr
     # y_transf_expr = args.y_transf_expr
@@ -113,23 +119,17 @@ def run(args):
     # if not z_max:
     #     z_max = np.max(z_data)
 
-    # Cap loglike?
-    if use_capped_loglike:
-        loglike_data = np.minimum(loglike_data, args.cap_loglike_val)
-
 
     #
     # Create delta chi-square dataset
     #
 
-    chi2_data = -2 * loglike_data
-    delta_chi2_data = chi2_data - np.min(chi2_data)
-    y_data = delta_chi2_data
-    s_data = y_data  # sort according to delta_chi2_data
+    delta_chisq_data = chisq_data - np.min(chisq_data)
+    y_data = delta_chisq_data
+    s_data = y_data  # sort according to delta_chisq_data
 
-    # Update y_range after y_data is calculated if not user-specified
-    if not args.y_range: # Check if y_range was passed as an argument
-        y_range = [0.0, np.max(y_data)]
+    # Get y max and min
+    y_range = args.y_range
 
 
     #
@@ -204,6 +204,25 @@ def run(args):
 
 
     #
+    # Add horizontal confidence interval bars
+    #
+
+    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width,
+                                              ccs.fg_ccode, ccs.bg_ccode)
+
+    cl_bar_lines = utils.generate_confidence_level_bars(confidence_levels, 
+                                                        y_func_data, 
+                                                        x_bin_limits, ff2,
+                                                        chisq=True)
+
+    for i,line in enumerate(cl_bar_lines):
+        cl_bar_width = len(line)
+        cl_bar = utils.prettify(line, ccs.bar_ccodes[i % 2], ccs.bg_ccode)
+        plot_lines, fig_width = utils.insert_line(cl_bar, cl_bar_width, 
+                                                  plot_lines, fig_width,
+                                                  ccs.fg_ccode, ccs.bg_ccode)
+
+    #
     # Add left padding
     #
 
@@ -231,8 +250,6 @@ def run(args):
         y_label=y_label, y_range=y_range, 
         s_label=s_label, s_type=s_type,
         x_transf_expr = x_transf_expr, 
-        capped_z=use_capped_loglike, capped_label="ln(L)", 
-        cap_val=args.cap_loglike_val,
         filter_names=filter_names,
         mode_name="delta chi-square, chi^2 - chi^2_min")
 

@@ -1931,13 +1931,13 @@ def add_axes(lines, fig_width, xy_bins, x_bin_limits, y_bin_limits, ccs,
 
 
 
-def get_cl_included_bins_1d(confidence_levels, y_func_data, dx):
+def get_cl_included_bins_1d(confidence_levels, y_func_data, dx, chisq=False):
     """Determine which bins are included within specified confidence levels (CL).
 
-    This function is used for 1D profile likelihoods functions where 
-    `y_func_data` represents normalized likelihood values (or L/L_max), 
-    and the goal is to find regions (sets of bins) corresponding
-    to certain confidence levels.
+    This function is used for 1D profile likelihoods or chi-square functions
+    where `y_func_data` represents normalized likelihood values (or L/L_max)
+    or delta chi-square values, and the goal is to find regions (sets of bins) 
+    corresponding to certain confidence levels.
 
     Parameters
     ----------
@@ -1951,6 +1951,8 @@ def get_cl_included_bins_1d(confidence_levels, y_func_data, dx):
         The width of each bin. While present in the signature, this parameter
         is not used in the current implementation of this function. It might
         be a remnant or intended for future use related to probability density.
+    chisq : bool
+        If True, the y_func_data is interpreted as delta chi^2 values
 
     Returns
     -------
@@ -1969,13 +1971,17 @@ def get_cl_included_bins_1d(confidence_levels, y_func_data, dx):
     """
     included_bins = []
 
-    # Check assumption that the max (non-NaN) element is 1.0
-    # Using np.nanmax to handle potential NaNs gracefully
-    max_y_val = np.nanmax(y_func_data)
-    if not np.isclose(max_y_val, 1.0):
-        # This assertion might be too strict if y_func_data isn't perfectly normalized.
-        # Consider logging a warning or adjusting the logic if y_func_data can deviate slightly.
-        assert np.isclose(max_y_val, 1.0), "Max of y_func_data (excluding NaNs) is not close to 1.0"
+    # Check assumption that the max (non-NaN) y element is 1.0 (for likelihood ratio)
+    # or that the min y element is close to 0.0 (for delta chi^2).
+    # Using np.nanmax and np.nanmin to handle potential NaNs gracefully
+    if chisq:
+        min_y_val = np.nanmin(y_func_data)
+        if not np.isclose(min_y_val, 0.0):
+            assert np.isclose(min_y_val, 0.0), "Min of y_func_data (excluding NaNs) is not close to 0.0"
+    else:
+        max_y_val = np.nanmax(y_func_data)
+        if not np.isclose(max_y_val, 1.0):
+            assert np.isclose(max_y_val, 1.0), "Max of y_func_data (excluding NaNs) is not close to 1.0"
 
     indices = list(range(len(y_func_data)))
 
@@ -1986,24 +1992,33 @@ def get_cl_included_bins_1d(confidence_levels, y_func_data, dx):
             included_bins.append(indices)
             continue
 
-        # Calculate the correct L/L_max threshold for the given CL
-        pp = cl * 0.01
-        chi2_val = chi2.ppf(pp, df=1)
-        llhratio_thres = np.exp(-0.5 * chi2_val)
+        if chisq:
+            # Calculate the correct delta chi^2 threshold for the given CL
+            pp = cl * 0.01
+            chisq_thres = chi2.ppf(pp, df=1)
 
-        inc_bins = []
+            inc_bins = []
+            for index in indices:
+                y_val = y_func_data[index]
+                if np.isnan(y_val):
+                    continue
+                if y_val <= chisq_thres:
+                    inc_bins.append(index)
+            included_bins.append(inc_bins)
+        else:
+            # Calculate the correct L/L_max threshold for the given CL
+            pp = cl * 0.01
+            chi2_val = chi2.ppf(pp, df=1)
+            llhratio_thres = np.exp(-0.5 * chi2_val)
 
-        for index in indices:
-
-            y_val = y_func_data[index]
-
-            if np.isnan(y_val):
-                continue
-
-            if y_val >= llhratio_thres:
-                inc_bins.append(index)
-            
-        included_bins.append(inc_bins)
+            inc_bins = []
+            for index in indices:
+                y_val = y_func_data[index]
+                if np.isnan(y_val):
+                    continue
+                if y_val >= llhratio_thres:
+                    inc_bins.append(index)                
+            included_bins.append(inc_bins)
 
     return included_bins
 
@@ -2298,7 +2313,7 @@ def generate_credible_region_bars(credible_regions, bins_content,
 
 
 def generate_confidence_level_bars(confidence_levels, y_func_data,
-                                   bin_limits, ff2):
+                                   bin_limits, ff2, chisq=False):
     """Generate a list of strings, each representing a confidence level bar.
 
     For each specified confidence level percentage, this function calculates
@@ -2312,7 +2327,8 @@ def generate_confidence_level_bars(confidence_levels, y_func_data,
         A list of confidence level percentages (e.g., [68.0, 95.0]) for which
         to generate bar strings.
     y_func_data : numpy.ndarray
-        A 1D array of y-values, typically normalized likelihoods (L/L_max).
+        A 1D array of y-values, as normalized likelihoods (L/L_max) or 
+        delta chi^2 values (if chisq=True)
         Passed to `get_cl_included_bins_1d`.
     bin_limits : numpy.ndarray
         A 1D array of bin edge coordinates. Passed to
@@ -2321,6 +2337,8 @@ def generate_confidence_level_bars(confidence_levels, y_func_data,
         Format string used for formatting the confidence level percentage in the
         label (e.g., "{:.1f}% CI"). Note: The current implementation uses
         "{:.12g}% CI" directly, so `ff2` is effectively unused here.
+    chisq : bool
+        If True, the y_func_data is interpreted as delta chi^2 values
 
     Returns
     -------
@@ -2332,7 +2350,7 @@ def generate_confidence_level_bars(confidence_levels, y_func_data,
 
     dx = bin_limits[1] - bin_limits[0]
 
-    included_bins = get_cl_included_bins_1d(confidence_levels, y_func_data, dx)
+    included_bins = get_cl_included_bins_1d(confidence_levels, y_func_data, dx, chisq=chisq)
 
     cl_ranges_indices, cl_ranges_pos = \
         get_ranges_from_included_bins(included_bins, bin_limits)
