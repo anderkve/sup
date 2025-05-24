@@ -4,6 +4,7 @@ import numpy as np
 from collections import OrderedDict
 from scipy.stats import chi2
 from io import StringIO 
+import sqlite3
 import sup.defaults as defaults
 
 
@@ -635,6 +636,124 @@ def get_dataset_names_txt(txt_file_name):
     return result
 
 
+def get_dataset_names_sql(sql_file_name):
+    """Get the names of all tables in an SQLite file.
+
+    Parameters
+    ----------
+    sql_file_name : str
+        Path to the input SQLite file.
+
+    Returns
+    -------
+    list of str
+        The table names.
+
+    Raises
+    ------
+    SupRuntimeError
+        If the file is not a valid SQLite database or if tables cannot be
+        retrieved.
+    """
+    table_names = []
+    try:
+        conn = sqlite3.connect(sql_file_name)
+        cursor = conn.cursor()
+        # Try sqlite_master first for broader compatibility
+        try:
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        except sqlite3.OperationalError:
+            # Fallback to sqlite_schema for newer SQLite versions
+            cursor.execute("SELECT name FROM sqlite_schema WHERE type='table';")
+        tables = cursor.fetchall()
+        table_names = [table[0] for table in tables]
+    except sqlite3.Error as e:
+        raise SupRuntimeError(
+            f"{error_prefix} Could not read tables from SQLite file {sql_file_name}. Error: {e}"
+        )
+    finally:
+        if 'conn' in locals() and conn:
+            conn.close()
+    
+    if not table_names:
+        # This case could mean an empty DB or a non-SQLite file that didn't error out on connect
+        # For simplicity, we'll treat it as "no tables found" which might also indicate an issue
+        # If a more specific error for "not a valid SQLite file" is needed, it would require
+        # more sophisticated checks (e.g., file signature) as sqlite3.connect can create a new empty file.
+        # However, the prompt implies we're reading existing files.
+        # We can check if the file was empty before connect, but that's outside this function's scope.
+        # For now, an empty list of tables will be the indicator.
+        pass # Or raise SupRuntimeError(f"{error_prefix} No tables found in SQLite file {sql_file_name}.")
+
+    return table_names
+
+
+def get_all_column_dataset_names_sql(sql_file_name):
+    """Get all dataset names (table.column) from an SQLite file.
+
+    Parameters
+    ----------
+    sql_file_name : str
+        Path to the input SQLite file.
+
+    Returns
+    -------
+    list of str
+        A list of all dataset names in "table_name.column_name" format.
+
+    Raises
+    ------
+    SupRuntimeError
+        If the file is not a valid SQLite database or if table/column info
+        cannot be retrieved.
+    """
+    # First, get all table names. get_dataset_names_sql handles its own
+    # connection and error reporting for this part.
+    try:
+        table_names = get_dataset_names_sql(sql_file_name)
+    except SupRuntimeError: # Passthrough errors from get_dataset_names_sql
+        raise
+    except Exception as e: # Catch any other unexpected error during table name fetching
+        raise SupRuntimeError(f"{error_prefix} An unexpected error occurred while fetching table names from {sql_file_name}: {e}")
+
+
+    if not table_names:
+        return [] # No tables, so no column datasets
+
+    all_column_dset_names = []
+    conn = None
+    try:
+        conn = sqlite3.connect(sql_file_name)
+        cursor = conn.cursor()
+
+        for table_name in table_names:
+            try:
+                # Quoting table name for safety, though PRAGMA usually doesn't need it like SELECT
+                cursor.execute(f'PRAGMA table_info("{table_name}");')
+                columns_info = cursor.fetchall()
+                for info in columns_info:
+                    column_name = info[1] # Column name is the second item in the tuple
+                    all_column_dset_names.append(f"{table_name}.{column_name}")
+            except sqlite3.Error as e:
+                raise SupRuntimeError(
+                    f"{error_prefix} Could not get column info for table '{table_name}' in SQLite file {sql_file_name}. Error: {e}"
+                )
+        
+    except sqlite3.Error as e: # Catch connection errors or other SQLite errors during column fetching phase
+        raise SupRuntimeError(
+            f"{error_prefix} Database error while fetching column details from SQLite file {sql_file_name}. Error: {e}"
+        )
+    except SupRuntimeError: # Re-raise SupRuntimeErrors explicitly
+        raise
+    except Exception as e: # Catch any other unexpected error
+        raise SupRuntimeError(f"{error_prefix} An unexpected error occurred while processing columns in {sql_file_name}: {e}")
+    finally:
+        if conn:
+            conn.close()
+            
+    return all_column_dset_names
+
+
 
 def check_file_type(input_file):
     """Determine file type based on file extension.
@@ -658,6 +777,8 @@ def check_file_type(input_file):
 
     if file_extension in ['.hdf5', '.h5', '.he5']:
         file_type = "hdf5"
+    elif file_extension in ['.db', '.sqlite', '.sqlite3']:
+        file_type = "sql"
 
     return file_type
 
@@ -772,6 +893,10 @@ def read_input_file(input_file, dset_indices, read_slice, delimiter=' '):
         print()
         dsets, dset_names = read_input_file_hdf5(input_file, dset_indices,
                                                  read_slice)
+    elif file_type == "sql":
+        print("Reading " + input_file + " as an SQL (SQLite) file")
+        print()
+        dsets, dset_names = read_input_file_sql(input_file, dset_indices, read_slice)
 
     check_dset_lengths(dsets, dset_names)
 
@@ -838,6 +963,125 @@ def read_input_file_hdf5(input_file, dset_indices, read_slice):
     return dsets, dset_names    
 
 
+def read_input_file_sql(input_file, dset_indices, read_slice):
+    """Read datasets (columns from specified tables) from an SQLite file.
+
+    Parameters
+    ----------
+    input_file : str
+        The input SQLite file path.
+    dset_indices : list of int
+        The table indices (0-based) to read from the SQLite file. All columns
+        from these tables will be read as individual datasets.
+    read_slice : slice
+        The slice to apply when reading each dataset.
+        Note: This parameter is currently NOT IMPLEMENTED for SQL sources.
+        All rows are read.
+
+    Returns
+    -------
+    tuple
+        A tuple containing:
+            - dsets (list of numpy.ndarray): The list of read datasets (columns).
+            - dset_names (list of str): The list of names for the read datasets,
+              formatted as "table_name.column_name".
+
+    Raises
+    ------
+    SupRuntimeError
+        If issues occur during file reading or dataset validation (e.g.,
+        file not found, SQL errors, invalid table index).
+    """
+    dsets = []
+    dset_names = []
+    conn = None  # Initialize conn to None for the finally block
+
+    try:
+        conn = sqlite3.connect(input_file)
+        cursor = conn.cursor()
+
+        all_table_names = get_dataset_names_sql(input_file)
+
+        if not all_table_names:
+            raise SupRuntimeError(f"{error_prefix} No tables found in SQLite file {input_file}.")
+
+        # check_dset_indices expects all_dset_names to be a list of all available dataset names.
+        # In this SQL context, a "dataset" is a column, but the user provides table_indices.
+        # So, we first check if the table_indices are valid for the list of tables.
+        check_dset_indices(input_file, dset_indices, all_table_names)
+
+        # Iterate through the user-specified table indices
+        for table_idx in dset_indices:
+            table_name = all_table_names[table_idx]
+
+            # Get column names for the current table
+            try:
+                cursor.execute(f'PRAGMA table_info("{table_name}");')
+                column_info = cursor.fetchall()
+                if not column_info:
+                    # This case should ideally not happen if table_name is valid
+                    # but good to be defensive.
+                    raise SupRuntimeError(f"{error_prefix} No columns found in table '{table_name}' in file {input_file}.")
+                
+                current_table_column_names = [info[1] for info in column_info]
+
+            except sqlite3.Error as e:
+                raise SupRuntimeError(
+                    f"{error_prefix} Could not get column info for table '{table_name}' in file {input_file}. Error: {e}"
+                )
+
+            # Read each column from the current table as a separate dataset
+            for column_name in current_table_column_names:
+                try:
+                    # Construct fully qualified dataset name
+                    full_dset_name = f"{table_name}.{column_name}"
+                    
+                    # Fetch all data from the column
+                    # Quoting column and table names to handle special characters/keywords
+                    cursor.execute(f'SELECT "{column_name}" FROM "{table_name}";')
+                    column_data_tuples = cursor.fetchall()
+                    
+                    # Convert list of tuples to a flat list, then to a NumPy array
+                    # (fetchall returns a list of tuples, e.g., [(val1,), (val2,)])
+                    column_data = [item[0] for item in column_data_tuples]
+                    
+                    # Note: read_slice is not implemented for SQL sources in this version.
+                    # If read_slice were to be implemented, it would likely be applied here
+                    # or by modifying the SQL query (e.g. LIMIT/OFFSET), though that
+                    # could be complex depending on the slice specifics.
+                    
+                    dsets.append(np.array(column_data))
+                    dset_names.append(full_dset_name)
+
+                except sqlite3.Error as e:
+                    raise SupRuntimeError(
+                        f"{error_prefix} Could not read data from column '{column_name}' of table '{table_name}' in file {input_file}. Error: {e}"
+                    )
+                except Exception as e: # Catch other potential errors during data processing
+                    raise SupRuntimeError(
+                        f"{error_prefix} An unexpected error occurred while processing column '{column_name}' of table '{table_name}': {e}"
+                    )
+                    
+    except sqlite3.Error as e: # Catch connection errors or other SQLite errors
+        raise SupRuntimeError(
+            f"{error_prefix} Database error with SQLite file {input_file}. Error: {e}"
+        )
+    except SupRuntimeError: # Re-raise SupRuntimeErrors from called functions or this try block
+        raise
+    except Exception as e: # Catch any other unexpected errors
+        raise SupRuntimeError(
+            f"{error_prefix} An unexpected error occurred while reading SQLite file {input_file}: {e}"
+        )
+    finally:
+        if conn:
+            conn.close()
+
+    # It's possible that dsets is empty if selected tables had no columns,
+    # though check_dset_indices and column fetching should prevent this.
+    # An explicit check for empty dsets can be added if necessary.
+    # e.g., if not dsets: raise SupRuntimeError("No data could be read with the given indices.")
+    
+    return dsets, dset_names
 
 
 def read_input_file_txt(input_file, dset_indices, read_slice, delimiter):
@@ -969,7 +1213,11 @@ def get_filters(input_file, filter_indices, read_slice, delimiter=' '):
     elif file_type == "hdf5":
         filter_dsets, filter_names = get_filters_hdf5(input_file, 
                                                       filter_indices, 
-                                                      read_slice)        
+                                                      read_slice)
+    elif file_type == "sql":
+        filter_dsets, filter_names = get_filters_sql(input_file,
+                                                     filter_indices,
+                                                     read_slice)
 
     check_dset_lengths(filter_dsets, filter_names)
 
@@ -1025,6 +1273,124 @@ def get_filters_hdf5(input_file, filter_indices, read_slice=slice(0,-1,1)):
 
     return filter_dsets, filter_names
 
+
+def get_filters_sql(input_file, filter_indices, read_slice):
+    """Get SQLite datasets (columns) that will be used for filtering (masking).
+
+    Parameters
+    ----------
+    input_file : str
+        The path to the input SQLite file.
+    filter_indices : list of int or None
+        A list of integer indices specifying which datasets (columns, identified
+        globally across all tables as table_name.column_name) to read as filters.
+        If None, returns empty lists for datasets and names.
+    read_slice : slice
+        A slice object indicating the portion of each dataset to read.
+        Note: This parameter is currently NOT IMPLEMENTED for SQL sources.
+        All rows are read.
+
+    Returns
+    -------
+    tuple
+        A tuple containing:
+            - filter_dsets (list of numpy.ndarray): A list of NumPy arrays,
+              where each array is a filter dataset.
+            - filter_names (list of str): A list of names for the filter datasets.
+
+    Raises
+    ------
+    SupRuntimeError
+        If issues occur during file reading, dataset validation, or if
+        filter_indices are invalid.
+    """
+    if filter_indices is None:
+        return [], []
+
+    filter_dsets = []
+    filter_names = []
+    conn = None
+
+    try:
+        conn = sqlite3.connect(input_file)
+        cursor = conn.cursor()
+
+        all_table_names = get_dataset_names_sql(input_file)
+        if not all_table_names:
+            # If there are no tables, there can be no filterable datasets.
+            # check_dset_indices would fail correctly if filter_indices is not empty.
+            # If filter_indices is empty (which is valid if None was not passed),
+            # then returning empty lists is correct.
+             pass
+
+
+        all_filterable_dset_names = []
+        for table_name in all_table_names:
+            try:
+                cursor.execute(f'PRAGMA table_info("{table_name}");')
+                column_info = cursor.fetchall()
+                for info in column_info:
+                    all_filterable_dset_names.append(f"{table_name}.{info[1]}")
+            except sqlite3.Error as e:
+                raise SupRuntimeError(
+                    f"{error_prefix} Could not get column info for table '{table_name}' in file {input_file}. Error: {e}"
+                )
+        
+        if not all_filterable_dset_names and filter_indices:
+             raise SupRuntimeError(f"{error_prefix} No filterable columns found in SQLite file {input_file}, but filter indices were provided.")
+
+
+        check_dset_indices(input_file, filter_indices, all_filterable_dset_names)
+
+        for idx in filter_indices:
+            selected_dset_name = all_filterable_dset_names[idx]
+            filter_names.append(selected_dset_name)
+
+            try:
+                # Ensure selected_dset_name contains a period before splitting
+                if '.' not in selected_dset_name:
+                    raise SupRuntimeError(
+                        f"{error_prefix} Invalid dataset name format '{selected_dset_name}'. Expected 'table_name.column_name'."
+                    )
+                table_name, column_name = selected_dset_name.split('.', 1)
+            except ValueError: # Handles cases where split might not return 2 values, though covered by check above
+                 raise SupRuntimeError(
+                    f"{error_prefix} Error parsing table and column from dataset name '{selected_dset_name}'."
+                )
+
+            try:
+                # Quoting column and table names to handle special characters/keywords
+                cursor.execute(f'SELECT "{column_name}" FROM "{table_name}";')
+                column_data_tuples = cursor.fetchall()
+                column_data = [item[0] for item in column_data_tuples]
+                
+                # Note: read_slice is not implemented for SQL sources in this version.
+                filter_dsets.append(np.array(column_data))
+
+            except sqlite3.Error as e:
+                raise SupRuntimeError(
+                    f"{error_prefix} Could not read data for filter from column '{column_name}' of table '{table_name}' in file {input_file}. Error: {e}"
+                )
+            except Exception as e:
+                 raise SupRuntimeError(
+                    f"{error_prefix} An unexpected error occurred while reading filter data for {selected_dset_name}: {e}"
+                )
+
+    except sqlite3.Error as e:
+        raise SupRuntimeError(
+            f"{error_prefix} Database error with SQLite file {input_file} when getting filters. Error: {e}"
+        )
+    except SupRuntimeError: # Re-raise SupRuntimeErrors
+        raise
+    except Exception as e: # Catch any other unexpected errors
+        raise SupRuntimeError(
+            f"{error_prefix} An unexpected error occurred while getting filters from SQLite file {input_file}: {e}"
+        )
+    finally:
+        if conn:
+            conn.close()
+            
+    return filter_dsets, filter_names
 
 
 def get_filters_txt(input_file, filter_indices, read_slice, delimiter=' '):

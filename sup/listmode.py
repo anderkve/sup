@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
 from sup.utils import (
-    check_file_type, get_dataset_names_hdf5, get_dataset_names_txt
+    check_file_type, get_dataset_names_hdf5, get_dataset_names_txt,
+    get_all_column_dataset_names_sql
     )
 
 def run(args):
@@ -30,9 +31,16 @@ def run(args):
         f = h5py.File(args.input_file, 'r')
         dset_names = get_dataset_names_hdf5(f)
         f.close()
+    
+    elif file_type == "sql":
+        print("Reading " + args.input_file + " as an SQL (SQLite) file")
+        print()
+        dset_names = get_all_column_dataset_names_sql(args.input_file)
 
     else:
-        raise ValueError("Unrecognized file_type: '{}'".format(file_type))
+        # This case should ideally not be reached if check_file_type is comprehensive
+        # and covers all types it can return.
+        raise ValueError("Unrecognized file_type: '{}' returned by check_file_type.".format(file_type))
 
     # Print the dataset names
     print("Index \t Dataset", sep='')
