@@ -19,9 +19,9 @@ import os
 import time
 import argparse
 from sup import (
-    colors, listmode, colorsmode, colormapsmode, plr2dmode, plr1dmode, 
-    maxmin2dmode, maxmin1dmode, avg1dmode, avg2dmode, hist1dmode, hist2dmode, 
-    post1dmode, post2dmode, graph1dmode, graph2dmode
+    colors, listmode, colorsmode, colormapsmode, plr2dmode, plr1dmode,
+    maxmin2dmode, maxmin1dmode, avg1dmode, avg2dmode, hist1dmode, hist2dmode,
+    post1dmode, post2dmode, graph1dmode, graph2dmode, chisq1dmode, chisq2dmode
     )
 from sup.utils import SupRuntimeError, error_prefix
 import sup.defaults as defaults
@@ -231,6 +231,24 @@ def _add_plr1d_args(parser):
     parser.add_argument("-dl", "--delimiter", type=str, action="store", dest="delimiter", default=" ", help="set the delimiter used in the input data file (only for text files)", metavar="DELIMITER")
     parser.add_argument("-wa", "--watch", type=float, action="store", dest="watch_n_seconds", default=None, help="regenerate the plot at fixed time intervals", metavar="N_SECONDS")
 
+def _add_chisq1d_args(parser):
+    """Adds arguments specific to the 'chisq1d' mode."""
+    parser.add_argument("input_file", type=str, action="store", help="path to the input data file")
+    parser.add_argument("x_index", type=int, action="store", help="index of the x-axis dataset")
+    parser.add_argument("loglike_index", type=int, action="store", help="index of the ln(L) dataset (used to calculate chi-square)")
+    parser.add_argument("-f", "--filter", nargs="+", type=int, action="store", dest="filter_indices", default=None, help="indices of boolean datasets used for filtering", metavar="F_INDEX")
+    parser.add_argument("-xr", "--x-range", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
+    parser.add_argument("-yr", "--y-range", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range (for delta chi-square)", metavar=("Y_MIN", "Y_MAX"))
+    parser.add_argument("-sz", "--size", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="plot size in terms of number of grid cells (bins) for each axis", metavar=("X_SIZE", "Y_SIZE"))
+    parser.add_argument("-c", "--cap-loglike", type=float, action="store", dest="cap_loglike_val", default=None, help="cap the ln(L) at the given value before chi-square calculation", metavar="CAP_VAL")
+    parser.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
+    parser.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
+    parser.add_argument("-xt", "--x-transf", type=str, action="store", dest="x_transf_expr", default="", help="tranformation for the x-axis dataset, using numpy as 'np' (e.g. -xt \"np.log10(x)\")", metavar="EXPR")
+    parser.add_argument("-rs", "--read-slice", nargs=3, type=int, action="store", dest="read_slice", default=[0,-1,1], help="read only the given slice of each dataset", metavar=("START", "END", "STEP"))
+    parser.add_argument("-d", "--decimals", type=int, action="store", dest="n_decimals", default=defaults.n_decimals, help="set the number of decimals for axis and colorbar tick labels", metavar="N_DECIMALS")
+    parser.add_argument("-dl", "--delimiter", type=str, action="store", dest="delimiter", default=" ", help="set the delimiter used in the input data file (only for text files)", metavar="DELIMITER")
+    parser.add_argument("-wa", "--watch", type=float, action="store", dest="watch_n_seconds", default=None, help="regenerate the plot at fixed time intervals", metavar="N_SECONDS")
+
 def _add_plr2d_args(parser):
     """Adds arguments specific to the 'plr2d' mode."""
     parser.add_argument("input_file", type=str, action="store", help="path to the input data file")
@@ -249,6 +267,32 @@ def _add_plr2d_args(parser):
     parser.add_argument("-xt", "--x-transf", type=str, action="store", dest="x_transf_expr", default="", help="tranformation for the x-axis dataset, using numpy as 'np' (e.g. -xt \"np.log10(x)\")", metavar="EXPR")
     parser.add_argument("-yt", "--y-transf", type=str, action="store", dest="y_transf_expr", default="", help="tranformation for the y-axis dataset, using numpy as 'np' (e.g. -yt \"np.log10(y)\")", metavar="EXPR")
     parser.add_argument("-ns", "--no-star", action="store_true", dest="no_star", default=False, help="switch off the star marker for the max likelihood point(s)")
+    parser.add_argument("-rs", "--read-slice", nargs=3, type=int, action="store", dest="read_slice", default=[0,-1,1], help="read only the given slice of each dataset", metavar=("START", "END", "STEP"))
+    parser.add_argument("-d", "--decimals", type=int, action="store", dest="n_decimals", default=defaults.n_decimals, help="set the number of decimals for axis and colorbar tick labels", metavar="N_DECIMALS")
+    parser.add_argument("-dl", "--delimiter", type=str, action="store", dest="delimiter", default=" ", help="set the delimiter used in the input data file (only for text files)", metavar="DELIMITER")
+    parser.add_argument("-wa", "--watch", type=float, action="store", dest="watch_n_seconds", default=None, help="regenerate the plot at fixed time intervals", metavar="N_SECONDS")
+
+def _add_chisq2d_args(parser):
+    """Adds arguments specific to the 'chisq2d' mode."""
+    parser.add_argument("input_file", type=str, action="store", help="path to the input data file")
+    parser.add_argument("x_index", type=int, action="store", help="index of the x-axis dataset")
+    parser.add_argument("y_index", type=int, action="store", help="index of the y-axis dataset")
+    parser.add_argument("loglike_index", type=int, action="store", help="index of the ln(L) dataset (used to calculate chi-square)")
+    parser.add_argument("-f", "--filter", nargs="+", type=int, action="store", dest="filter_indices", default=None, help="indices of boolean datasets used for filtering", metavar="F_INDEX")
+    parser.add_argument("-xr", "--x-range", nargs=2, type=float, action="store", dest="x_range", default=None, help="x-axis range", metavar=("X_MIN", "X_MAX"))
+    parser.add_argument("-yr", "--y-range", nargs=2, type=float, action="store", dest="y_range", default=None, help="y-axis range", metavar=("Y_MIN", "Y_MAX"))
+    # For chisq2d, z_range applies to delta chi-square values
+    parser.add_argument("-zr", "--z-range", nargs=2, type=float, action="store", dest="z_range", default=None, help="z-axis range (for delta chi-square)", metavar=("Z_MIN", "Z_MAX"))
+    parser.add_argument("-sz", "--size", nargs=2, type=int, action="store", dest="xy_bins", default=None, help="plot size in terms of number of grid cells (bins) for each axis", metavar=("X_SIZE", "Y_SIZE"))
+    parser.add_argument("-c", "--cap-loglike", type=float, action="store", dest="cap_loglike_val", default=None, help="cap the ln(L) at the given value before chi-square calculation", metavar="CAP_VAL")
+    parser.add_argument("-g", "--gray", action="store_true", dest="use_grayscale", default=False, help="grayscale plot")
+    parser.add_argument("-wb", "--white-bg", action="store_true", dest="use_white_bg", default=False, help="white background")
+    # Added n_colors argument for chisq2d, similar to hist2d
+    parser.add_argument("-nc", "--num-colors", type=int, action="store", dest="n_colors", default=None, help="number of colors in colorbar (max 10, default 5 for chisq2d)", metavar="N_COLORS")
+    parser.add_argument("-cm", "--colormap", type=int, action="store", dest="cmap_index", default=4, help="select colormap: 0 = viridis-ish, 1 = jet-ish, 2 = inferno-ish, 3 = blue-red-ish, 4 = gambit-ish", metavar="CM")
+    parser.add_argument("-xt", "--x-transf", type=str, action="store", dest="x_transf_expr", default="", help="tranformation for the x-axis dataset, using numpy as 'np' (e.g. -xt \"np.log10(x)\")", metavar="EXPR")
+    parser.add_argument("-yt", "--y-transf", type=str, action="store", dest="y_transf_expr", default="", help="tranformation for the y-axis dataset, using numpy as 'np' (e.g. -yt \"np.log10(y)\")", metavar="EXPR")
+    parser.add_argument("-ns", "--no-star", action="store_true", dest="no_star", default=False, help="switch off the star marker for the min chi-square point(s)")
     parser.add_argument("-rs", "--read-slice", nargs=3, type=int, action="store", dest="read_slice", default=[0,-1,1], help="read only the given slice of each dataset", metavar=("START", "END", "STEP"))
     parser.add_argument("-d", "--decimals", type=int, action="store", dest="n_decimals", default=defaults.n_decimals, help="set the number of decimals for axis and colorbar tick labels", metavar="N_DECIMALS")
     parser.add_argument("-dl", "--delimiter", type=str, action="store", dest="delimiter", default=" ", help="set the delimiter used in the input data file (only for text files)", metavar="DELIMITER")
@@ -314,6 +358,8 @@ modes:
   sup post2d      plot the (x,y) posterior probability distribution
   sup plr1d       plot the profile likelihood ratio across the x axis
   sup plr2d       plot the profile likelihood ratio across the (x,y) plane
+  sup chisq1d     plot the delta chi-square across the x axis
+  sup chisq2d     plot the delta chi-square across the (x,y) plane
   sup graph1d     plot the function y = f(x) across the x axis
   sup graph2d     plot the function z = f(x,y) across the (x,y) plane
   sup colormaps   display the available colormaps
@@ -406,6 +452,16 @@ examples:
     parser_plr2dmode = subparsers.add_parser("plr2d")
     parser_plr2dmode.set_defaults(func=plr2dmode.run)
     _add_plr2d_args(parser_plr2dmode)
+
+    # Parser for "chisq1d" mode
+    parser_chisq1dmode = subparsers.add_parser("chisq1d")
+    parser_chisq1dmode.set_defaults(func=chisq1dmode.run)
+    _add_chisq1d_args(parser_chisq1dmode)
+
+    # Parser for "chisq2d" mode
+    parser_chisq2dmode = subparsers.add_parser("chisq2d")
+    parser_chisq2dmode.set_defaults(func=chisq2dmode.run)
+    _add_chisq2d_args(parser_chisq2dmode)
 
     # Parser for "graph1d" mode
     parser_graph1dmode = subparsers.add_parser("graph1d")
