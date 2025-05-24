@@ -19,6 +19,7 @@ I often find while doing terminal-based work (e.g. running scientific computatio
     *   `max1d`, `max2d`, `min1d`, `min2d`, `avg1d`, `avg2d`: Plotting max, min, or average values.
     *   `post1d`, `post2d`: 1D and 2D posterior probability distributions.
     *   `plr1d`, `plr2d`: Profile likelihood ratios.
+    *   `chisq1d`, `chisq2d`: Delta chi^2 plots.
     *   `graph1d`, `graph2d`: Plotting functions y=f(x) and z=f(x,y).
     *   `list`: List dataset names and indices from input files.
     *   `colors`, `colormaps`: Display available colors and colormaps.
@@ -100,6 +101,8 @@ modes:
   sup post2d      plot the (x,y) posterior probability distribution
   sup plr1d       plot the profile likelihood ratio across the x axis
   sup plr2d       plot the profile likelihood ratio across the (x,y) plane
+  sup chisq1d     plot the delta chi^2 across the x axis
+  sup chisq2d     plot the delta chi^2 across the (x,y) plane
   sup graph1d     plot the function y = f(x) across the x axis
   sup graph2d     plot the function z = f(x,y) across the (x,y) plane
   sup colormaps   display the available colormaps
