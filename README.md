@@ -1,7 +1,7 @@
 
 # sup — the Simple Unicode Plotter
 
-`sup` is a command-line tool for generating quick 1D and 2D data visualizations directly in the terminal using Unicode characters and ANSI colors. It can plot data from files (text or HDF5) or from piped input, or plot mathematical functions evaluated by `sup` directly. 
+`sup` is a command-line tool for generating quick 1D and 2D data visualizations directly in the terminal using Unicode characters and ANSI colors. It can plot data from a file or from piped input, or plot mathematical functions evaluated by `sup` directly. 
 
 <img src="./example_plots/sup_post1d.png" alt="1D posterior example" height="184"/>  <img src="./example_plots/sup_plr1d.png" alt="1D profile likelihood example" height="184"/> <img src="./example_plots/sup_graph1d.png" alt="1D graph example" height="184"/> 
 
@@ -23,7 +23,7 @@ I often find while doing terminal-based work (e.g. running scientific computatio
     *   `graph1d`, `graph2d`: Plotting functions y=f(x) and z=f(x,y).
     *   `list`: List dataset names and indices from input files.
     *   `colors`, `colormaps`: Display available colors and colormaps.
-*   Supports text, HDF5, CSV, and JSON input files.
+*   Supports text, CSV, HDF5 and JSON input files.
 *   Supports piping data from stdin for text, CSV, and JSON formats.
 *   Customizable plot size, ranges, transformations (e.g., log scale).
 *   Color and grayscale output, with optional white background.
