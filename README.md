@@ -24,6 +24,7 @@ I often find while doing terminal-based work (e.g. running scientific computatio
     *   `list`: List dataset names and indices from input files.
     *   `colors`, `colormaps`: Display available colors and colormaps.
 *   Supports text and HDF5 input files.
+*   Supports piping data from stdin for text and CSV formats.
 *   Customizable plot size, ranges, transformations (e.g., log scale).
 *   Color and grayscale output, with optional white background.
 *   Various colormaps for 2D plots.
@@ -128,6 +129,19 @@ examples:
   sup graph2d "np.sin(x**2 + y**2) / (x**2 + y**2)" --x-range -5 5 --y-range -5 5 --size 50 50
 ```
 
+**Plotting from stdin (e.g., via pipe):**
+```bash
+# Plot column 0 from piped space-delimited text data with header '# val1 val2'
+# (Assumes my_data.txt has a header compatible with 'txt' format if not just numbers)
+cat my_data.txt | sup hist1d - 0 --stdin-format txt --delimiter " "
+
+# Plot column 1 from piped CSV data (e.g., headers: col0,col1,col2)
+cat my_data.csv | sup hist1d - 1 --stdin-format csv
+
+# List datasets from piped CSV data
+cat my_data.csv | sup list - --stdin-format csv
+```
+Note: When using stdin ("-") as the input file, the `--stdin-format` argument is required. Supported formats for stdin are 'txt' (for general delimited text files) and 'csv' (for comma-separated values files, assumes first line is header). HDF5 data format is not supported from stdin. The `--delimiter` option is used for 'txt' format.
 
 ## License
 This project is licensed under the GNU General Public License v3 (GPLv3+). See the file `LICENSE` for details.

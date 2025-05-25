@@ -117,3 +117,39 @@ echo "sup plr2d posterior.dat 0 1 8 -sz 40 40"
 sup plr2d posterior.dat 0 1 8 -sz 40 40
 
 
+# Test stdin modes
+echo
+echo
+echo "####################"
+echo "# Test stdin modes #"
+echo "####################"
+
+echo
+echo "cat tests/sample_pipe.txt | sup hist1d - 0 --stdin-format txt --delimiter \" \" -sz 30 10 -wb"
+cat tests/sample_pipe.txt | sup hist1d - 0 --stdin-format txt --delimiter " " -sz 30 10 -wb
+echo
+echo "cat tests/sample_pipe.csv | sup hist1d - 0 --stdin-format csv -sz 30 10 -wb"
+cat tests/sample_pipe.csv | sup hist1d - 0 --stdin-format csv -sz 30 10 -wb
+echo
+echo "cat tests/sample_pipe.csv | sup list - --stdin-format csv"
+cat tests/sample_pipe.csv | sup list - --stdin-format csv
+
+
+# Test stdin error handling
+echo
+echo
+echo "#############################"
+echo "# Test stdin error handling #"
+echo "#############################"
+
+echo
+echo "sup hist1d - 0 # Expect error: missing --stdin-format"
+sup hist1d - 0
+echo
+echo "sup hist1d - 0 --stdin-format hdf5 # Expect error: hdf5 from stdin not supported"
+sup hist1d - 0 --stdin-format hdf5
+echo
+echo "cat tests/sample_pipe.txt | sup hist1d - 0 --stdin-format txt --watch 1 # Expect error: watch mode with stdin"
+cat tests/sample_pipe.txt | sup hist1d - 0 --stdin-format txt --watch 1
+
+

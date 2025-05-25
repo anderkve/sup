@@ -96,15 +96,16 @@ def run(args):
     #
 
     dsets, dset_names = utils.read_input_file(
-        input_file, [x_index, y_index, loglike_index, s_index], read_slice, 
-        delimiter=args.delimiter)
+        args.input_file, [x_index, y_index, loglike_index, s_index], read_slice, 
+        delimiter=args.delimiter, stdin_format=args.stdin_format)
     x_data, y_data, loglike_data, s_data = dsets
     x_name, y_name, loglike_name, s_name = dset_names
 
-    filter_datasets, filter_names = utils.get_filters(input_file, 
+    filter_datasets, filter_names = utils.get_filters(args.input_file, 
                                                       filter_indices, 
                                                       read_slice=read_slice, 
-                                                      delimiter=args.delimiter)
+                                                      delimiter=args.delimiter,
+                                                      stdin_format=args.stdin_format)
 
     if use_filters:
         x_data, y_data, loglike_data, s_data = utils.apply_filters(

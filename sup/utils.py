@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 import os
+import sys
+import io
 import numpy as np
 from collections import OrderedDict
 from scipy.stats import chi2
-from io import StringIO 
+# from io import StringIO # Replaced by io.StringIO
 import sup.defaults as defaults
 
 
@@ -569,8 +571,8 @@ def get_dataset_names_hdf5(hdf5_file_object):
 
 
 
-def get_dataset_names_txt(txt_file_name):
-    """Get the names of all datasets in a text file.
+def get_dataset_names_txt(source):
+    """Get the names of all datasets in a text file or stream.
 
     The function assumes that the first non-empty line starting with the
     comment character '#' contains the dataset names (header). If no such
@@ -579,13 +581,15 @@ def get_dataset_names_txt(txt_file_name):
 
     Parameters
     ----------
-    txt_file_name : str
-        Path to the input text file.
+    source : str or file-like object
+        Path to the input text file or a file-like object (e.g., sys.stdin).
 
     Returns
     -------
-    list of str
-        The dataset names.
+    tuple
+        A tuple containing:
+            - result_names (list of str): The parsed dataset names.
+            - file_content (str): The full string content of the file or stdin.
 
     Raises
     ------
@@ -598,58 +602,143 @@ def get_dataset_names_txt(txt_file_name):
 
     result = []
 
-    # To avoid reading the entire file just to list the dataset names
-    # we'll use a StringIO file-like object constructed from the first
-    # interesting line in the file.
+    file_content = ""
+    if isinstance(source, str):
+        with open(source, 'r') as f:
+            file_content = f.read()
+        display_source_name = source
+    else: # assume file-like object for stdin
+        file_content = source.read()
+        display_source_name = "stdin"
 
     comments = '#'
-
-    # Let's find the first non-empty comment line, which we require 
-    # should contain the column names.
-    # This function assumes that the first non-empty line starting with
-    # the comment character '#' contains the dataset names (header).
-    firstline = ''
-    with open(txt_file_name) as f:
-        templine = ''
-        for line in f:
-            templine = line.lstrip().rstrip()
-            if not ((templine == '') or (templine == comments)):
-                break
-        firstline = templine
+    header_line_str = ''
+    lines = file_content.splitlines()
+    
+    for line in lines:
+        stripped_line = line.lstrip().rstrip()
+        if not ((stripped_line == '') or (stripped_line == comments)):
+            header_line_str = stripped_line
+            break # Found the first relevant line
 
     use_names = True
-    # If firstline is not a header with column names, we have to create
-    # a list of names based on the number of columns we detect from firstline.
-    if not firstline.startswith(comments):
-        # If the firstline does not start with the comment character,
-        # it might be a data line or a malformed header.
-        # We'll try to infer column count if it's not empty.
-        if not firstline:
+    # If header_line_str is not a comment header with column names, 
+    # we have to create a list of names based on the number of columns 
+    # we detect from header_line_str.
+    if not header_line_str.startswith(comments):
+        if not header_line_str: # Empty or only whitespace after reading all lines
             raise SupRuntimeError(
                 f"{error_prefix} Could not find a valid header line (non-empty, starting with '{comments}') "
-                f"in file {txt_file_name}. The first non-empty line found was empty or missing."
+                f"or any data lines in {display_source_name}."
             )
-        n_cols = len(firstline.replace(',', ' ').split())
+        # Assume it's a data line, try to infer column count
+        # Replace comma with space for robust splitting, then split by whitespace
+        n_cols = len(header_line_str.replace(',', ' ').split())
         if n_cols == 0:
             raise SupRuntimeError(
-                f"{error_prefix} Could not parse column names from the first non-empty line in {txt_file_name}. "
-                f"The line was: '{firstline}'. It does not start with '{comments}' and no columns could be inferred."
+                f"{error_prefix} Could not parse column names from the first non-empty line in {display_source_name}. "
+                f"The line was: '{header_line_str}'. It does not start with '{comments}' and no columns could be inferred."
             )
-        use_names = ['dataset' + str(i) for i in range(n_cols)]
-    elif not firstline.lstrip(comments).strip():
-        # The line starts with a comment but is empty otherwise.
-        raise SupRuntimeError(
-            f"{error_prefix} The header line (starting with '{comments}') in file {txt_file_name} "
-            f"is empty after stripping the comment character and whitespace: '{firstline}'"
-        )
+        result_names = ['dataset' + str(i) for i in range(n_cols)]
+    else: # Starts with comment character
+        # Check if the line is empty after stripping comment char and whitespace
+        actual_header_content = header_line_str.lstrip(comments).strip()
+        if not actual_header_content:
+            raise SupRuntimeError(
+                f"{error_prefix} The header line (starting with '{comments}') in {display_source_name} "
+                f"is empty after stripping the comment character and whitespace: '{header_line_str}'"
+            )
+        # Use np.genfromtxt on this single header line to get names
+        # Pass actual_header_content directly to StringIO
+        stringIO_header = io.StringIO(actual_header_content)
+        try:
+            # We pass names=True to auto-detect names from this line.
+            # delimiter=None will split by whitespace. If names are comma-separated, this will treat them as one.
+            # This part of np.genfromtxt is primarily for data, but can extract names.
+            # A more robust way would be to split actual_header_content by delimiter if known,
+            # but this function's original logic used genfromtxt.
+            # Forcing delimiter to None (whitespace) for header parsing is safer.
+            dset_dtype = np.genfromtxt(stringIO_header, names=True, comments=None, max_rows=1, delimiter=None).dtype
+            result_names = list(dset_dtype.names)
+            if not result_names: # If genfromtxt failed to parse names (e.g. bad format)
+                 raise ValueError("genfromtxt failed to parse names from header.")
+        except Exception as e: # Catch broad exceptions from genfromtxt if header is tricky
+            # Fallback: simple split by whitespace (and comma as a common alternative)
+            cleaned_header = actual_header_content.replace(',', ' ')
+            result_names = [name for name in cleaned_header.split() if name]
+            if not result_names:
+                 raise SupRuntimeError(
+                    f"{error_prefix} Failed to parse column names from header line '{header_line_str}' in {display_source_name} using genfromtxt and fallback split. Error: {e}"
+                )
+    
+    return result_names, file_content
 
 
-    stringIO_file = StringIO(firstline)
-    dsets = np.genfromtxt(stringIO_file, names=use_names, comments=comments)
-    result = dsets.dtype.names
+def read_input_file_txt_from_stream_content(file_content_str, all_dset_names, dset_indices, read_slice, delimiter):
+    """Read datasets from a string containing text file content.
 
-    return result
+    Parameters
+    ----------
+    file_content_str : str
+        The full content of the text file as a string.
+    all_dset_names : list of str
+        Names of all datasets found in the input file content.
+    dset_indices : list of int
+        The dataset column indices (0-based) to read.
+    read_slice : slice
+        The slice to be applied to each read dataset.
+    delimiter : str
+        The delimiter string that separates entries.
 
+    Returns
+    -------
+    tuple
+        A tuple containing:
+            - dsets (list of numpy.ndarray): The list of read datasets.
+            - dset_names (list of str): The list of names for the read datasets.
+    """
+    dset_names = [all_dset_names[dset_index] for dset_index in dset_indices]
+
+    if delimiter.strip() == "":
+        delimiter = None
+
+    data_stream = io.StringIO(file_content_str)
+    
+    try:
+        # Read all columns specified by dset_indices. names=None as we handle names based on all_dset_names.
+        # np.genfromtxt will return a structured array if multiple columns, or a single array if one column.
+        loaded_data = np.genfromtxt(data_stream, usecols=dset_indices, names=None, comments="#", 
+                                    delimiter=delimiter, unpack=False) # unpack=False to handle single column case better initially
+    except ValueError as e:
+        print("{} Encountered an unexpected problem when reading from stream. "
+              "Perhaps there are values missing? Full error message below.".format(error_prefix))
+        print()
+        raise e
+
+    # Ensure dsets is a list of arrays, even if only one dataset is read
+    if len(dset_indices) == 1:
+        # If loaded_data is 1D, it's a single column. If it's >1D (e.g. structured), something else is wrong.
+        # For a single column, genfromtxt (unpack=False) returns a 1D array.
+        if loaded_data.ndim == 1:
+            dsets = [loaded_data[read_slice]]
+        else: # Should not happen with names=None and single usecol.
+             raise SupRuntimeError("Unexpected data shape when reading a single column from stream.")
+    else:
+        # If multiple columns are read with names=None and unpack=False, 
+        # genfromtxt returns a structured array. We need to convert it to a list of arrays.
+        # This is different from unpack=True which returns a list of arrays directly.
+        # Let's re-evaluate using unpack=True for consistency.
+        # Re-trying with unpack=True as it's more direct for multiple columns.
+        data_stream.seek(0) # Reset stream for re-read
+        dsets_tuple = np.genfromtxt(data_stream, usecols=dset_indices, names=None, comments="#", 
+                                   delimiter=delimiter, unpack=True)
+        if len(dset_indices) == 1: # unpack=True still returns single array not in tuple if one col
+             dsets = [dsets_tuple[read_slice]]
+        else:
+             dsets = [d[read_slice] for d in dsets_tuple]
+
+
+    return dsets, dset_names
 
 
 def check_file_type(input_file):
@@ -738,23 +827,24 @@ def check_dset_lengths(dsets, dset_names):
 
 
 
-def read_input_file(input_file, dset_indices, read_slice, delimiter=' '):
-    """Read datasets from an input file.
+def read_input_file(input_file_path_or_stream, dset_indices, read_slice, delimiter=' ', stdin_format=None):
+    """Read datasets from an input file or stream.
 
-    The input file can either be of text or HDF5 type. The type is
-    determined by `check_file_type`.
+    The input can be a file path (str) or a file-like object (e.g., sys.stdin).
+    The type is determined by `check_file_type` for files, or `stdin_format` for streams.
 
     Parameters
     ----------
-    input_file : str
-        The input file path.
+    input_file_path_or_stream : str or file-like object
+        The input file path or stream.
     dset_indices : list of int
-        The dataset indices to read from the file.
+        The dataset indices to read.
     read_slice : slice
         The slice to be read for each dataset.
     delimiter : str, optional
-        The delimiter string that separates entries in the input file,
-        if it's a text file. Defaults to ' '.
+        The delimiter for text files. Defaults to ' '.
+    stdin_format : str, optional
+        Format of stdin ('txt', 'csv'), required if reading from stdin. Defaults to None.
 
     Returns
     -------
@@ -774,24 +864,68 @@ def read_input_file(input_file, dset_indices, read_slice, delimiter=' '):
     dsets = []
     dset_names = []
 
-    file_type = check_file_type(input_file)
+    # Check if input_file_path_or_stream is sys.stdin or a similar stream object
+    # A simple check for '-' is used if sup.py translates it to sys.stdin later,
+    # or we can check type if sys.stdin is passed directly.
+    # For this refactoring, we'll assume sup.py might pass sys.stdin directly,
+    # or a string '-' which it resolves. The task description mentions input_file == '-'
+    # in sup.py. Let's assume if it's not a string, it's a stream (like sys.stdin).
+    
+    is_stream_input = not isinstance(input_file_path_or_stream, str) or input_file_path_or_stream == '-'
 
-    if file_type == "text":
-        print("Reading " + input_file + " as a text file with delimiter '" +
-              delimiter + "'")
-        print()
-        dsets, dset_names = read_input_file_txt(input_file, dset_indices,
-                                                read_slice, delimiter)
+    if is_stream_input:
+        # If it's '-', assume it means sys.stdin should be used by the caller.
+        # Here, we expect the actual stream object if '-' was resolved by caller.
+        # If '-' is passed, it implies caller needs to handle it. Let's refine this logic
+        # based on assumption that if input_file_path_or_stream is not a string path, it's a stream.
+        # The problem states `sup.py` uses `input_file == '-'`.
+        # `read_input_file` in `utils.py` will receive `sys.stdin` if `input_file` was `'-'`.
+        
+        actual_stream = sys.stdin if input_file_path_or_stream == '-' else input_file_path_or_stream
 
-    elif file_type == "hdf5":
-        print("Reading " + input_file + " as an HDF5 file")
-        print()
-        dsets, dset_names = read_input_file_hdf5(input_file, dset_indices,
-                                                 read_slice)
+        if not stdin_format:
+            raise SupRuntimeError("stdin_format must be specified when reading from a stream.")
+
+        print("Reading from stdin as {}...".format(stdin_format))
+        print() # for spacing, similar to file reading messages
+
+        if stdin_format == 'txt':
+            all_dset_names, file_content_str = get_dataset_names_txt(actual_stream)
+            check_dset_indices("stdin", dset_indices, all_dset_names)
+            dsets, dset_names = read_input_file_txt_from_stream_content(
+                file_content_str, all_dset_names, dset_indices, read_slice, delimiter
+            )
+        elif stdin_format == 'csv':
+            all_dset_names, file_content_str = get_dataset_names_csv(actual_stream)
+            check_dset_indices("stdin", dset_indices, all_dset_names)
+            dsets, dset_names = read_input_file_csv_from_stream_content(
+                file_content_str, all_dset_names, dset_indices, read_slice
+            )
+        elif stdin_format == 'hdf5':
+            raise SupRuntimeError("HDF5 from stdin is not supported.")
+        else:
+            raise SupRuntimeError("Unknown stdin format: {}".format(stdin_format))
+    else:
+        # It's a filename string
+        file_type = check_file_type(input_file_path_or_stream)
+
+        if file_type == "text":
+            print("Reading " + input_file_path_or_stream + " as a text file with delimiter '" +
+                  delimiter + "'")
+            print()
+            dsets, dset_names = read_input_file_txt(input_file_path_or_stream, dset_indices,
+                                                    read_slice, delimiter)
+        elif file_type == "hdf5":
+            print("Reading " + input_file_path_or_stream + " as an HDF5 file")
+            print()
+            dsets, dset_names = read_input_file_hdf5(input_file_path_or_stream, dset_indices,
+                                                     read_slice)
+        else:
+            # Should not happen if check_file_type is robust
+            raise SupRuntimeError("Unknown file type for: {}".format(input_file_path_or_stream))
 
     check_dset_lengths(dsets, dset_names)
-
-    return dsets, dset_names    
+    return dsets, dset_names
 
 
 
@@ -856,23 +990,17 @@ def read_input_file_hdf5(input_file, dset_indices, read_slice):
 
 
 
-def read_input_file_txt(input_file, dset_indices, read_slice, delimiter):
+def read_input_file_txt(txt_file_name, dset_indices, read_slice, delimiter):
     """Read datasets from an input text file.
-
-    Note: The `read_slice` parameter is not currently used in this function
-    for text files, as `np.genfromtxt` reads all data and then slicing would
-    need to be applied post-read if desired. This might be a point for
-    future improvement if partial reads are necessary.
 
     Parameters
     ----------
-    input_file : str
+    txt_file_name : str
         The input text file path.
     dset_indices : list of int
         The dataset column indices (0-based) to read from the text file.
     read_slice : slice
-        The slice to be read for each dataset in use. (Currently not applied
-        for text files by this function).
+        The slice to be read for each dataset.
     delimiter : str
         The delimiter string that separates entries in the input file.
         If `delimiter` consists only of whitespace, it is treated as `None`
@@ -896,69 +1024,201 @@ def read_input_file_txt(input_file, dset_indices, read_slice, delimiter):
 
     """
 
-    dsets = []
-    dset_names = []
+    all_dset_names, file_content_str = get_dataset_names_txt(txt_file_name)
 
-    all_dset_names = get_dataset_names_txt(input_file)
+    if len(all_dset_names) == 0: # Should ideally be caught by get_dataset_names_txt
+        raise SupRuntimeError("No datasets found in {}.".format(txt_file_name))
 
-    if len(all_dset_names) == 0:
-        raise SupRuntimeError("No datasets found in {}.".format(input_file))
-
-    check_dset_indices(input_file, dset_indices, all_dset_names)
+    check_dset_indices(txt_file_name, dset_indices, all_dset_names)
     
-    dset_names = [all_dset_names[dset_index] for dset_index in dset_indices]
-    
-    if delimiter.strip() == "":
-        delimiter = None
+    return read_input_file_txt_from_stream_content(file_content_str, all_dset_names, dset_indices, read_slice, delimiter)
+
+
+def get_dataset_names_csv(source):
+    """Get the names of all datasets in a CSV file or stream.
+
+    The function assumes that the first line contains the dataset names (header).
+
+    Parameters
+    ----------
+    source : str or file-like object
+        Path to the input CSV file or a file-like object (e.g., sys.stdin).
+
+    Returns
+    -------
+    tuple
+        A tuple containing:
+            - result_names (list of str): The parsed dataset names.
+            - file_content (str): The full string content of the file or stdin.
+    """
+    file_content_str = ""
+    if isinstance(source, str):
+        with open(source, 'r') as f:
+            file_content_str = f.read()
+        display_source_name = source
+    else: # assume file-like object for stdin
+        file_content_str = source.read()
+        display_source_name = "stdin"
+
+    if not file_content_str.strip():
+        raise SupRuntimeError(f"{error_prefix} The input from {display_source_name} is empty.")
+
+    header_line_str = file_content_str.splitlines()[0]
+
+    if not header_line_str.strip():
+        raise SupRuntimeError(f"{error_prefix} The header line in {display_source_name} is empty.")
 
     try:
-        dsets = list(np.genfromtxt(input_file, usecols=dset_indices,
-                                    names=dset_names, unpack=True, comments="#", 
-                                    delimiter=delimiter))
+        # Use np.genfromtxt on this single header line to get names.
+        # Set comments to None as CSVs don't typically have comment lines like text files.
+        # delimiter is explicitly ','.
+        stringIO_header = io.StringIO(header_line_str)
+        # Setting invalid_raise=False for genfromtxt when parsing header, as it might be too strict.
+        dset_dtype = np.genfromtxt(stringIO_header, delimiter=',', names=True, comments=None, max_rows=1, invalid_raise=False).dtype
+        result_names = list(dset_dtype.names)
+        if not result_names: # If genfromtxt failed (e.g. all names were invalid according to its rules)
+             # Fallback: simple split by comma, strip quotes and spaces
+             result_names = [name.strip().strip('"').strip("'") for name in header_line_str.split(',') if name.strip()]
+             if not result_names:
+                 raise ValueError("genfromtxt and fallback failed to parse names from CSV header.")
+    except Exception as e:
+        # Fallback: simple split by comma, strip quotes and spaces
+        result_names = [name.strip().strip('"').strip("'") for name in header_line_str.split(',') if name.strip()]
+        if not result_names:
+            raise SupRuntimeError(
+                f"{error_prefix} Failed to parse column names from CSV header line '{header_line_str}' in {display_source_name} using genfromtxt and fallback split. Error: {e}"
+            )
+            
+    return result_names, file_content_str
+
+
+def read_input_file_csv_from_stream_content(file_content_str, all_dset_names, dset_indices, read_slice):
+    """Read datasets from a string containing CSV file content.
+
+    Parameters
+    ----------
+    file_content_str : str
+        The full content of the CSV file as a string.
+    all_dset_names : list of str
+        Names of all datasets found in the input file content (typically from header).
+    dset_indices : list of int
+        The dataset column indices (0-based) to read.
+    read_slice : slice
+        The slice to be applied to each read dataset.
+
+    Returns
+    -------
+    tuple
+        A tuple containing:
+            - dsets (list of numpy.ndarray): The list of read datasets.
+            - dset_names (list of str): The list of names for the read datasets.
+    """
+    dset_names = [all_dset_names[dset_index] for dset_index in dset_indices]
+    data_stream = io.StringIO(file_content_str)
+
+    try:
+        # Use names=True to skip header, comments=None as CSVs don't usually have them.
+        # unpack=True is important to get columns as separate arrays.
+        dsets_tuple = np.genfromtxt(data_stream, usecols=dset_indices, delimiter=',', 
+                                    names=True, comments=None, unpack=True, invalid_raise=False)
+                                    # names=True tells genfromtxt to use the first line as header and skip it for data.
+                                    # Using names=None and then manually skipping header might be another option if names=True is problematic.
+                                    # However, the get_dataset_names_csv already parsed the header, so we want to skip it.
+                                    # A common way to skip header with genfromtxt is skip_header=1 if names are handled manually.
+                                    # Let's re-evaluate: since all_dset_names are already parsed, we should skip the header row.
     except ValueError as e:
-        print("{} Encountered an unexpected problem when reading the "
-              "input file {}. Perhaps there are values missing in the file? "
-              "Full error message below.".format(error_prefix, input_file))
+        print("{} Encountered an unexpected problem when reading CSV from stream. "
+              "Full error message below.".format(error_prefix))
+        print()
+        raise e
+
+    # Reset stream and read again, this time skipping the header.
+    # This is safer as `names=True` might have subtle effects on type or data reading.
+    data_stream.seek(0)
+    try:
+        # We use usecols to select specific columns.
+        # unpack=True ensures that dsets_tuple is a tuple of arrays, one for each column.
+        # skip_header=1 to ignore the CSV header line.
+        dsets_tuple_data = np.genfromtxt(data_stream, usecols=dset_indices, delimiter=',', 
+                                         skip_header=1, comments=None, unpack=True)
+    except ValueError as e:
+        # This error might occur if, after skipping header, data is still problematic
+        print("{} Encountered an unexpected problem when reading CSV data (post-header) from stream. "
+              "Full error message below.".format(error_prefix))
         print()
         raise e
 
     if len(dset_indices) == 1:
-        dsets = [dsets]
+        # If only one column is selected, np.genfromtxt (with unpack=True) returns a single 1D array, not a tuple.
+        dsets = [dsets_tuple_data[read_slice]]
+    else:
+        # If multiple columns, it returns a tuple of 1D arrays.
+        dsets = [d[read_slice] for d in dsets_tuple_data]
 
-    return dsets, dset_names    
+    return dsets, dset_names
 
 
+def get_filters_txt_from_stream_content(file_content_str, all_dset_names, filter_indices, read_slice, delimiter):
+    """Get text-file datasets from a string that will be used for filtering (masking)."""
+    filter_names = [all_dset_names[filter_index] for filter_index in filter_indices]
+    
+    if delimiter.strip() == "":
+        delimiter = None
+
+    data_stream = io.StringIO(file_content_str)
+    # skip_header=1 assumes that the header was part of file_content_str and needs to be skipped for data reading.
+    # This aligns with how read_input_file_txt_from_stream_content implicitly handles it via get_dataset_names_txt.
+    filter_dsets_tuple = np.genfromtxt(data_stream, usecols=filter_indices, names=None, comments="#", 
+                                   delimiter=delimiter, unpack=True, skip_header=1)
+
+    if len(filter_indices) == 1:
+        filter_dsets = [filter_dsets_tuple[read_slice]]
+    else:
+        filter_dsets = [d[read_slice] for d in filter_dsets_tuple]
+        
+    return filter_dsets, filter_names
 
 
-def get_filters(input_file, filter_indices, read_slice, delimiter=' '):
-    """Get datasets that will be used for filtering (masking).
+def get_filters_csv_from_stream_content(file_content_str, all_dset_names, filter_indices, read_slice):
+    """Get CSV datasets from a string that will be used for filtering (masking)."""
+    filter_names = [all_dset_names[filter_index] for filter_index in filter_indices]
+    data_stream = io.StringIO(file_content_str)
+    
+    # For CSV, delimiter is ',', comments=None, skip_header=1
+    filter_dsets_tuple = np.genfromtxt(data_stream, usecols=filter_indices, delimiter=',', 
+                                   names=None, comments=None, unpack=True, skip_header=1)
 
-    The input file can be either text or HDF5 format. This function
-    determines the file type and calls the appropriate helper function
-    (`get_filters_txt` or `get_filters_hdf5`).
+    if len(filter_indices) == 1:
+        filter_dsets = [filter_dsets_tuple[read_slice]]
+    else:
+        filter_dsets = [d[read_slice] for d in filter_dsets_tuple]
+        
+    return filter_dsets, filter_names
+
+
+def get_filters(input_file_path_or_stream, filter_indices, read_slice, delimiter=' ', stdin_format=None):
+    """Get datasets that will be used for filtering (masking) from file or stream.
 
     Parameters
     ----------
-    input_file : str
-        The path to the input file.
+    input_file_path_or_stream : str or file-like object
+        The path to the input file or a stream.
     filter_indices : list of int or None
         A list of integer indices specifying which datasets to read as filters.
         If None, returns empty lists for datasets and names.
     read_slice : slice
         A slice object indicating the portion of each dataset to read.
     delimiter : str, optional
-        The delimiter used in the input file if it's a text file.
-        Defaults to ' '.
-
+        The delimiter used in the input file if it's a text file. Defaults to ' '.
+    stdin_format : str, optional
+        Format of stdin ('txt', 'csv'), required if reading from stdin. Defaults to None.
+    
     Returns
     -------
     tuple
         A tuple containing:
-            - filter_dsets (list of numpy.ndarray): A list of NumPy arrays,
-              where each array is a filter dataset. Empty if `filter_indices`
-              is None.
-            - filter_names (list of str): A list of names for the filter
-              datasets. Empty if `filter_indices` is None.
+            - filter_dsets (list of numpy.ndarray): Filter datasets.
+            - filter_names (list of str): Names of filter datasets.
 
     Raises
     ------
@@ -968,32 +1228,97 @@ def get_filters(input_file, filter_indices, read_slice, delimiter=' '):
 
     """
 
+    if filter_indices is None:
+        return [], []
+
     filter_dsets = []
     filter_names = []
+    
+    is_stream_input = not isinstance(input_file_path_or_stream, str) or input_file_path_or_stream == '-'
 
-    # @todo: Check this before function is called?
-    if filter_indices is None:
-        return filter_dsets, filter_names
+    if is_stream_input:
+        actual_stream = sys.stdin if input_file_path_or_stream == '-' else input_file_path_or_stream
+        
+        if not stdin_format:
+            raise SupRuntimeError("stdin_format must be specified when reading filters from a stream.")
 
-    file_type = check_file_type(input_file)
+        print("Reading filters from stdin as {}...".format(stdin_format)) # User feedback
+        
+        if stdin_format == 'txt':
+            all_dset_names, file_content_str = get_dataset_names_txt(actual_stream)
+            check_dset_indices("stdin (for filters)", filter_indices, all_dset_names)
+            filter_dsets, filter_names = get_filters_txt_from_stream_content(
+                file_content_str, all_dset_names, filter_indices, read_slice, delimiter
+            )
+        elif stdin_format == 'csv':
+            all_dset_names, file_content_str = get_dataset_names_csv(actual_stream)
+            check_dset_indices("stdin (for filters)", filter_indices, all_dset_names)
+            filter_dsets, filter_names = get_filters_csv_from_stream_content(
+                file_content_str, all_dset_names, filter_indices, read_slice
+            )
+        elif stdin_format == 'hdf5':
+            raise SupRuntimeError("HDF5 filters from stdin are not supported.")
+        else:
+            raise SupRuntimeError("Unknown stdin format for filters: {}".format(stdin_format))
+    else:
+        # It's a filename string
+        file_type = check_file_type(input_file_path_or_stream)
+        
+        if file_type == "text":
+            # get_filters_txt was refactored to handle reading content and calling _from_stream_content
+            # It also means check_dset_indices is implicitly handled by the call to get_dataset_names_txt within get_filters_txt
+            # However, for consistency and explicit message, we might want to call check_dset_indices here too
+            # Let's assume get_filters_txt calls get_dataset_names_txt which returns all_names,
+            # then get_filters_txt calls check_dset_indices itself, or it's done here.
+            # The refactored get_filters_txt ALREADY calls get_dataset_names_txt.
+            # It does NOT call check_dset_indices. So we should call it here.
+            # To do that, get_filters_txt needs to return all_dset_names or we parse again.
+            # For now, let's simplify: get_filters_txt will directly return dsets and names.
+            # The internal call to get_dataset_names_txt inside get_filters_txt will ensure names are valid before reading.
+            # The check_dset_indices for the *specific filter_indices* should be done here.
+            # This requires get_filters_txt to also return all_dset_names.
+            # Alternative: get_dataset_names_txt once, then pass content for filters.
+            # Let's adjust get_filters_txt to NOT call get_dataset_names_txt, but receive content.
+            # This seems more aligned with the overall strategy.
+            # Re-evaluating: The current `get_filters_txt` *does* call `get_dataset_names_txt`.
+            # This means `check_dset_indices` against `all_dset_names` should be done in `get_filters_txt`
+            # or `get_filters_txt` should return `all_dset_names` for this function to do it.
+            # The current `get_filters_txt` does:
+            #    all_dset_names, file_content_str = get_dataset_names_txt(txt_file_name)
+            #    return get_filters_txt_from_stream_content(...)
+            # So, `all_dset_names` is available. Let's pass it back or do check inside.
+            # For simplicity, let's assume get_filters_txt handles this check internally or check_dset_indices is called by caller after.
+            # The prompt for get_filters_txt did not include check_dset_indices.
+            # Let's add it here for file paths.
+            print("Reading filters from text file {}...".format(input_file_path_or_stream))
+            all_dset_names_for_file, _ = get_dataset_names_txt(input_file_path_or_stream) # Get names for check
+            check_dset_indices(input_file_path_or_stream, filter_indices, all_dset_names_for_file)
+            filter_dsets, filter_names = get_filters_txt(input_file_path_or_stream, # This will re-read names, inefficient.
+                                                         filter_indices,
+                                                         read_slice,
+                                                         delimiter)
+        elif file_type == "hdf5":
+            print("Reading filters from HDF5 file {}...".format(input_file_path_or_stream))
+            # get_filters_hdf5 reads directly from file path, no stream intermediary for names needed here.
+            # It should internally call get_dataset_names_hdf5 and check_dset_indices.
+            # Let's verify get_filters_hdf5 structure:
+            #   f = h5py.File(input_file, "r")
+            #   dset_names = get_dataset_names_hdf5(f)
+            #   ... then it iterates filter_indices and appends. It implicitly checks index validity.
+            filter_dsets, filter_names = get_filters_hdf5(input_file_path_or_stream, 
+                                                          filter_indices, 
+                                                          read_slice)
+        else:
+            raise SupRuntimeError("Unknown file type for filters: {}".format(input_file_path_or_stream))
 
-    if file_type == "text":
-        filter_dsets, filter_names = get_filters_txt(input_file,
-                                                     filter_indices,
-                                                     read_slice,
-                                                     delimiter)
-    elif file_type == "hdf5":
-        filter_dsets, filter_names = get_filters_hdf5(input_file, 
-                                                      filter_indices, 
-                                                      read_slice)        
-
-    check_dset_lengths(filter_dsets, filter_names)
+    if filter_dsets: # Only check lengths if datasets were actually loaded
+        check_dset_lengths(filter_dsets, filter_names)
 
     return filter_dsets, filter_names
 
 
 
-def get_filters_hdf5(input_file, filter_indices, read_slice=slice(0,-1,1)):
+def get_filters_hdf5(input_file, filter_indices, read_slice=slice(0,-1,1)): # Renaming for clarity in get_filters
     """Get HDF5 datasets that will be used for filtering (masking).
 
     Parameters
@@ -1043,63 +1368,33 @@ def get_filters_hdf5(input_file, filter_indices, read_slice=slice(0,-1,1)):
 
 
 
-def get_filters_txt(input_file, filter_indices, read_slice, delimiter=' '):
+def get_filters_txt(txt_file_name, filter_indices, read_slice, delimiter=' '):
     """Get text-file datasets that will be used for filtering (masking).
-
-    Note: The `read_slice` parameter is not currently used in this function
-    for text files, as `np.genfromtxt` reads all data. Slicing would need
-    to be applied post-read if desired for text files.
 
     Parameters
     ----------
-    input_file : str
+    txt_file_name : str
         The path to the input text file.
     filter_indices : list of int
         A list of integer indices specifying which columns (datasets) to read
         as filters.
     read_slice : slice
         A slice object indicating the portion of each dataset to read.
-        (Currently not applied for text files by this function).
     delimiter : str, optional
         The delimiter used in the input text file. Defaults to ' '.
-        If `delimiter` consists only of whitespace, it is treated as `None`
-        by `np.genfromtxt`.
 
     Returns
     -------
     tuple
         A tuple containing:
-            - filter_dsets (list of numpy.ndarray): A list of NumPy arrays,
-              where each array is a filter dataset.
+            - filter_dsets (list of numpy.ndarray): A list of NumPy arrays.
             - filter_names (list of str): A list of names for the filter datasets.
-
-    Raises
-    ------
-    SupRuntimeError
-        If `get_dataset_names_txt` or `np.genfromtxt` encounters issues,
-        though specific errors are typically raised by those functions directly.
-
     """
-
-    filter_dsets = []
-    filter_names = []
-
-    all_dset_names = get_dataset_names_txt(input_file)
-
-    filter_names = [
-        all_dset_names[filter_index] for filter_index in filter_indices
-    ]
-    
-    if delimiter.strip() == "":
-        delimiter = None
-
-    filter_dsets = list(np.genfromtxt(input_file, usecols=filter_indices,
-                                       names=filter_names, unpack=True, 
-                                       comments="#", delimiter=delimiter))
-    if len(filter_indices) == 1:
-        filter_dsets = [filter_dsets]
-
-    return filter_dsets, filter_names
+    all_dset_names, file_content_str = get_dataset_names_txt(txt_file_name)
+    if not all_dset_names: 
+        raise SupRuntimeError(f"No dataset names found in {txt_file_name} while trying to get filters.")
+    # check_dset_indices is deferred to the main get_filters function
+    return get_filters_txt_from_stream_content(file_content_str, all_dset_names, filter_indices, read_slice, delimiter)
 
 
 
