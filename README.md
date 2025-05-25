@@ -1,7 +1,7 @@
 
 # sup — the Simple Unicode Plotter
 
-`sup` is a command-line tool for generating quick 1D and 2D data visualizations directly in the terminal using Unicode characters and ANSI colors. It can plot data from files (text or HDF5) or directly from mathematical functions.
+`sup` is a command-line tool for generating quick 1D and 2D data visualizations directly in the terminal using Unicode characters and ANSI colors. It can plot data from files (text or HDF5) or from piped input, or plot mathematical functions evaluated by `sup` directly. 
 
 <img src="./example_plots/sup_post1d.png" alt="1D posterior example" height="184"/>  <img src="./example_plots/sup_plr1d.png" alt="1D profile likelihood example" height="184"/> <img src="./example_plots/sup_graph1d.png" alt="1D graph example" height="184"/> 
 
@@ -86,6 +86,20 @@ sup hist2d posterior.dat 0 1 -sz 40 40
 sup graph2d "np.sin(x**2 + y**2) / (x**2 + y**2)" --x-range -5 5 --y-range -5 5 -sz 40 40
 ```
 
+**Plotting from stdin (e.g., via pipe):**
+```bash
+# Plot column 0 from piped space-delimited text data with header '# val1 val2'
+# (Assumes my_data.txt has a header compatible with 'txt' format if not just numbers)
+cat my_data.txt | sup hist1d - 0 --stdin-format txt --delimiter " "
+
+# Plot column 1 from piped CSV data (e.g., headers: col0,col1,col2)
+cat my_data.csv | sup hist1d - 1 --stdin-format csv
+
+# List datasets from piped CSV data
+cat my_data.csv | sup list - --stdin-format csv
+```
+Note: When using stdin ("-") as the input file, the `--stdin-format` argument is required. Supported formats for stdin are 'txt' (for general delimited text files) and 'csv' (for comma-separated values files, assumes first line is header). HDF5 data format is not supported from stdin. The `--delimiter` option is used for 'txt' format.
+
 **More examples from `sup --help`:**
 ```
 modes:
@@ -129,19 +143,6 @@ examples:
   sup graph2d "np.sin(x**2 + y**2) / (x**2 + y**2)" --x-range -5 5 --y-range -5 5 --size 50 50
 ```
 
-**Plotting from stdin (e.g., via pipe):**
-```bash
-# Plot column 0 from piped space-delimited text data with header '# val1 val2'
-# (Assumes my_data.txt has a header compatible with 'txt' format if not just numbers)
-cat my_data.txt | sup hist1d - 0 --stdin-format txt --delimiter " "
-
-# Plot column 1 from piped CSV data (e.g., headers: col0,col1,col2)
-cat my_data.csv | sup hist1d - 1 --stdin-format csv
-
-# List datasets from piped CSV data
-cat my_data.csv | sup list - --stdin-format csv
-```
-Note: When using stdin ("-") as the input file, the `--stdin-format` argument is required. Supported formats for stdin are 'txt' (for general delimited text files) and 'csv' (for comma-separated values files, assumes first line is header). HDF5 data format is not supported from stdin. The `--delimiter` option is used for 'txt' format.
 
 ## License
 This project is licensed under the GNU General Public License v3 (GPLv3+). See the file `LICENSE` for details.
