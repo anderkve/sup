@@ -504,12 +504,17 @@ examples:
 
     # Parse arguments and perform some consistency checks
     args = parser.parse_args()
+    args_dict = vars(args) # Ensure args_dict is initialized right after parsing
 
     if len(sys.argv) < 2:
         parser.print_usage()
         return 1
 
-    args_dict = vars(args)
+    # Modify default read_slice behavior
+    # If --read-slice was not specified by the user, its value will be the default [0, -1, 1].
+    # In this case, change the second element from -1 to None to include the last data point.
+    if "read_slice" in args_dict and args.read_slice == [0, -1, 1]:
+        args.read_slice[1] = None
 
     # Must check watch_n_seconds before other checks that might depend on do_watch,
     # and before do_watch itself is set.
