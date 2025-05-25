@@ -78,26 +78,29 @@ def run(args):
     w_data = None
 
     if use_weights:
-        dsets, dset_names = utils.read_input_file(input_file,
+        dsets, dset_names = utils.read_input_file(args.input_file,
                                                   [x_index, w_index],
                                                   read_slice,
-                                                  delimiter=args.delimiter)
+                                                  delimiter=args.delimiter,
+                                                  stdin_format=args.stdin_format)
         x_data, w_data = dsets
         x_name, w_name = dset_names
         utils.check_weights(w_data, w_name)
     else:
-        dsets, dset_names = utils.read_input_file(input_file, 
+        dsets, dset_names = utils.read_input_file(args.input_file, 
                                                   [x_index],
                                                   read_slice,
-                                                  delimiter=args.delimiter)
+                                                  delimiter=args.delimiter,
+                                                  stdin_format=args.stdin_format)
         x_data,  = dsets
         x_name,  = dset_names
         w_data = np.ones(len(x_data))
 
-    filter_datasets, filter_names = utils.get_filters(input_file, 
+    filter_datasets, filter_names = utils.get_filters(args.input_file, 
                                                       filter_indices,
                                                       read_slice=read_slice,
-                                                      delimiter=args.delimiter)
+                                                      delimiter=args.delimiter,
+                                                      stdin_format=args.stdin_format)
 
     if use_filters:
         x_data, w_data = utils.apply_filters([x_data, w_data], filter_datasets)

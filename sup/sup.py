@@ -298,6 +298,10 @@ def _add_chisq2d_args(parser):
     parser.add_argument("-dl", "--delimiter", type=str, action="store", dest="delimiter", default=" ", help="set the delimiter used in the input data file (only for text files)", metavar="DELIMITER")
     parser.add_argument("-wa", "--watch", type=float, action="store", dest="watch_n_seconds", default=None, help="regenerate the plot at fixed time intervals", metavar="N_SECONDS")
 
+def _add_stdin_format_arg(parser):
+    """Adds stdin_format argument to the parser."""
+    parser.add_argument("-sf", "--stdin-format", type=str, action="store", dest="stdin_format", default=None, choices=['txt', 'csv'], help="Format of data piped from stdin. Required if input_file is '-'. Choices: 'txt' (standard text file, use with --delimiter), 'csv' (comma-separated values).", metavar="FORMAT")
+
 def _add_graph1d_args(parser):
     """Adds arguments specific to the 'graph1d' mode."""
     parser.add_argument("function", type=str, action="store", help="definition of function f(x), using numpy as 'np' (e.g. \"x * np.sin(x)\")")
@@ -392,76 +396,91 @@ examples:
     parser_listmode = subparsers.add_parser("list")
     parser_listmode.set_defaults(func=listmode.run)
     _add_list_args(parser_listmode)
+    _add_stdin_format_arg(parser_listmode)
 
     # Parser for "hist1d" mode
     parser_hist1dmode = subparsers.add_parser("hist1d")
     parser_hist1dmode.set_defaults(func=hist1dmode.run)
     _add_hist1d_args(parser_hist1dmode)
+    _add_stdin_format_arg(parser_hist1dmode)
 
     # Parser for "hist2d" mode
     parser_hist2dmode = subparsers.add_parser("hist2d")
     parser_hist2dmode.set_defaults(func=hist2dmode.run)
     _add_hist2d_args(parser_hist2dmode)
+    _add_stdin_format_arg(parser_hist2dmode)
 
     # Parser for "max1d" mode
     parser_max1dmode = subparsers.add_parser("max1d")
     parser_max1dmode.set_defaults(func=maxmin1dmode.run_max)
     _add_maxmin1d_args(parser_max1dmode)
+    _add_stdin_format_arg(parser_max1dmode)
 
     # Parser for "min1d" mode
     parser_min1dmode = subparsers.add_parser("min1d")
     parser_min1dmode.set_defaults(func=maxmin1dmode.run_min)
     _add_maxmin1d_args(parser_min1dmode) # Uses the same args as max1d
+    _add_stdin_format_arg(parser_min1dmode)
 
     # Parser for "max2d" mode
     parser_max2dmode = subparsers.add_parser("max2d")
     parser_max2dmode.set_defaults(func=maxmin2dmode.run_max)
     _add_maxmin2d_args(parser_max2dmode)
+    _add_stdin_format_arg(parser_max2dmode)
 
     # Parser for "min2d" mode
     parser_min2dmode = subparsers.add_parser("min2d")
     parser_min2dmode.set_defaults(func=maxmin2dmode.run_min)
     _add_maxmin2d_args(parser_min2dmode) # Uses the same args as max2d
+    _add_stdin_format_arg(parser_min2dmode)
 
     # Parser for "avg1d" mode
     parser_avg1dmode = subparsers.add_parser("avg1d")
     parser_avg1dmode.set_defaults(func=avg1dmode.run)
     _add_avg1d_args(parser_avg1dmode)
+    _add_stdin_format_arg(parser_avg1dmode)
 
     # Parser for "avg2d" mode
     parser_avg2dmode = subparsers.add_parser("avg2d")
     parser_avg2dmode.set_defaults(func=avg2dmode.run)
     _add_avg2d_args(parser_avg2dmode)
+    _add_stdin_format_arg(parser_avg2dmode)
 
     # Parser for "post1d" mode
     parser_post1dmode = subparsers.add_parser("post1d")
     parser_post1dmode.set_defaults(func=post1dmode.run)
     _add_post1d_args(parser_post1dmode)
+    _add_stdin_format_arg(parser_post1dmode)
 
     # Parser for "post2d" mode
     parser_post2dmode = subparsers.add_parser("post2d")
     parser_post2dmode.set_defaults(func=post2dmode.run)
     _add_post2d_args(parser_post2dmode)
+    _add_stdin_format_arg(parser_post2dmode)
 
     # Parser for "plr1d" mode
     parser_plr1dmode = subparsers.add_parser("plr1d")
     parser_plr1dmode.set_defaults(func=plr1dmode.run)
     _add_plr1d_args(parser_plr1dmode)
+    _add_stdin_format_arg(parser_plr1dmode)
 
     # Parser for "plr2d" mode
     parser_plr2dmode = subparsers.add_parser("plr2d")
     parser_plr2dmode.set_defaults(func=plr2dmode.run)
     _add_plr2d_args(parser_plr2dmode)
+    _add_stdin_format_arg(parser_plr2dmode)
 
     # Parser for "chisq1d" mode
     parser_chisq1dmode = subparsers.add_parser("chisq1d")
     parser_chisq1dmode.set_defaults(func=chisq1dmode.run)
     _add_chisq1d_args(parser_chisq1dmode)
+    _add_stdin_format_arg(parser_chisq1dmode)
 
     # Parser for "chisq2d" mode
     parser_chisq2dmode = subparsers.add_parser("chisq2d")
     parser_chisq2dmode.set_defaults(func=chisq2dmode.run)
     _add_chisq2d_args(parser_chisq2dmode)
+    _add_stdin_format_arg(parser_chisq2dmode)
 
     # Parser for "graph1d" mode
     parser_graph1dmode = subparsers.add_parser("graph1d")
@@ -485,12 +504,17 @@ examples:
 
     # Parse arguments and perform some consistency checks
     args = parser.parse_args()
+    args_dict = vars(args) # Ensure args_dict is initialized right after parsing
 
     if len(sys.argv) < 2:
         parser.print_usage()
         return 1
 
-    args_dict = vars(args)
+    # Modify default read_slice behavior
+    # If --read-slice was not specified by the user, its value will be the default [0, -1, 1].
+    # In this case, change the second element from -1 to None to include the last data point.
+    if "read_slice" in args_dict and args.read_slice == [0, -1, 1]:
+        args.read_slice[1] = None
 
     # Must check watch_n_seconds before other checks that might depend on do_watch,
     # and before do_watch itself is set.
@@ -507,9 +531,17 @@ examples:
 
     # Consistency checks:
     try:
-        # The input_file check should only occur if not in watch mode.
+        if "input_file" in args_dict and args.input_file == '-':
+            if 'stdin_format' not in args_dict or args.stdin_format is None:
+                raise SupRuntimeError("Argument --stdin-format is required when reading from stdin ('-').")
+            if args.stdin_format == 'hdf5': # This check might seem redundant given choices, but good for clarity.
+                raise SupRuntimeError("Reading HDF5 data from stdin is not supported.")
+            if do_watch:
+                raise SupRuntimeError("Watch mode is not supported when reading from stdin.")
+
+        # The input_file check should only occur if not in watch mode and not reading from stdin.
         # In watch mode, the file might not exist initially, and the loop handles this.
-        if "input_file" in args_dict and not do_watch:
+        if "input_file" in args_dict and args.input_file != '-' and not do_watch:
             if not os.path.isfile(args.input_file):
                 raise SupRuntimeError("File not found:"
                                       " {}".format(args.input_file))
@@ -594,13 +626,14 @@ examples:
 
                 message = ""
 
-                # If input file is *not* found:
-                if not os.path.isfile(args.input_file):
+                # If input file is *not* found (and not reading from stdin):
+                if args.input_file != '-' and not os.path.isfile(args.input_file):
                     message += ("File not found: {}\n".format(args.input_file))
                     message += ("Trying again in {} seconds. Press CTRL+C to "
                                 "abort.".format(args.watch_n_seconds))
-                # If input file *is* found:
+                # If input file *is* found or reading from stdin:
                 else:
+                    # Cannot use watch with stdin, already checked.
                     args.func(args)
 
                     message += ("Regenerating the plot in {} seconds. Press "
