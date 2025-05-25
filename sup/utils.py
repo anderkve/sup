@@ -674,6 +674,195 @@ def get_dataset_names_txt(source):
     return result_names, file_content
 
 
+def get_dataset_names_json(source):
+    """Get the names of all datasets in a JSON file or stream.
+
+    The function expects JSON in one of two formats:
+    1. Object of arrays: {"col1": [1, 2, 3], "col2": [4, 5, 6]}
+       Dataset names are the keys of the object.
+    2. List of objects (records): [{"col1": 1, "col2": 4}, {"col1": 2, "col2": 5}]
+       Dataset names are the keys of the first object in the list.
+       It's assumed all objects in the list share the same keys.
+
+    Parameters
+    ----------
+    source : str or file-like object
+        Path to the input JSON file or a file-like object (e.g., sys.stdin).
+
+    Returns
+    -------
+    tuple
+        A tuple containing:
+            - result_names (list of str): The parsed dataset names.
+            - file_content (str): The full string content of the file or stdin.
+
+    Raises
+    ------
+    SupRuntimeError
+        If the JSON structure is not one of the expected types, if parsing fails,
+        or if dataset names cannot be determined (e.g., empty JSON object,
+        empty list of records, or inconsistent keys in records).
+    json.JSONDecodeError
+        If the source content is not valid JSON.
+    """
+    import json
+
+    file_content_str = ""
+    if isinstance(source, str):
+        with open(source, 'r') as f:
+            file_content_str = f.read()
+        display_source_name = source
+    else:  # assume file-like object for stdin
+        file_content_str = source.read()
+        display_source_name = "stdin"
+
+    if not file_content_str.strip():
+        raise SupRuntimeError(f"{error_prefix} The input from {display_source_name} is empty.")
+
+    try:
+        data = json.loads(file_content_str)
+    except json.JSONDecodeError as e:
+        raise SupRuntimeError(
+            f"{error_prefix} Failed to decode JSON from {display_source_name}. Error: {e}"
+        )
+
+    result_names = []
+    if isinstance(data, dict):
+        # Object of arrays: {"col1": [1,2,3], "col2": [4,5,6]}
+        if not data:
+            raise SupRuntimeError(
+                f"{error_prefix} JSON object in {display_source_name} is empty. Cannot determine dataset names."
+            )
+        result_names = list(data.keys())
+        # Basic validation: ensure all values are lists (arrays)
+        for key, value in data.items():
+            if not isinstance(value, list):
+                raise SupRuntimeError(
+                    f"{error_prefix} JSON object in {display_source_name} has non-list value for key '{key}'. Expected object of arrays."
+                )
+    elif isinstance(data, list):
+        # List of objects: [{"col1": 1, "col2": 4}, {"col1": 2, "col2": 5}]
+        if not data:
+            raise SupRuntimeError(
+                f"{error_prefix} JSON list in {display_source_name} is empty. Cannot determine dataset names."
+            )
+        if not isinstance(data[0], dict):
+            raise SupRuntimeError(
+                f"{error_prefix} First element in JSON list from {display_source_name} is not an object. Expected list of objects."
+            )
+        result_names = list(data[0].keys())
+        if not result_names:
+             raise SupRuntimeError(
+                f"{error_prefix} First object in JSON list from {display_source_name} has no keys. Cannot determine dataset names."
+            )
+        # Optional: Check key consistency across other records (can be slow for large lists)
+        # for i, record in enumerate(data[1:], 1):
+        #     if not isinstance(record, dict) or list(record.keys()) != result_names:
+        #         raise SupRuntimeError(
+        #             f"{error_prefix} Inconsistent keys in JSON list of objects at index {i} in {display_source_name}."
+        #         )
+    else:
+        raise SupRuntimeError(
+            f"{error_prefix} Unexpected JSON structure in {display_source_name}. Expected an object of arrays or a list of objects."
+        )
+
+    if not result_names: # Should be caught by earlier checks, but as a safeguard
+        raise SupRuntimeError(f"{error_prefix} Could not determine dataset names from JSON in {display_source_name}.")
+
+    return result_names, file_content_str
+
+
+def read_input_file_json_from_stream_content(file_content_str, all_dset_names, dset_indices, read_slice):
+    """Read datasets from a string containing JSON file content.
+
+    Parameters
+    ----------
+    file_content_str : str
+        The full content of the JSON file as a string.
+    all_dset_names : list of str
+        Names of all datasets identified in the JSON content.
+    dset_indices : list of int
+        The dataset indices (0-based, corresponding to `all_dset_names`) to read.
+    read_slice : slice
+        The slice to be applied to each read dataset after conversion to NumPy array.
+
+    Returns
+    -------
+    tuple
+        A tuple containing:
+            - dsets (list of numpy.ndarray): The list of read datasets as NumPy arrays.
+            - dset_names (list of str): The list of names for the read datasets.
+
+    Raises
+    ------
+    SupRuntimeError
+        If JSON parsing fails, or if requested dataset names/indices are invalid,
+        or if data extraction from the JSON structure fails.
+    json.JSONDecodeError
+        If `file_content_str` is not valid JSON.
+    """
+    import json
+
+    selected_dset_names = [all_dset_names[dset_index] for dset_index in dset_indices]
+    dsets = []
+
+    try:
+        data = json.loads(file_content_str)
+    except json.JSONDecodeError as e:
+        # This should ideally not happen if get_dataset_names_json already parsed it,
+        # but good to have for direct calls or unexpected scenarios.
+        raise SupRuntimeError(f"{error_prefix} Failed to decode JSON from stream content. Error: {e}")
+
+    if isinstance(data, dict): # Object of arrays: {"col1": [1,2,3], "col2": [4,5,6]}
+        for name in selected_dset_names:
+            if name not in data:
+                raise SupRuntimeError(f"{error_prefix} Dataset name '{name}' not found in JSON object keys.")
+            try:
+                # Ensure data is array-like before converting to np.array
+                if not isinstance(data[name], list):
+                     raise SupRuntimeError(f"{error_prefix} Value for key '{name}' in JSON object is not a list.")
+                dsets.append(np.array(data[name])[read_slice])
+            except Exception as e: # Catch errors during np.array conversion or slicing
+                raise SupRuntimeError(f"{error_prefix} Error processing dataset '{name}' from JSON object: {e}")
+
+    elif isinstance(data, list): # List of objects: [{"col1": 1, "col2": 4}, {"col1": 2, "col2": 5}]
+        if not data: # Empty list
+            # If selected_dset_names is not empty, this is problematic.
+            # If selected_dset_names is empty, return empty dsets.
+            if selected_dset_names:
+                 raise SupRuntimeError(f"{error_prefix} JSON data is an empty list, cannot extract datasets: {', '.join(selected_dset_names)}")
+            return [], []
+
+        # Transpose: convert list of dicts to dict of lists
+        temp_dict_of_lists = {name: [] for name in selected_dset_names}
+        
+        # Validate that all selected names are present in the first record, assuming consistency
+        first_record_keys = data[0].keys() if isinstance(data[0], dict) else []
+        for name in selected_dset_names:
+            if name not in first_record_keys:
+                raise SupRuntimeError(f"{error_prefix} Dataset name '{name}' not found in keys of the first JSON record.")
+
+        for record in data:
+            if not isinstance(record, dict):
+                raise SupRuntimeError(f"{error_prefix} Encountered non-object item in JSON list of objects.")
+            for name in selected_dset_names:
+                if name not in record:
+                    # This indicates inconsistent records if validation in get_dataset_names_json wasn't exhaustive
+                    raise SupRuntimeError(f"{error_prefix} Dataset name '{name}' missing in a JSON record.")
+                temp_dict_of_lists[name].append(record[name])
+        
+        for name in selected_dset_names:
+            try:
+                dsets.append(np.array(temp_dict_of_lists[name])[read_slice])
+            except Exception as e: # Catch errors during np.array conversion or slicing
+                raise SupRuntimeError(f"{error_prefix} Error processing dataset '{name}' from JSON list of objects: {e}")
+    else:
+        # This case should have been caught by get_dataset_names_json
+        raise SupRuntimeError(f"{error_prefix} Unexpected JSON structure in stream content.")
+
+    return dsets, selected_dset_names
+
+
 def read_input_file_txt_from_stream_content(file_content_str, all_dset_names, dset_indices, read_slice, delimiter):
     """Read datasets from a string containing text file content.
 
@@ -759,10 +948,16 @@ def check_file_type(input_file):
     # Default assumption is that the input file is a text file.
     file_type = "text"
 
-    filename_without_extension, file_extension = os.path.splitext(input_file)    
+    filename_without_extension, file_extension = os.path.splitext(input_file)
+    file_extension = file_extension.lower()
 
     if file_extension in ['.hdf5', '.h5', '.he5']:
         file_type = "hdf5"
+    elif file_extension == '.csv':
+        file_type = "csv"
+    elif file_extension == '.json':
+        file_type = "json"
+    # Keep 'text' as default for other extensions or no extension
 
     return file_type
 
@@ -891,17 +1086,23 @@ def read_input_file(input_file_path_or_stream, dset_indices, read_slice, delimit
 
         if stdin_format == 'txt':
             all_dset_names, file_content_str = get_dataset_names_txt(actual_stream)
-            check_dset_indices("stdin", dset_indices, all_dset_names)
+            check_dset_indices("stdin (txt)", dset_indices, all_dset_names)
             dsets, dset_names = read_input_file_txt_from_stream_content(
                 file_content_str, all_dset_names, dset_indices, read_slice, delimiter
             )
         elif stdin_format == 'csv':
             all_dset_names, file_content_str = get_dataset_names_csv(actual_stream)
-            check_dset_indices("stdin", dset_indices, all_dset_names)
+            check_dset_indices("stdin (csv)", dset_indices, all_dset_names)
             dsets, dset_names = read_input_file_csv_from_stream_content(
                 file_content_str, all_dset_names, dset_indices, read_slice
             )
-        elif stdin_format == 'hdf5':
+        elif stdin_format == 'json':
+            all_dset_names, file_content_str = get_dataset_names_json(actual_stream)
+            check_dset_indices("stdin (json)", dset_indices, all_dset_names)
+            dsets, dset_names = read_input_file_json_from_stream_content(
+                file_content_str, all_dset_names, dset_indices, read_slice
+            )
+        elif stdin_format == 'hdf5': # Technically not supported for stdin, but good to have a check
             raise SupRuntimeError("HDF5 from stdin is not supported.")
         else:
             raise SupRuntimeError("Unknown stdin format: {}".format(stdin_format))
@@ -910,19 +1111,41 @@ def read_input_file(input_file_path_or_stream, dset_indices, read_slice, delimit
         file_type = check_file_type(input_file_path_or_stream)
 
         if file_type == "text":
-            print("Reading " + input_file_path_or_stream + " as a text file with delimiter '" +
-                  delimiter + "'")
+            print(f"Reading {input_file_path_or_stream} as a text file with delimiter '{delimiter}'")
             print()
-            dsets, dset_names = read_input_file_txt(input_file_path_or_stream, dset_indices,
-                                                    read_slice, delimiter)
+            # get_dataset_names_txt is called within read_input_file_txt
+            all_dset_names, file_content_str = get_dataset_names_txt(input_file_path_or_stream)
+            check_dset_indices(input_file_path_or_stream, dset_indices, all_dset_names)
+            dsets, dset_names = read_input_file_txt_from_stream_content(
+                file_content_str, all_dset_names, dset_indices, read_slice, delimiter
+            )
+        elif file_type == "csv":
+            print(f"Reading {input_file_path_or_stream} as a CSV file")
+            print()
+            all_dset_names, file_content_str = get_dataset_names_csv(input_file_path_or_stream)
+            check_dset_indices(input_file_path_or_stream, dset_indices, all_dset_names)
+            # For CSV, delimiter is implicitly comma, so not passed to _from_stream_content
+            dsets, dset_names = read_input_file_csv_from_stream_content(
+                file_content_str, all_dset_names, dset_indices, read_slice
+            )
+        elif file_type == "json":
+            print(f"Reading {input_file_path_or_stream} as a JSON file")
+            print()
+            all_dset_names, file_content_str = get_dataset_names_json(input_file_path_or_stream)
+            check_dset_indices(input_file_path_or_stream, dset_indices, all_dset_names)
+            dsets, dset_names = read_input_file_json_from_stream_content(
+                file_content_str, all_dset_names, dset_indices, read_slice
+            )
         elif file_type == "hdf5":
-            print("Reading " + input_file_path_or_stream + " as an HDF5 file")
+            print(f"Reading {input_file_path_or_stream} as an HDF5 file")
             print()
+            # HDF5 reading is direct, doesn't use the _from_stream_content pattern as much.
+            # get_dataset_names_hdf5 and check_dset_indices are called within read_input_file_hdf5
             dsets, dset_names = read_input_file_hdf5(input_file_path_or_stream, dset_indices,
                                                      read_slice)
         else:
             # Should not happen if check_file_type is robust
-            raise SupRuntimeError("Unknown file type for: {}".format(input_file_path_or_stream))
+            raise SupRuntimeError(f"Unknown file type for: {input_file_path_or_stream}")
 
     check_dset_lengths(dsets, dset_names)
     return dsets, dset_names
@@ -1115,45 +1338,64 @@ def read_input_file_csv_from_stream_content(file_content_str, all_dset_names, ds
     """
     dset_names = [all_dset_names[dset_index] for dset_index in dset_indices]
     data_stream = io.StringIO(file_content_str)
+    dsets = []
 
-    try:
-        # Use names=True to skip header, comments=None as CSVs don't usually have them.
-        # unpack=True is important to get columns as separate arrays.
-        dsets_tuple = np.genfromtxt(data_stream, usecols=dset_indices, delimiter=',', 
-                                    names=True, comments=None, unpack=True, invalid_raise=False)
-                                    # names=True tells genfromtxt to use the first line as header and skip it for data.
-                                    # Using names=None and then manually skipping header might be another option if names=True is problematic.
-                                    # However, the get_dataset_names_csv already parsed the header, so we want to skip it.
-                                    # A common way to skip header with genfromtxt is skip_header=1 if names are handled manually.
-                                    # Let's re-evaluate: since all_dset_names are already parsed, we should skip the header row.
-    except ValueError as e:
-        print("{} Encountered an unexpected problem when reading CSV from stream. "
-              "Full error message below.".format(error_prefix))
-        print()
-        raise e
-
-    # Reset stream and read again, this time skipping the header.
-    # This is safer as `names=True` might have subtle effects on type or data reading.
-    data_stream.seek(0)
     try:
         # We use usecols to select specific columns.
-        # unpack=True ensures that dsets_tuple is a tuple of arrays, one for each column.
-        # skip_header=1 to ignore the CSV header line.
-        dsets_tuple_data = np.genfromtxt(data_stream, usecols=dset_indices, delimiter=',', 
-                                         skip_header=1, comments=None, unpack=True)
+        # unpack=True ensures that loaded_data is a tuple of arrays, one for each column,
+        # or a single array if only one column is read.
+        # skip_header=1 to ignore the CSV header line, as names are already parsed.
+        # comments=None as CSVs don't typically have comment lines in the same way as text files.
+        loaded_data = np.genfromtxt(data_stream, usecols=dset_indices, delimiter=',',
+                                     skip_header=1, comments=None, unpack=True)
     except ValueError as e:
-        # This error might occur if, after skipping header, data is still problematic
+        # This error might occur if data is problematic (e.g. non-numeric values in numeric columns)
         print("{} Encountered an unexpected problem when reading CSV data (post-header) from stream. "
               "Full error message below.".format(error_prefix))
         print()
         raise e
+    except IndexError as e:
+        # This can happen if usecols contains an index out of bounds for a line after header
+        # For example, if a data line has fewer columns than expected by dset_indices.
+        print("{} Encountered an IndexError, possibly due to inconsistent column numbers in data rows "
+              "or an invalid column index in dset_indices. Full error message below.".format(error_prefix))
+        print()
+        raise e
+
 
     if len(dset_indices) == 1:
-        # If only one column is selected, np.genfromtxt (with unpack=True) returns a single 1D array, not a tuple.
-        dsets = [dsets_tuple_data[read_slice]]
-    else:
-        # If multiple columns, it returns a tuple of 1D arrays.
-        dsets = [d[read_slice] for d in dsets_tuple_data]
+        # If only one column is selected, np.genfromtxt (with unpack=True) typically returns a single 1D array.
+        # If loaded_data is unexpectedly not 1D (e.g. 0D if file is empty after header, or 2D for structured array if unpack misbehaved)
+        # This check ensures we handle it correctly.
+        if loaded_data.ndim == 0: # Possibly empty file after header
+            dsets = [np.array([])[read_slice]] # Apply slice to an empty array
+        elif loaded_data.ndim == 1:
+            dsets = [loaded_data[read_slice]]
+        else: # Should not happen with unpack=True and single usecol index
+            raise SupRuntimeError(
+                f"{error_prefix} Unexpected data shape (ndim={loaded_data.ndim}) when reading a single CSV column."
+            )
+    else: # Multiple columns selected
+        # np.genfromtxt with unpack=True returns a tuple of 1D arrays.
+        # If no data rows exist after the header, it might return a single empty array or handle it differently.
+        # We need to ensure each element of the tuple is sliced.
+        if not isinstance(loaded_data, tuple):
+            # This can happen if all data rows are empty or if there's only one data row after header.
+            # Or if genfromtxt decides to return a single array for some reason (e.g. if all cols but one are empty)
+            # A robust way is to check if the number of arrays matches number of indices.
+            # For now, assume if it's not a tuple, it implies empty or problematic read for multiple columns.
+            # A simple case: if file has header but no data lines, loaded_data can be tricky.
+            # genfromtxt might return an empty array or raise error depending on version/data.
+            # If loaded_data is a single empty array when multiple columns were expected:
+            if loaded_data.size == 0 and len(dset_indices) > 0 : # Check if it's an empty array
+                dsets = [np.array([])[read_slice] for _ in dset_indices]
+            else:
+                # This case indicates an unexpected return type from genfromtxt for multiple columns.
+                raise SupRuntimeError(
+                    f"{error_prefix} Expected a tuple of arrays for multiple columns from CSV, but got {type(loaded_data)}."
+                )
+        else: # It's a tuple of arrays as expected
+            dsets = [d[read_slice] for d in loaded_data]
 
     return dsets, dset_names
 
@@ -1194,6 +1436,90 @@ def get_filters_csv_from_stream_content(file_content_str, all_dset_names, filter
         filter_dsets = [d[read_slice] for d in filter_dsets_tuple]
         
     return filter_dsets, filter_names
+
+
+def get_filters_json_from_stream_content(file_content_str, all_dset_names, filter_indices, read_slice):
+    """Get JSON datasets from a string that will be used for filtering (masking).
+
+    Parameters
+    ----------
+    file_content_str : str
+        The full content of the JSON file as a string.
+    all_dset_names : list of str
+        Names of all datasets identified in the JSON content.
+    filter_indices : list of int
+        The dataset indices (0-based, corresponding to `all_dset_names`) to read as filters.
+    read_slice : slice
+        The slice to be applied to each read filter dataset.
+
+    Returns
+    -------
+    tuple
+        A tuple containing:
+            - filter_dsets (list of numpy.ndarray): The list of filter datasets.
+              These arrays are typically boolean or can be evaluated as boolean for filtering.
+            - filter_names (list of str): The list of names for the filter datasets.
+
+    Raises
+    ------
+    SupRuntimeError
+        If JSON parsing fails, or if requested dataset names/indices are invalid,
+        or if data extraction from the JSON structure fails.
+    """
+    import json
+
+    selected_filter_names = [all_dset_names[filter_index] for filter_index in filter_indices]
+    filter_dsets = []
+
+    try:
+        data = json.loads(file_content_str)
+    except json.JSONDecodeError as e:
+        raise SupRuntimeError(f"{error_prefix} Failed to decode JSON for filters from stream content. Error: {e}")
+
+    if isinstance(data, dict): # Object of arrays: {"col1": [true, false, true], "col2": [0, 1, 0]}
+        for name in selected_filter_names:
+            if name not in data:
+                raise SupRuntimeError(f"{error_prefix} Filter dataset name '{name}' not found in JSON object keys.")
+            try:
+                if not isinstance(data[name], list):
+                     raise SupRuntimeError(f"{error_prefix} Value for filter key '{name}' in JSON object is not a list.")
+                # Convert to boolean array after slicing.
+                # This assumes filter data can be directly interpreted as boolean (e.g. contains 0/1, true/false)
+                filter_dsets.append(np.array(data[name])[read_slice].astype(bool))
+            except Exception as e:
+                raise SupRuntimeError(f"{error_prefix} Error processing filter dataset '{name}' from JSON object: {e}")
+
+    elif isinstance(data, list): # List of objects: [{"f1": true, "f2": 0}, {"f1": false, "f2": 1}]
+        if not data:
+            if selected_filter_names:
+                 raise SupRuntimeError(f"{error_prefix} JSON data for filters is an empty list, cannot extract: {', '.join(selected_filter_names)}")
+            return [], []
+
+
+        temp_dict_of_lists = {name: [] for name in selected_filter_names}
+        first_record_keys = data[0].keys() if isinstance(data[0], dict) else []
+        for name in selected_filter_names:
+            if name not in first_record_keys:
+                raise SupRuntimeError(f"{error_prefix} Filter dataset name '{name}' not found in keys of the first JSON record.")
+
+        for record in data:
+            if not isinstance(record, dict):
+                raise SupRuntimeError(f"{error_prefix} Encountered non-object item in JSON list for filters.")
+            for name in selected_filter_names:
+                if name not in record:
+                    raise SupRuntimeError(f"{error_prefix} Filter dataset name '{name}' missing in a JSON record.")
+                temp_dict_of_lists[name].append(record[name])
+        
+        for name in selected_filter_names:
+            try:
+                # Convert to boolean array after slicing
+                filter_dsets.append(np.array(temp_dict_of_lists[name])[read_slice].astype(bool))
+            except Exception as e:
+                raise SupRuntimeError(f"{error_prefix} Error processing filter dataset '{name}' from JSON list of objects: {e}")
+    else:
+        raise SupRuntimeError(f"{error_prefix} Unexpected JSON structure for filters in stream content.")
+
+    return filter_dsets, selected_filter_names
 
 
 def get_filters(input_file_path_or_stream, filter_indices, read_slice, delimiter=' ', stdin_format=None):
@@ -1246,70 +1572,59 @@ def get_filters(input_file_path_or_stream, filter_indices, read_slice, delimiter
         
         if stdin_format == 'txt':
             all_dset_names, file_content_str = get_dataset_names_txt(actual_stream)
-            check_dset_indices("stdin (for filters)", filter_indices, all_dset_names)
+            check_dset_indices("stdin (txt filters)", filter_indices, all_dset_names)
             filter_dsets, filter_names = get_filters_txt_from_stream_content(
                 file_content_str, all_dset_names, filter_indices, read_slice, delimiter
             )
         elif stdin_format == 'csv':
             all_dset_names, file_content_str = get_dataset_names_csv(actual_stream)
-            check_dset_indices("stdin (for filters)", filter_indices, all_dset_names)
+            check_dset_indices("stdin (csv filters)", filter_indices, all_dset_names)
             filter_dsets, filter_names = get_filters_csv_from_stream_content(
                 file_content_str, all_dset_names, filter_indices, read_slice
             )
-        elif stdin_format == 'hdf5':
+        elif stdin_format == 'json':
+            all_dset_names, file_content_str = get_dataset_names_json(actual_stream)
+            check_dset_indices("stdin (json filters)", filter_indices, all_dset_names)
+            filter_dsets, filter_names = get_filters_json_from_stream_content(
+                file_content_str, all_dset_names, filter_indices, read_slice
+            )
+        elif stdin_format == 'hdf5': # Not supported for stdin
             raise SupRuntimeError("HDF5 filters from stdin are not supported.")
         else:
-            raise SupRuntimeError("Unknown stdin format for filters: {}".format(stdin_format))
+            raise SupRuntimeError(f"Unknown stdin format for filters: {stdin_format}")
     else:
         # It's a filename string
         file_type = check_file_type(input_file_path_or_stream)
         
         if file_type == "text":
-            # get_filters_txt was refactored to handle reading content and calling _from_stream_content
-            # It also means check_dset_indices is implicitly handled by the call to get_dataset_names_txt within get_filters_txt
-            # However, for consistency and explicit message, we might want to call check_dset_indices here too
-            # Let's assume get_filters_txt calls get_dataset_names_txt which returns all_names,
-            # then get_filters_txt calls check_dset_indices itself, or it's done here.
-            # The refactored get_filters_txt ALREADY calls get_dataset_names_txt.
-            # It does NOT call check_dset_indices. So we should call it here.
-            # To do that, get_filters_txt needs to return all_dset_names or we parse again.
-            # For now, let's simplify: get_filters_txt will directly return dsets and names.
-            # The internal call to get_dataset_names_txt inside get_filters_txt will ensure names are valid before reading.
-            # The check_dset_indices for the *specific filter_indices* should be done here.
-            # This requires get_filters_txt to also return all_dset_names.
-            # Alternative: get_dataset_names_txt once, then pass content for filters.
-            # Let's adjust get_filters_txt to NOT call get_dataset_names_txt, but receive content.
-            # This seems more aligned with the overall strategy.
-            # Re-evaluating: The current `get_filters_txt` *does* call `get_dataset_names_txt`.
-            # This means `check_dset_indices` against `all_dset_names` should be done in `get_filters_txt`
-            # or `get_filters_txt` should return `all_dset_names` for this function to do it.
-            # The current `get_filters_txt` does:
-            #    all_dset_names, file_content_str = get_dataset_names_txt(txt_file_name)
-            #    return get_filters_txt_from_stream_content(...)
-            # So, `all_dset_names` is available. Let's pass it back or do check inside.
-            # For simplicity, let's assume get_filters_txt handles this check internally or check_dset_indices is called by caller after.
-            # The prompt for get_filters_txt did not include check_dset_indices.
-            # Let's add it here for file paths.
-            print("Reading filters from text file {}...".format(input_file_path_or_stream))
-            all_dset_names_for_file, _ = get_dataset_names_txt(input_file_path_or_stream) # Get names for check
-            check_dset_indices(input_file_path_or_stream, filter_indices, all_dset_names_for_file)
-            filter_dsets, filter_names = get_filters_txt(input_file_path_or_stream, # This will re-read names, inefficient.
-                                                         filter_indices,
-                                                         read_slice,
-                                                         delimiter)
+            print(f"Reading filters from text file {input_file_path_or_stream}...")
+            all_dset_names, file_content_str = get_dataset_names_txt(input_file_path_or_stream)
+            check_dset_indices(input_file_path_or_stream, filter_indices, all_dset_names)
+            filter_dsets, filter_names = get_filters_txt_from_stream_content(
+                file_content_str, all_dset_names, filter_indices, read_slice, delimiter
+            )
+        elif file_type == "csv":
+            print(f"Reading filters from CSV file {input_file_path_or_stream}...")
+            all_dset_names, file_content_str = get_dataset_names_csv(input_file_path_or_stream)
+            check_dset_indices(input_file_path_or_stream, filter_indices, all_dset_names)
+            filter_dsets, filter_names = get_filters_csv_from_stream_content(
+                file_content_str, all_dset_names, filter_indices, read_slice
+            )
+        elif file_type == "json":
+            print(f"Reading filters from JSON file {input_file_path_or_stream}...")
+            all_dset_names, file_content_str = get_dataset_names_json(input_file_path_or_stream)
+            check_dset_indices(input_file_path_or_stream, filter_indices, all_dset_names)
+            filter_dsets, filter_names = get_filters_json_from_stream_content(
+                file_content_str, all_dset_names, filter_indices, read_slice
+            )
         elif file_type == "hdf5":
-            print("Reading filters from HDF5 file {}...".format(input_file_path_or_stream))
-            # get_filters_hdf5 reads directly from file path, no stream intermediary for names needed here.
-            # It should internally call get_dataset_names_hdf5 and check_dset_indices.
-            # Let's verify get_filters_hdf5 structure:
-            #   f = h5py.File(input_file, "r")
-            #   dset_names = get_dataset_names_hdf5(f)
-            #   ... then it iterates filter_indices and appends. It implicitly checks index validity.
+            print(f"Reading filters from HDF5 file {input_file_path_or_stream}...")
+            # get_filters_hdf5 handles its own name extraction and checking.
             filter_dsets, filter_names = get_filters_hdf5(input_file_path_or_stream, 
                                                           filter_indices, 
                                                           read_slice)
         else:
-            raise SupRuntimeError("Unknown file type for filters: {}".format(input_file_path_or_stream))
+            raise SupRuntimeError(f"Unknown file type for filters: {input_file_path_or_stream}")
 
     if filter_dsets: # Only check lengths if datasets were actually loaded
         check_dset_lengths(filter_dsets, filter_names)
