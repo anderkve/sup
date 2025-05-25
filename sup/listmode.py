@@ -28,7 +28,7 @@ def run(args):
         print(f"Reading from stdin as {args.stdin_format}...")
         print()
         if args.stdin_format == 'txt':
-            dset_names, _ = get_dataset_names_txt(sys.stdin)
+            dset_names, _ = get_dataset_names_txt(sys.stdin, args.delimiter)
         elif args.stdin_format == 'csv':
             dset_names, _ = get_dataset_names_csv(sys.stdin)
         elif args.stdin_format == 'hdf5':
@@ -45,7 +45,7 @@ def run(args):
         if file_type == "text":
             print("Reading " + args.input_file + " as a text file")
             print()
-            dset_names, _ = get_dataset_names_txt(args.input_file) 
+            dset_names, _ = get_dataset_names_txt(args.input_file, args.delimiter) 
 
         elif file_type == "csv":
             print("Reading " + args.input_file + " as a CSV file")

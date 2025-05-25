@@ -31,6 +31,8 @@ def _add_list_args(parser):
     """Adds arguments specific to the 'list' mode."""
     parser.add_argument("input_file", type=str, action="store", 
                                  help="path to the input data file")
+    parser.add_argument("-dl", "--delimiter", type=str, action="store", dest="delimiter", default=" ", help="set the delimiter used in the input data file (primarily for text files, default: space)", metavar="DELIMITER")
+
 
 def _add_hist1d_args(parser):
     """Adds arguments specific to the 'hist1d' mode."""

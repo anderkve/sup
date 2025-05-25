@@ -203,7 +203,6 @@ def run(args):
             if selected_idx >= ccs.use_n_colors:
                 selected_idx = ccs.use_n_colors - 1
 
-            # print(f"DEBUG: xiyi: {xiyi}  selected_idx: {selected_idx}  ccs.ccodes: {ccs.ccodes}")
             ccode = ccs.ccodes[selected_idx]
 
         return ccode, marker

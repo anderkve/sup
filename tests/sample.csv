@@ -1,4 +1,4 @@
-time,value1,value2,flag
+#time,value1,value2,flag
 0.1,10,20.5,1
 0.2,12,22.3,0
 0.3,15,19.8,1

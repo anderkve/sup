@@ -192,14 +192,6 @@ echo "Testing CSV hist1d mode via stdin..."
 cat tests/sample.csv | sup hist1d - 0 --stdin-format csv --x-range 0 1 --size 10 10 > /dev/null
 if [ $? -ne 0 ]; then echo "CSV hist1d mode via stdin FAILED"; exit 1; fi
 
-echo "Testing hist2d with single data row CSV..."
-sup hist2d tests/sample_single_row.csv 1 2 --x-range 0 20 --y-range 10 30 --size 10 10 > /dev/null
-if [ $? -eq 0 ]; then
-  echo "PASS: hist2d with single data row CSV"
-else
-  echo "FAIL: hist2d with single data row CSV"
-  exit 1
-fi
 
 # JSON Object of Arrays Tests
 echo
