@@ -1376,26 +1376,34 @@ def read_input_file_csv_from_stream_content(file_content_str, all_dset_names, ds
                 f"{error_prefix} Unexpected data shape (ndim={loaded_data.ndim}) when reading a single CSV column."
             )
     else: # Multiple columns selected
-        # np.genfromtxt with unpack=True returns a tuple of 1D arrays.
-        # If no data rows exist after the header, it might return a single empty array or handle it differently.
-        # We need to ensure each element of the tuple is sliced.
-        if not isinstance(loaded_data, tuple):
-            # This can happen if all data rows are empty or if there's only one data row after header.
-            # Or if genfromtxt decides to return a single array for some reason (e.g. if all cols but one are empty)
-            # A robust way is to check if the number of arrays matches number of indices.
-            # For now, assume if it's not a tuple, it implies empty or problematic read for multiple columns.
-            # A simple case: if file has header but no data lines, loaded_data can be tricky.
-            # genfromtxt might return an empty array or raise error depending on version/data.
-            # If loaded_data is a single empty array when multiple columns were expected:
-            if loaded_data.size == 0 and len(dset_indices) > 0 : # Check if it's an empty array
+        if isinstance(loaded_data, tuple):
+            # It's a tuple of arrays as expected (most common case for multiple rows of data)
+            dsets = [d[read_slice] for d in loaded_data]
+        elif isinstance(loaded_data, np.ndarray):
+            if loaded_data.ndim == 1 and len(dset_indices) == loaded_data.shape[0]:
+                # Single data row read for multiple columns.
+                # loaded_data is like np.array([val1, val2, ...]) where each val corresponds to a column.
+                # We need to turn this into a list of 1D arrays, each containing one value.
+                dsets = [np.array([loaded_data[i]])[read_slice] for i in range(len(dset_indices))]
+            elif loaded_data.ndim == 1 and loaded_data.size == 0 and len(dset_indices) > 0:
+                # Empty result (e.g., no data rows after header) but multiple columns were selected.
+                # genfromtxt might return a single 1D empty array.
+                dsets = [np.array([])[read_slice] for _ in dset_indices]
+            elif loaded_data.ndim == 2 and loaded_data.shape[1] == len(dset_indices):
+                # This could happen if np.genfromtxt returns a 2D array.
+                # Each column of the 2D array corresponds to a selected dataset.
+                dsets = [loaded_data[:, i][read_slice] for i in range(len(dset_indices))]
+            elif loaded_data.ndim == 0 and len(dset_indices) > 0 : # Handles case where file is empty after header
                 dsets = [np.array([])[read_slice] for _ in dset_indices]
             else:
-                # This case indicates an unexpected return type from genfromtxt for multiple columns.
+                # If it's an ndarray but doesn't fit the expected patterns
                 raise SupRuntimeError(
-                    f"{error_prefix} Expected a tuple of arrays for multiple columns from CSV, but got {type(loaded_data)}."
+                    f"{error_prefix} CSV data for multiple columns has unexpected shape: {loaded_data.shape} for {len(dset_indices)} selected columns. Type: {type(loaded_data)}, ndim: {loaded_data.ndim}"
                 )
-        else: # It's a tuple of arrays as expected
-            dsets = [d[read_slice] for d in loaded_data]
+        else: # Not a tuple and not an ndarray
+            raise SupRuntimeError(
+                f"{error_prefix} Unexpected data type from np.genfromtxt for CSV: {type(loaded_data)}. Expected tuple or ndarray."
+            )
 
     return dsets, dset_names
 
