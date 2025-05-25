@@ -1,0 +1,7 @@
+[
+    {"time": 0.1, "value1": 10, "value2": 20.5, "flag": 1},
+    {"time": 0.2, "value1": 12, "value2": 22.3, "flag": 0},
+    {"time": 0.3, "value1": 15, "value2": 19.8, "flag": 1},
+    {"time": 0.4, "value1": 13, "value2": 21.5, "flag": 1},
+    {"time": 0.5, "value1": 16, "value2": 20.1, "flag": 0}
+]

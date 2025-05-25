@@ -3,7 +3,7 @@ import os
 import sys
 from sup.utils import (
     check_file_type, get_dataset_names_hdf5, get_dataset_names_txt,
-    get_dataset_names_csv, SupRuntimeError, error_prefix
+    get_dataset_names_csv, get_dataset_names_json, SupRuntimeError, error_prefix
     )
 
 def run(args):
@@ -28,7 +28,7 @@ def run(args):
         print(f"Reading from stdin as {args.stdin_format}...")
         print()
         if args.stdin_format == 'txt':
-            dset_names, _ = get_dataset_names_txt(sys.stdin)
+            dset_names, _ = get_dataset_names_txt(sys.stdin, args.delimiter)
         elif args.stdin_format == 'csv':
             dset_names, _ = get_dataset_names_csv(sys.stdin)
         elif args.stdin_format == 'hdf5':
@@ -43,12 +43,20 @@ def run(args):
     else: # It's a file path
         file_type = check_file_type(args.input_file)
         if file_type == "text":
-            # Assuming get_dataset_names_txt is updated to return (names, content)
             print("Reading " + args.input_file + " as a text file")
             print()
-            dset_names, _ = get_dataset_names_txt(args.input_file) 
-                                                # We only need names for listmode
+            dset_names, _ = get_dataset_names_txt(args.input_file, args.delimiter) 
 
+        elif file_type == "csv":
+            print("Reading " + args.input_file + " as a CSV file")
+            print()
+            dset_names, _ = get_dataset_names_csv(args.input_file) 
+
+        elif file_type == "json":
+            print("Reading " + args.input_file + " as a JSON file")
+            print()
+            dset_names, _ = get_dataset_names_json(args.input_file) 
+                                                # We only need names for listmode
         elif file_type == "hdf5":
             print("Reading " + args.input_file + " as an HDF5 file")
             print()

@@ -1,7 +1,7 @@
 
 # sup — the Simple Unicode Plotter
 
-`sup` is a command-line tool for generating quick 1D and 2D data visualizations directly in the terminal using Unicode characters and ANSI colors. It can plot data from files (text or HDF5) or from piped input, or plot mathematical functions evaluated by `sup` directly. 
+`sup` is a command-line tool for generating quick 1D and 2D data visualizations directly in the terminal using Unicode characters and ANSI colors. It can plot data from a file or from piped input, or plot mathematical functions evaluated by `sup` directly. 
 
 <img src="./example_plots/sup_post1d.png" alt="1D posterior example" height="184"/>  <img src="./example_plots/sup_plr1d.png" alt="1D profile likelihood example" height="184"/> <img src="./example_plots/sup_graph1d.png" alt="1D graph example" height="184"/> 
 
@@ -23,8 +23,8 @@ I often find while doing terminal-based work (e.g. running scientific computatio
     *   `graph1d`, `graph2d`: Plotting functions y=f(x) and z=f(x,y).
     *   `list`: List dataset names and indices from input files.
     *   `colors`, `colormaps`: Display available colors and colormaps.
-*   Supports text and HDF5 input files.
-*   Supports piping data from stdin for text and CSV formats.
+*   Supports text, CSV, HDF5 and JSON input files.
+*   Supports piping data from stdin for text, CSV, and JSON formats.
 *   Customizable plot size, ranges, transformations (e.g., log scale).
 *   Color and grayscale output, with optional white background.
 *   Various colormaps for 2D plots.
@@ -63,6 +63,8 @@ To see all the options for a specific run mode, do `sup <mode> --help`.
 ```bash
 sup list data.hdf5
 sup list data.txt --delimiter ","
+sup list tests/sample.csv 
+sup list tests/sample_object.json
 ```
 
 **Plot a 1D histogram from `posterior.dat` (column 0):**
@@ -95,10 +97,44 @@ cat my_data.txt | sup hist1d - 0 --stdin-format txt --delimiter " "
 # Plot column 1 from piped CSV data (e.g., headers: col0,col1,col2)
 cat my_data.csv | sup hist1d - 1 --stdin-format csv
 
+# Plot column 0 from piped JSON data (object of arrays format)
+cat data_object.json | sup hist1d - 0 --stdin-format json --x-range 0 1
+
 # List datasets from piped CSV data
 cat my_data.csv | sup list - --stdin-format csv
 ```
-Note: When using stdin ("-") as the input file, the `--stdin-format` argument is required. Supported formats for stdin are 'txt' (for general delimited text files) and 'csv' (for comma-separated values files, assumes first line is header). HDF5 data format is not supported from stdin. The `--delimiter` option is used for 'txt' format.
+Note: When using stdin ("-") as the input file, the `--stdin-format` argument is required. Supported formats for stdin are 'txt' (for general delimited text files), 'csv' (comma-separated values files, assumes first line is header), and 'json'. HDF5 data format is not supported from stdin. The `--delimiter` option is used for 'txt' format.
+
+### Supported Input File Formats
+
+`sup` can read data from several file formats:
+
+*   **Text Files:** Standard text files where data columns are separated by a delimiter.
+    *   Use the `--delimiter` option to specify the character used (e.g., space, comma, tab). Default is space.
+    *   The first commented line (starting with '#') is typically interpreted as the header row for dataset names. If no such header is found, names like "dataset0", "dataset1", etc., are assigned.
+*   **HDF5 Files:** Hierarchical Data Format version 5.
+    *   Dataset names are read directly from the HDF5 file structure.
+*   **CSV (Comma-Separated Values) Files:**
+    *   The first row is expected to be a header containing the column names.
+    *   The delimiter is assumed to be a comma (`,`).
+*   **JSON (JavaScript Object Notation) Files:**
+    *   Two primary structures are supported:
+        1.  **Object of arrays:** A single JSON object where keys are dataset names and values are arrays (lists) of data.
+            ```json
+            {
+                "time": [0.1, 0.2, 0.3],
+                "value1": [10, 12, 15],
+                "value2": [20.5, 22.3, 19.8]
+            }
+            ```
+        2.  **List of records:** A JSON array (list) where each element is an object representing a row/record. All record objects must have the same keys, which are used as dataset names.
+            ```json
+            [
+                {"time": 0.1, "value1": 10, "value2": 20.5},
+                {"time": 0.2, "value1": 12, "value2": 22.3},
+                {"time": 0.3, "value1": 15, "value2": 19.8}
+            ]
+            ```
 
 **More examples from `sup --help`:**
 ```
@@ -127,6 +163,12 @@ examples:
   sup list data.hdf5
 
   sup list data.txt --delimiter ","
+  
+  sup hist1d tests/sample.csv 0 --x-range 0 1 --size 10 10
+  
+  sup hist1d tests/sample_object.json 0 --x-range 0 1 --size 10 10
+  
+  sup hist1d tests/sample_records.json 0 --x-range 0 1 --size 10 10
 
   sup hist1d data.txt 0 --x-range -10 10 --size 100 20 --y-transf "np.log10(y)" --delimiter ","
 

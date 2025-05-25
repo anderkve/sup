@@ -162,6 +162,74 @@ echo
 echo "cat tests/sample_pipe.txt | sup hist1d - 0 --stdin-format txt --watch 1 # Expect error: watch mode with stdin"
 cat tests/sample_pipe.txt | sup hist1d - 0 --stdin-format txt --watch 1
 
+
+# Test CSV and JSON inputs
+echo
+echo
+echo "#################################"
+echo "# Test CSV and JSON input modes #"
+echo "#################################"
+
+# CSV Tests
+echo
+echo "Testing CSV list mode..."
+sup list tests/sample.csv > /dev/null
+if [ $? -ne 0 ]; then echo "CSV list mode FAILED"; exit 1; fi
+
+echo "Testing CSV hist1d mode..."
+sup hist1d tests/sample.csv 0 --x-range 0 1 --size 10 10 > /dev/null
+if [ $? -ne 0 ]; then echo "CSV hist1d mode FAILED"; exit 1; fi
+
+echo "Testing CSV hist2d mode..."
+sup hist2d tests/sample.csv 1 2 --x-range 0 20 --y-range 15 25 --size 10 10 > /dev/null
+if [ $? -ne 0 ]; then echo "CSV hist2d mode FAILED"; exit 1; fi
+
+echo "Testing CSV hist1d mode with filter..."
+sup hist1d tests/sample.csv 0 -f 3 --x-range 0 1 --size 10 10 > /dev/null
+if [ $? -ne 0 ]; then echo "CSV hist1d mode with filter FAILED"; exit 1; fi
+
+echo "Testing CSV hist1d mode via stdin..."
+cat tests/sample.csv | sup hist1d - 0 --stdin-format csv --x-range 0 1 --size 10 10 > /dev/null
+if [ $? -ne 0 ]; then echo "CSV hist1d mode via stdin FAILED"; exit 1; fi
+
+
+# JSON Object of Arrays Tests
+echo
+echo "Testing JSON (Object of Arrays) list mode..."
+sup list tests/sample_object.json > /dev/null
+if [ $? -ne 0 ]; then echo "JSON (Object) list mode FAILED"; exit 1; fi
+
+echo "Testing JSON (Object of Arrays) hist1d mode..."
+sup hist1d tests/sample_object.json 0 --x-range 0 1 --size 10 10 > /dev/null
+if [ $? -ne 0 ]; then echo "JSON (Object) hist1d mode FAILED"; exit 1; fi
+
+echo "Testing JSON (Object of Arrays) hist2d mode..."
+sup hist2d tests/sample_object.json 1 2 --x-range 0 20 --y-range 15 25 --size 10 10 > /dev/null
+if [ $? -ne 0 ]; then echo "JSON (Object) hist2d mode FAILED"; exit 1; fi
+
+echo "Testing JSON (Object of Arrays) hist1d mode via stdin..."
+cat tests/sample_object.json | sup hist1d - 0 --stdin-format json --x-range 0 1 --size 10 10 > /dev/null
+if [ $? -ne 0 ]; then echo "JSON (Object) hist1d mode via stdin FAILED"; exit 1; fi
+
+# JSON List of Records Tests
+echo
+echo "Testing JSON (List of Records) list mode..."
+sup list tests/sample_records.json > /dev/null
+if [ $? -ne 0 ]; then echo "JSON (Records) list mode FAILED"; exit 1; fi
+
+echo "Testing JSON (List of Records) hist1d mode..."
+sup hist1d tests/sample_records.json 0 --x-range 0 1 --size 10 10 > /dev/null
+if [ $? -ne 0 ]; then echo "JSON (Records) hist1d mode FAILED"; exit 1; fi
+
+echo "Testing JSON (List of Records) hist2d mode..."
+sup hist2d tests/sample_records.json 1 2 --x-range 0 20 --y-range 15 25 --size 10 10 > /dev/null
+if [ $? -ne 0 ]; then echo "JSON (Records) hist2d mode FAILED"; exit 1; fi
+
+echo "Testing JSON (List of Records) hist1d mode via stdin..."
+cat tests/sample_records.json | sup hist1d - 0 --stdin-format json --x-range 0 1 --size 10 10 > /dev/null
+if [ $? -ne 0 ]; then echo "JSON (Records) hist1d mode via stdin FAILED"; exit 1; fi
+
+
 echo
 echo
 echo "##############"
