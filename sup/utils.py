@@ -314,17 +314,18 @@ def generate_colorbar(plot_lines, fig_width, ff, ccs, color_z_lims,
 
 
 
-def generate_info_text(ff=defaults.ff2, 
+def generate_info_text(ff=defaults.ff2,
                        x_label=None, x_range=None, x_bin_width=None,
                        y_label=None, y_range=None, y_bin_width=None,
-                       z_label=None, z_range=None, 
-                       x_transf_expr="", y_transf_expr="", z_transf_expr="", 
+                       z_label=None, z_range=None,
+                       x_transf_expr="", y_transf_expr="", z_transf_expr="",
                        y_normalized_hist=False, z_normalized_hist=False,
-                       s_label=None, s_type=None, s_transf_expr="", 
+                       s_label=None, s_type=None, s_transf_expr="",
                        w_label=None, w_transf_expr="",
                        capped_z=False, capped_label="z-axis", cap_val=1e99,
                        filter_names=[],
                        mode_name=None,
+                       post_mean_x=None, post_mean_y=None,
                        left_padding=defaults.left_padding + " "):
     """Generate the info text printed below the plot.
 
@@ -472,9 +473,17 @@ def generate_info_text(ff=defaults.ff2,
         line = left_padding + "filter: {}".format(f_name)
         info_lines.append(line)
 
+    # Posterior mean information
+    if post_mean_x is not None:
+        if post_mean_y is not None:
+            line = left_padding + "Posterior mean point: (" + ff.format(post_mean_x) + ", " + ff.format(post_mean_y) + ")"
+        else:
+            line = left_padding + "Posterior mean point: " + ff.format(post_mean_x)
+        info_lines.append(line)
+
     # Plot mode information (if mode_name is provided)
     if mode_name is not None:
-        info_lines.append(left_padding) # Add a padding line before mode info.
+        info_lines.append(left_padding)  # Add a padding line before mode info.
         line = left_padding + "plot type: {}".format(mode_name)
         info_lines.append(line)
 
@@ -512,7 +521,7 @@ def add_info_text(plot_lines, fig_width, fg_ccode, bg_ccode, **kwargs):
 
     """
 
-    info_lines = generate_info_text(**kwargs) 
+    info_lines = generate_info_text(**kwargs)
 
     for i,line in enumerate(info_lines):
         pretty_line = prettify(line + "  ", fg_ccode, bg_ccode, bold=False)

@@ -124,6 +124,8 @@ def run(args):
     if w_transf_expr != "":
         w_data = eval(w_transf_expr)
 
+    posterior_mean_x = np.average(x_data, weights=w_data)
+
     if not x_range:
         x_range = [np.min(x_data), np.max(x_data)]
 
@@ -293,11 +295,12 @@ def run(args):
     plot_lines, fig_width = utils.add_info_text(
         plot_lines, fig_width, ccs.fg_ccode, ccs.bg_ccode, ff=ff2,
         x_label=x_label, x_range=x_range, x_bin_width=dx,
-        y_label=y_label, y_range=y_range, 
+        y_label=y_label, y_range=y_range,
         x_transf_expr=x_transf_expr, y_transf_expr=y_transf_expr,
-        y_normalized_hist=normalize_histogram, 
+        y_normalized_hist=normalize_histogram,
         w_label=w_label, w_transf_expr=w_transf_expr,
-        filter_names=filter_names, mode_name="posterior")
+        filter_names=filter_names, mode_name="posterior",
+        post_mean_x=posterior_mean_x)
 
 
     #
