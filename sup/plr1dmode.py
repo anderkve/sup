@@ -120,10 +120,9 @@ def run(args):
     if not y_range:
         y_range = [0.0, 1.0]
 
-    # if not z_min:
-    #     z_min = np.min(z_data)
-    # if not z_max:
-    #     z_max = np.max(z_data)
+    # Adjust ranges to make sure points on the boundary are displayed
+    x_range = utils.nudge_bounds_to_include_boundary_points(x_range)
+    y_range = utils.nudge_bounds_to_include_boundary_points(y_range)
 
     # Cap loglike?
     if use_capped_loglike:

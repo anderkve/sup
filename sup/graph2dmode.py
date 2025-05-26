@@ -67,6 +67,10 @@ def run(args):
     if not y_range:
         y_range = [0.0, 1.0]
 
+    # Adjust ranges to make sure points on the boundary are displayed
+    x_range = utils.nudge_bounds_to_include_boundary_points(x_range)
+    y_range = utils.nudge_bounds_to_include_boundary_points(y_range)
+
     x_bins, y_bins = xy_bins
     x_min, x_max = x_range
     y_min, y_max = y_range

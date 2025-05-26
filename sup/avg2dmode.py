@@ -109,6 +109,10 @@ def run(args):
     if not z_range:
         z_range = [np.min(z_data), np.max(z_data)]
 
+    # Adjust ranges to make sure points on the boundary are displayed
+    x_range = utils.nudge_bounds_to_include_boundary_points(x_range)
+    y_range = utils.nudge_bounds_to_include_boundary_points(y_range)
+
     # Get z max and minimum
     z_min, z_max = z_range
 

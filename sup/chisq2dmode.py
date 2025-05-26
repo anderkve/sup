@@ -107,6 +107,10 @@ def run(args):
     if not y_range:
         y_range = [np.min(y_data), np.max(y_data)]
 
+    # Adjust ranges to make sure points on the boundary are displayed
+    x_range = utils.nudge_bounds_to_include_boundary_points(x_range)
+    y_range = utils.nudge_bounds_to_include_boundary_points(y_range)
+
 
     #
     # Create delta chi-square dataset

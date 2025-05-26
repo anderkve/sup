@@ -128,6 +128,8 @@ def run(args):
 
     if not x_range:
         x_range = [np.min(x_data), np.max(x_data)]
+    # Adjust range to make sure points on the boundary are displayed
+    x_range = utils.nudge_bounds_to_include_boundary_points(x_range)
 
 
     #
@@ -155,6 +157,7 @@ def run(args):
             np.min(bins_content[bins_content > -np.inf]), 
             np.max(bins_content)
         ]
+    y_range = utils.nudge_bounds_to_include_boundary_points(y_range)
     y_min, y_max = y_range
 
     bins_info, x_bin_limits, y_bin_limits = utils.get_bin_tuples_avg_1d(

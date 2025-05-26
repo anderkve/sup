@@ -7,6 +7,7 @@ from collections import OrderedDict
 from scipy.stats import chi2
 # from io import StringIO # Replaced by io.StringIO
 import sup.defaults as defaults
+from copy import copy
 
 
 error_prefix = "sup error:"
@@ -2943,3 +2944,32 @@ def fill_plot(xy_bins, bins_info, x_bin_limits, y_bin_limits, ccs, ms,
                                         insert_pos=0)
 
     return plot_lines, fig_width
+
+
+
+def nudge_bounds_to_include_boundary_points(bounds):
+    """Increase bounds by epsilon in both directions.
+
+    Parameters
+    ----------
+    bounds : numpy.ndarray or list
+        A two-element array or list with the bounds
+
+    Returns
+    -------
+    numpy.ndarray or list
+        The adjusted bounds.
+    """
+    new_bounds = copy(bounds)
+
+    if np.isclose(new_bounds[0], 0.0):
+        new_bounds[0] = new_bounds[0] - 1 * np.finfo(float).eps
+    else:
+        new_bounds[0] = new_bounds[0] - 1 * np.finfo(float).eps * np.abs(new_bounds[0])
+
+    if np.isclose(new_bounds[1], 0.0):
+        new_bounds[1] = new_bounds[1] + 1 * np.finfo(float).eps
+    else:
+        new_bounds[1] = new_bounds[1] + 1 * np.finfo(float).eps * np.abs(new_bounds[1])
+
+    return new_bounds

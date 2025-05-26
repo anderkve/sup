@@ -163,9 +163,11 @@ echo
 echo "Testing: sup hist1d - 0 # Expect error: missing --stdin-format"
 sup hist1d - 0
 
+echo
 echo "Testing: sup hist1d - 0 --stdin-format hdf5 # Expect error: hdf5 from stdin not supported"
 sup hist1d - 0 --stdin-format hdf5
 
+echo
 echo "Testing: cat tests/sample_pipe.txt | sup hist1d - 0 --stdin-format txt --watch 1 # Expect error: watch mode with stdin"
 cat tests/sample_pipe.txt | sup hist1d - 0 --stdin-format txt --watch 1
 
