@@ -105,37 +105,6 @@ cat my_data.csv | sup list - --stdin-format csv
 ```
 Note: When using stdin ("-") as the input file, the `--stdin-format` argument is required. Supported formats for stdin are 'txt' (for general delimited text files), 'csv' (comma-separated values files, assumes first line is header), and 'json'. HDF5 data format is not supported from stdin. The `--delimiter` option is used for 'txt' format.
 
-### Supported input file formats
-
-`sup` can read data from several file formats:
-
-*   **Text Files:** Standard text files where data columns are separated by a delimiter.
-    *   Use the `--delimiter` option to specify the character used (e.g., space, comma, tab). Default is space.
-    *   The first commented line (starting with '#') is typically interpreted as the header row for dataset names. If no such header is found, names like "dataset0", "dataset1", etc., are assigned.
-*   **HDF5 Files:** Hierarchical Data Format version 5.
-    *   Dataset names are read directly from the HDF5 file structure.
-*   **CSV (Comma-Separated Values) Files:**
-    *   The first row is expected to be a header containing the column names.
-    *   The delimiter is assumed to be a comma (`,`).
-*   **JSON (JavaScript Object Notation) Files:**
-    *   Two primary structures are supported:
-        1.  **Object of arrays:** A single JSON object where keys are dataset names and values are arrays (lists) of data.
-            ```json
-            {
-                "time": [0.1, 0.2, 0.3],
-                "value1": [10, 12, 15],
-                "value2": [20.5, 22.3, 19.8]
-            }
-            ```
-        2.  **List of records:** A JSON array (list) where each element is an object representing a row/record. All record objects must have the same keys, which are used as dataset names.
-            ```json
-            [
-                {"time": 0.1, "value1": 10, "value2": 20.5},
-                {"time": 0.2, "value1": 12, "value2": 22.3},
-                {"time": 0.3, "value1": 15, "value2": 19.8}
-            ]
-            ```
-
 **More examples from `sup --help`:**
 ```
 modes:
@@ -184,6 +153,37 @@ examples:
 
   sup graph2d "np.sin(x**2 + y**2) / (x**2 + y**2)" --x-range -5 5 --y-range -5 5 --size 50 50
 ```
+
+## Supported input file formats
+
+`sup` can read data from several file formats:
+
+*   **Text Files:** Standard text files where data columns are separated by a delimiter.
+    *   Use the `--delimiter` option to specify the character used (e.g., space, comma, tab). Default is space.
+    *   The first commented line (starting with '#') is typically interpreted as the header row for dataset names. If no such header is found, names like "dataset0", "dataset1", etc., are assigned.
+*   **HDF5 Files:** Hierarchical Data Format version 5.
+    *   Dataset names are read directly from the HDF5 file structure.
+*   **CSV (Comma-Separated Values) Files:**
+    *   The first row is expected to be a header containing the column names.
+    *   The delimiter is assumed to be a comma (`,`).
+*   **JSON (JavaScript Object Notation) Files:**
+    *   Two primary structures are supported:
+        1.  **Object of arrays:** A single JSON object where keys are dataset names and values are arrays (lists) of data.
+            ```json
+            {
+                "time": [0.1, 0.2, 0.3],
+                "value1": [10, 12, 15],
+                "value2": [20.5, 22.3, 19.8]
+            }
+            ```
+        2.  **List of records:** A JSON array (list) where each element is an object representing a row/record. All record objects must have the same keys, which are used as dataset names.
+            ```json
+            [
+                {"time": 0.1, "value1": 10, "value2": 20.5},
+                {"time": 0.2, "value1": 12, "value2": 22.3},
+                {"time": 0.3, "value1": 15, "value2": 19.8}
+            ]
+            ```
 
 
 ## License
