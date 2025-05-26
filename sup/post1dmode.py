@@ -248,28 +248,47 @@ def run(args):
     # Add legend
     #
 
-    # max bin legend
-    maxbin_index = np.argmax(bins_content)
-    maxbin_content = bins_content[maxbin_index]
-    maxbin_limits = [x_bin_limits[maxbin_index], x_bin_limits[maxbin_index+1]]
+    # Legend: posterior max bin
+    post_maxbin_legend_entries = []
+    post_maxbin_index = np.argmax(bins_content)
+    post_maxbin_content = bins_content[post_maxbin_index]
+    post_maxbin_limits = [x_bin_limits[post_maxbin_index], x_bin_limits[post_maxbin_index+1]]
     
-    maxbin_str = "max bin:  x: "
-    maxbin_str += ("(" + ff2 + ", " + ff2 + ")").format(maxbin_limits[0],
-                                                        maxbin_limits[1])
-    maxbin_str += "  bin height: "
-    maxbin_str += (ff2).format(maxbin_content)
+    post_maxbin_str = "posterior max bin:  x: "
+    post_maxbin_str += ("(" + ff2 + ", " + ff2 + ")").format(post_maxbin_limits[0],
+                                                        post_maxbin_limits[1])
+    post_maxbin_str += "  bin height: "
+    post_maxbin_str += (ff2).format(post_maxbin_content)
 
-    legend_maxbin_entries = []
-    legend_maxbin_entries.append(("", ccs.fg_ccode, maxbin_str, ccs.fg_ccode))
-    legend_maxbin, legend_maxbin_width = utils.generate_legend(
-        legend_maxbin_entries, ccs.bg_ccode, sep="  ", internal_sep=" ")
+    post_maxbin_legend_entries.append(("", ccs.fg_ccode, post_maxbin_str, ccs.fg_ccode))
 
+    post_maxbin_legend, post_maxbin_legend_width = utils.generate_legend(
+        post_maxbin_legend_entries, ccs.bg_ccode, sep="  ", internal_sep=" ")
+
+    # Legend: posterior mean point
+    post_mean_legend_entries = []
+    post_mean_str = "posterior mean point:  x = "
+    post_mean_str += ff2.format(posterior_mean_x)
+
+    post_mean_legend_entries.append(("", ccs.fg_ccode, post_mean_str, ccs.fg_ccode))
+
+    post_mean_legend, post_mean_legend_width = utils.generate_legend(
+        post_mean_legend_entries, ccs.bg_ccode, sep="  ", internal_sep=" ")
+
+
+    # Empty line
     plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width,
                                               ccs.fg_ccode, ccs.bg_ccode)
-    plot_lines, fig_width = utils.insert_line(legend_maxbin, 
-                                              legend_maxbin_width, plot_lines, 
+    # Insert maxbin legend
+    plot_lines, fig_width = utils.insert_line(post_maxbin_legend, post_maxbin_legend_width, plot_lines, 
                                               fig_width, ccs.fg_ccode,
                                               ccs.bg_ccode)
+    # Empty line
+    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width,
+                                              ccs.fg_ccode, ccs.bg_ccode)
+    # Insert posterior mean legend
+    plot_lines, fig_width = utils.insert_line(post_mean_legend, post_mean_legend_width, plot_lines, 
+                                              fig_width, ccs.fg_ccode, ccs.bg_ccode)
 
 
     #
@@ -299,8 +318,7 @@ def run(args):
         x_transf_expr=x_transf_expr, y_transf_expr=y_transf_expr,
         y_normalized_hist=normalize_histogram,
         w_label=w_label, w_transf_expr=w_transf_expr,
-        filter_names=filter_names, mode_name="posterior",
-        post_mean_x=posterior_mean_x)
+        filter_names=filter_names, mode_name="posterior")
 
 
     #

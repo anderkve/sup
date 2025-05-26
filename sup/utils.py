@@ -325,7 +325,6 @@ def generate_info_text(ff=defaults.ff2,
                        capped_z=False, capped_label="z-axis", cap_val=1e99,
                        filter_names=[],
                        mode_name=None,
-                       post_mean_x=None, post_mean_y=None,
                        left_padding=defaults.left_padding + " "):
     """Generate the info text printed below the plot.
 
@@ -471,14 +470,6 @@ def generate_info_text(ff=defaults.ff2,
     # Filter information (loop through all filter_names)
     for f_name in filter_names:
         line = left_padding + "filter: {}".format(f_name)
-        info_lines.append(line)
-
-    # Posterior mean information
-    if post_mean_x is not None:
-        if post_mean_y is not None:
-            line = left_padding + "Posterior mean point: (" + ff.format(post_mean_x) + ", " + ff.format(post_mean_y) + ")"
-        else:
-            line = left_padding + "Posterior mean point: " + ff.format(post_mean_x)
         info_lines.append(line)
 
     # Plot mode information (if mode_name is provided)

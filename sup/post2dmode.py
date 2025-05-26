@@ -264,21 +264,71 @@ def run(args):
     # Add colorbar, legend, etc
     #
         
-    legend_entries = []
+    # CR legend
+    CR_legend_entries = []
 
-    # legend_entries.append(("", fg_ccode, "", fg_ccode))
     for i,cred_reg in enumerate(credible_regions[:-1]):
         cred_reg_str = "{:.12g}% CR".format(cred_reg)
-        legend_entries.append((ms.regular_marker.strip(), ccs.ccodes[i], 
+        CR_legend_entries.append((ms.regular_marker.strip(), ccs.ccodes[i], 
                                cred_reg_str, ccs.fg_ccode))
     
-    legend, legend_width = utils.generate_legend(legend_entries, 
+    CR_legend, CR_legend_width = utils.generate_legend(CR_legend_entries, 
                                                  ccs.bg_ccode, sep="  ")
 
+
+    # Legend: posterior max bin
+    post_maxbin_legend_entries = []
+    post_maxbin_index = np.unravel_index(np.argmax(bins_content), bins_content.shape)
+    post_maxbin_content = bins_content[post_maxbin_index]
+    post_maxbin_limits_x = [x_bin_limits[post_maxbin_index[0]], x_bin_limits[post_maxbin_index[0]+1]]
+    post_maxbin_limits_y = [y_bin_limits[post_maxbin_index[1]], y_bin_limits[post_maxbin_index[1]+1]]
+    
+    post_maxbin_str = "posterior max bin:  x: "
+    post_maxbin_str += ("(" + ff2 + ", " + ff2 + ")").format(post_maxbin_limits_x[0],
+                                                             post_maxbin_limits_x[1])
+    post_maxbin_str += "  y: "
+    post_maxbin_str += ("(" + ff2 + ", " + ff2 + ")").format(post_maxbin_limits_y[0],
+                                                             post_maxbin_limits_y[1])
+    post_maxbin_str += "  bin height: "
+    post_maxbin_str += (ff2).format(post_maxbin_content)
+
+    post_maxbin_legend_entries.append(("", ccs.fg_ccode, post_maxbin_str, ccs.fg_ccode))
+
+    post_maxbin_legend, post_maxbin_legend_width = utils.generate_legend(
+        post_maxbin_legend_entries, ccs.bg_ccode, sep="  ", internal_sep=" ")
+
+
+    # Legend: posterior mean point
+    post_mean_legend_entries = []
+    post_mean_str = "posterior mean point:  (x,y) = "
+    post_mean_str += ("(" + ff2 + ", " + ff2 + ")").format(posterior_mean_x,
+                                                           posterior_mean_y)
+
+    post_mean_legend_entries.append(("", ccs.fg_ccode, post_mean_str, ccs.fg_ccode))
+
+    post_mean_legend, post_mean_legend_width = utils.generate_legend(
+        post_mean_legend_entries, ccs.bg_ccode, sep="  ", internal_sep=" ")
+
+
+    # Empty line
     plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width,
                                               ccs.fg_ccode, ccs.bg_ccode)
-    plot_lines, fig_width = utils.insert_line(legend, legend_width, plot_lines,
+    # Insert CR legend
+    plot_lines, fig_width = utils.insert_line(CR_legend, CR_legend_width, plot_lines,
                                               fig_width, ccs.fg_ccode, ccs.bg_ccode)
+    # Empty line
+    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width,
+                                              ccs.fg_ccode, ccs.bg_ccode)
+    # Insert maxbin legend
+    plot_lines, fig_width = utils.insert_line(post_maxbin_legend, post_maxbin_legend_width, plot_lines,
+                                              fig_width, ccs.fg_ccode, ccs.bg_ccode)
+    # Empty line
+    plot_lines, fig_width = utils.insert_line("", 0, plot_lines, fig_width,
+                                              ccs.fg_ccode, ccs.bg_ccode)
+    # Insert posterior mean legend
+    plot_lines, fig_width = utils.insert_line(post_mean_legend, post_mean_legend_width, plot_lines, 
+                                              fig_width, ccs.fg_ccode, ccs.bg_ccode)
+
 
 
     #
@@ -306,8 +356,7 @@ def run(args):
         y_label=y_label, y_range=y_range, y_bin_width=dy,
         x_transf_expr=x_transf_expr, y_transf_expr=y_transf_expr,
         w_label=w_label, w_transf_expr=w_transf_expr,
-        filter_names=filter_names, mode_name="posterior",
-        post_mean_x=posterior_mean_x, post_mean_y=posterior_mean_y)
+        filter_names=filter_names, mode_name="posterior")
 
 
     #
