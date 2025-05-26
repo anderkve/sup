@@ -652,30 +652,6 @@ def get_dataset_names_txt(source, delimiter):
             )
         result_names = [name for name in actual_header_content.split(delimiter) if name]
 
-        # _Anders
-        # # Use np.genfromtxt on this single header line to get names
-        # # Pass actual_header_content directly to StringIO
-        # stringIO_header = io.StringIO(actual_header_content)
-        # try:
-        #     # We pass names=True to auto-detect names from this line.
-        #     # delimiter=None will split by whitespace. If names are comma-separated, this will treat them as one.
-        #     # This part of np.genfromtxt is primarily for data, but can extract names.
-        #     # A more robust way would be to split actual_header_content by delimiter if known,
-        #     # but this function's original logic used genfromtxt.
-        #     # Forcing delimiter to None (whitespace) for header parsing is safer.
-        #     dset_dtype = np.genfromtxt(stringIO_header, names=True, comments=None, max_rows=1, delimiter=None).dtype
-        #     result_names = list(dset_dtype.names)
-        #     if not result_names: # If genfromtxt failed to parse names (e.g. bad format)
-        #          raise ValueError("genfromtxt failed to parse names from header.")
-        # except Exception as e: # Catch broad exceptions from genfromtxt if header is tricky
-        #     # Fallback: simple split by whitespace (and comma as a common alternative)
-        #     cleaned_header = actual_header_content.replace(',', ' ')
-        #     result_names = [name for name in cleaned_header.split() if name]
-        #     if not result_names:
-        #          raise SupRuntimeError(
-        #             f"{error_prefix} Failed to parse column names from header line '{header_line_str}' in {display_source_name} using genfromtxt and fallback split. Error: {e}"
-        #         )
-    
     return result_names, file_content
 
 
