@@ -9,7 +9,6 @@ setup(
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     packages=find_packages(where=".", include=["sup", "sup.*"]),
-    py_modules=["sup"], # Added this line
     install_requires=[
         "numpy",
         "scipy",

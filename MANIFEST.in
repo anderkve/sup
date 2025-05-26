@@ -1,2 +1,3 @@
 include README.md
-include posterior.dat
+include tests/posterior.dat
+recursive-include example_plots *.png
