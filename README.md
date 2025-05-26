@@ -158,15 +158,15 @@ examples:
 
 `sup` can read data from several file formats:
 
-*   **Text Files:** Standard text files where data columns are separated by a delimiter.
+*   **Text files:** Standard text files where data columns are separated by a delimiter.
     *   Use the `--delimiter` option to specify the character used (e.g., space, comma, tab). Default is space.
     *   The first commented line (starting with '#') is typically interpreted as the header row for dataset names. If no such header is found, names like "dataset0", "dataset1", etc., are assigned.
-*   **HDF5 Files:** Hierarchical Data Format version 5.
+*   **HDF5 files:** Hierarchical Data Format version 5.
     *   Dataset names are read directly from the HDF5 file structure.
-*   **CSV (Comma-Separated Values) Files:**
+*   **CSV (Comma-Separated Values) files:**
     *   The first row is expected to be a header containing the column names.
     *   The delimiter is assumed to be a comma (`,`).
-*   **JSON (JavaScript Object Notation) Files:**
+*   **JSON (JavaScript Object Notation) files:**
     *   Two primary structures are supported:
         1.  **Object of arrays:** A single JSON object where keys are dataset names and values are arrays (lists) of data.
             ```json
