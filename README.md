@@ -105,7 +105,7 @@ cat my_data.csv | sup list - --stdin-format csv
 ```
 Note: When using stdin ("-") as the input file, the `--stdin-format` argument is required. Supported formats for stdin are 'txt' (for general delimited text files), 'csv' (comma-separated values files, assumes first line is header), and 'json'. HDF5 data format is not supported from stdin. The `--delimiter` option is used for 'txt' format.
 
-### Supported Input File Formats
+### Supported input file formats
 
 `sup` can read data from several file formats:
 
